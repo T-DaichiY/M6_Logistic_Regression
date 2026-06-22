@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第6章 モデル評価②：AIC — ロジスティック回帰 完全ガイド</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+      <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main active" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+</header>
+<div class="ch-banner">
+<div class="ch-banner-inner">
+  <div class="ch-tag">Chapter 6</div>
+  <h1>📊 モデル評価②：AIC</h1>
+  <p>AIC = −2LL + 2K。予測変数追加のペナルティがある点が逸脱度との違い。2モデルをAICで比較する。</p>
+  <div class="ch-banner unit-nav" style="background:none;padding:0;">
+    <a href="#unit1">① AICとは</a><a href="#unit2">② 2モデルを比較</a><a href="#unit3">③ AICと逸脱度の違い</a><a href="#quiz">📝 Quiz</a>
+  </div>
+</div>
+</div>
+<div class="page-layout">
+<main>
+
+<div class="unit" id="unit1">
+  <div class="unit-header">
+    <div class="unit-num">①</div>
+    <div><h2>AICとは何か</h2><div class="unit-sub">逸脱度に予測変数数のペナルティを加える</div></div>
+  </div>
+  <p>M5でも登場したAIC（赤池情報量規準）は、ロジスティック回帰でも使えます。計算式はほぼ同じです：</p>
+<div class="note-box" style="text-align:center;font-size:1.1rem;">
+  <strong>AIC = −2LL + 2K</strong><br>
+  <small>（−2LL = 逸脱度、K = モデルのパラメータ数）</small>
+</div>
+<ul>
+  <li><strong>−2LL（逸脱度）：</strong>当てはまりの悪さを示す部分。小さいほど良い。</li>
+  <li><strong>2K：</strong>予測変数を増やすほど大きくなるペナルティ。複雑すぎるモデルを罰する。</li>
+</ul>
+<div class="note-box"><strong>📌 AICは小さいほど良い！</strong>　当てはまりが良く（−2LLが小さく）、かつシンプルな（Kが小さい）モデルが低いAICを持ちます。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>AICは「成績とコストのバランス」で先生を評価するようなもの。どんなに授業が上手くても（当てはまりが良くても）、コストがかかりすぎる（変数が多すぎる）なら減点されます📝</p></div>
+</div>
+
+<div class="unit" id="unit2">
+  <div class="unit-header">
+    <div class="unit-num">②</div>
+    <div><h2>2つのモデルをAICで比較</h2><div class="unit-sub">Diameterのみ vs Diameter + Rings</div></div>
+  </div>
+  <p>アバロンデータで、2つのモデルを比較します。</p>
+<div class="code-block"><span class="cl"><span class="cm"># モデル1: Type ~ Diameter</span></span><span class="cl">model1 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter, data<span class="kw">=</span>abalone2, family<span class="kw">=</span>binomial)</span><span class="cl"></span><span class="cl"><span class="cm"># モデル2: Type ~ Diameter + Rings（わずかに有意な変数を追加）</span></span><span class="cl">model2 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter <span class="kw">+</span> Rings, data<span class="kw">=</span>abalone2, family<span class="kw">=</span>binomial)</span><span class="cl"></span><span class="cl"><span class="cm"># AICを比較</span></span><span class="cl"><span class="kw">AIC</span>(model1)</span><span class="cl"><span class="kw">AIC</span>(model2)</span></div>
+<div class="output-text">AIC(model1) = 3597.8  (Diameterのみ)
+AIC(model2) = 3596.1  (Diameter + Rings)
+差 = 1.7  ← ほとんど変わらない</div>
+<p>RingsはわずかにAICを下げますが、差はとても小さい。AICの<strong>ペナルティ（2K）</strong>が、Ringsを追加することで得られる当てはまりの改善をほぼ相殺しています。</p>
+</div>
+
+<div class="unit" id="unit3">
+  <div class="unit-header">
+    <div class="unit-num">③</div>
+    <div><h2>AICと逸脱度の違い</h2><div class="unit-sub">ペナルティがある vs ない</div></div>
+  </div>
+  <p>AICと逸脱度（Deviance）の最大の違いは<strong>予測変数数へのペナルティ</strong>です。</p>
+<table class="compare-table">
+  <thead><tr><th>指標</th><th>計算式</th><th>予測変数を増やしたとき</th></tr></thead>
+  <tbody>
+    <tr><td>逸脱度（Deviance）</td><td>−2LL</td><td>必ず下がる（良く見える）</td></tr>
+    <tr><td>AIC</td><td>−2LL + 2K</td><td>改善が小さければ上がることもある</td></tr>
+  </tbody>
+</table>
+<div class="warn-box"><strong>⚠️ 逸脱度だけ見ると騙される：</strong>無意味な変数を追加しても逸脱度は減ります。AICはそれにペナルティを課すので、より公平なモデル比較ができます。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>逸脱度は「何点取ったか」だけ見る評価。AICは「何点取ったか」と「何問解いたか（変数の数）」の両方を見る評価。変数を増やせば点は上がるが、AICはそれをズルとみなします😏</p></div>
+</div>
+
+<div class="quiz-section" id="quiz">
+  <div class="quiz-header">
+    <h2>📝 確認クイズ</h2>
+    <div class="quiz-score" id="score">0 / 5</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
+  
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">What does the K in the AIC formula (AIC = −2LL + 2K) represent?</div>
+  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The number of observations</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of parameters (predictors + intercept)</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The chi-square value</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The degrees of freedom of the residuals</button>
+</div>
+  <div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">A model has AIC = 3597.8 and a second model (with one more predictor) has AIC = 3596.1. Which model is preferred?</div>
+  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Model 1 (fewer predictors, simpler)</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Model 2 (lower AIC)</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>They are equivalent — the difference is too small</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Cannot be determined</button>
+</div>
+  <div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">Why does adding more predictors NOT always lower AIC?</div>
+  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>R has a bug with AIC</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC penalizes model complexity with the 2K term</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC is based on R-squared</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Adding predictors always lowers AIC</button>
+</div>
+  <div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">Compared to deviance alone, what advantage does AIC provide?</div>
+  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>AIC is easier to compute</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC penalizes unnecessary complexity, making model comparison fairer</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC accounts for sample size</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>AIC is always smaller than deviance</button>
+</div>
+  <div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">In R, how do you compute AIC for a glm model object called 'model1'?</div>
+  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>deviance(model1)</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC(model1)</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>summary(model1)$AIC</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>aic(model1)</button>
+</div>
+  <div class="q-feedback" id="fb5"></div>
+</div>
+</div>
+<script>
+var ANSWERS=[1, 1, 1, 1, 1];
+var FEEDBACKS=["K is the number of parameters in the model, including the intercept.", "Lower AIC is preferred. Model 2 has a slightly lower AIC, but the difference (1.7) is very small in practice.", "AIC = −2LL + 2K. Adding a predictor decreases −2LL but increases 2K. If the improvement in fit is small, AIC may increase.", "AIC penalizes model complexity (via 2K), discouraging overfitting by adding too many predictors.", "AIC(model1) directly returns the AIC value of the model."];
+var score=0,done=0,total=5;
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='❌ '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<div class="page-nav"><a href="ch5.html">← 第5章</a><a href="ch7.html">第7章 →</a></div>
+</main>
+<aside class="sidebar">
+
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">AIC</div>
+      <div class="term-en">Akaike Information Criterion</div>
+      <div class="term-def">赤池情報量規準。= −2LL + 2K。小さいほど良いモデル。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">ペナルティ項</div>
+      <div class="term-en">Penalty Term</div>
+      <div class="term-def">AICの2K部分。予測変数が多いほど大きくなり、過複雑化を防ぐ。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">K（パラメータ数）</div>
+      <div class="term-en">Number of Parameters</div>
+      <div class="term-def">切片 + 予測変数の数の合計。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">モデル比較</div>
+      <div class="term-en">Model Comparison</div>
+      <div class="term-def">複数のモデルを評価指標（AIC・逸脱度など）で比較し最良を選ぶ作業。</div>
+    </div>
+  </div>
+<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
+</aside>
+</div>
+
+<footer>
+  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
+  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+</footer>
+<script>
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
+</script>
+<script src="typewriter.js"></script>
+</body></html>
