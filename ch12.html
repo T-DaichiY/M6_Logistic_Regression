@@ -23,6 +23,7 @@
     <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
     <span class="navg"><a class="n-main active" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
 </header>
 
 <div class="ch-banner">
@@ -187,7 +188,26 @@
 <aside class="sidebar">
   <div class="glossary">
     <h3>📖 用語集</h3>
-    <dl class="gl-list"><dt>連続予測変数</dt><dd>年齢・収入など連続した数値をとる予測変数。係数は1単位増加あたりの対数オッズ変化</dd><dt>オッズ比（連続）</dt><dd>exp(係数)。予測変数1単位増加あたりのオッズの倍率</dd><dt>線形性</dt><dd>連続変数の係数は全範囲で一定（Age=0→1でもAge=55→56でも同じ変化量）</dd><dt>フルモデル</dt><dd>複数の予測変数を全て含むモデル。AICで他のモデルと比較して選択</dd></dl>
+    <div class="term-item">
+      <div class="term-name">連続予測変数</div>
+      <div class="term-en">Continuous Predictor</div>
+      <div class="term-def">年齢・収入など連続した数値をとる予測変数。係数は1単位増加あたりの対数オッズ変化を示す。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">オッズ比（連続）</div>
+      <div class="term-en">Odds Ratio (Continuous)</div>
+      <div class="term-def">exp(係数)。予測変数1単位増加あたりのオッズの倍率。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">線形性</div>
+      <div class="term-en">Linearity Assumption</div>
+      <div class="term-def">連続変数の係数は全範囲で一定（Age=0→1でもAge=55→56でも同じ変化量）。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">フルモデル</div>
+      <div class="term-en">Full Model</div>
+      <div class="term-def">複数の予測変数を全て含むモデル。AICで他のモデルと比較して最適なものを選択する。</div>
+    </div>
   </div>
 </aside>
 </div>

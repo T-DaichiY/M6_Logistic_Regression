@@ -23,6 +23,7 @@
     <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
     <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
 </header>
 
 <div class="ch-banner">
@@ -174,7 +175,26 @@
 <aside class="sidebar">
   <div class="glossary">
     <h3>📖 用語集</h3>
-    <dl class="gl-list"><dt>バイナリ予測変数</dt><dd>0または1の2値をとる予測変数。例：ForeignWorker（0=外国人、1=国内）</dd><dt>条件付き切片</dt><dd>バイナリ予測変数=0のときの対数オッズ。単純な全体の対数オッズとは異なる</dd><dt>contrasts()</dt><dd>Rでカテゴリ変数のコーディング（参照カテゴリ）を確認する関数</dd><dt>オッズ比</dt><dd>exp(係数)。予測変数が1増えたときのオッズの倍率</dd></dl>
+    <div class="term-item">
+      <div class="term-name">バイナリ予測変数</div>
+      <div class="term-en">Binary Predictor</div>
+      <div class="term-def">0または1の2値をとる予測変数。例：ForeignWorker（0=外国人、1=国内）</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">条件付き切片</div>
+      <div class="term-en">Conditional Intercept</div>
+      <div class="term-def">バイナリ予測変数=0のときの対数オッズ。単純な全体の対数オッズとは異なる。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">contrasts()</div>
+      <div class="term-en">Contrast Coding Check</div>
+      <div class="term-def">Rでカテゴリ変数のコーディング（参照カテゴリ）を確認する関数。解釈前に必ず確認。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">オッズ比</div>
+      <div class="term-en">Odds Ratio</div>
+      <div class="term-def">exp(係数)。予測変数が1増えたときのオッズの倍率。1より大きければ正の効果。</div>
+    </div>
   </div>
 </aside>
 </div>
