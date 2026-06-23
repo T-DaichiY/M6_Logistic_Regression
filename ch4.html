@@ -83,6 +83,7 @@ exp(切片)      = 1.169  (オッズ)
     <div class="unit-num">④</div>
     <div><h2>解釈のまとめと次のステップ</h2><div class="unit-sub">予測変数を追加するとどうなるか</div></div>
   </div>
+<div class="note-box"><strong>📌 切片の意味が変わる予告：</strong>予測変数なしモデルの切片は「全体の対数オッズ」ですが、予測変数を1つでも加えると、切片は「その予測変数が0（基準）のときの対数オッズ」という<em>条件付き</em>の意味に変わります（第10章で詳述）。同じ「切片」でもモデル構成によって解釈が変わる点が、ロジスティック回帰でつまずきやすい所です。</div>
   <p>切片のみのモデルでわかったこと：</p>
 <div class="task-grid">
   <div class="task-card"><div class="tc-icon">📊</div><div class="tc-name">切片 = 対数オッズ</div><div class="tc-example">予測変数が0のときの log odds</div></div>
@@ -96,7 +97,7 @@ exp(切片)      = 1.169  (オッズ)
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -151,11 +152,61 @@ exp(切片)      = 1.169  (オッズ)
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">In an intercept-only logistic model, the intercept equals:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The residual deviance value</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The raw count of successes</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The mean of the predictors</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-odds of the outcome overall</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">How do you turn an odds value back into a probability?</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>P = odds / (1 + odds)</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>P = odds × 2</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>P = 1 − odds</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>P = log(odds)</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Which R function exponentiates a coefficient to obtain odds?</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>log()</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>sqrt()</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>abs()</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>exp()</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">With 1528 males (coded 1) out of 2835 abalone, the proportion of 1s is about:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.30</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.46</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.54</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.72</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">What does exp(intercept) give you in an intercept-only model?</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The probability directly</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The log-likelihood</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The odds of the outcome</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 1, 2, 1, 2];
-var FEEDBACKS=["With no predictors, the intercept equals the log odds of the outcome (being in category 1).", "exp(0.1565) ≈ 1.169. To convert log odds to odds, use the exponential function.", "P = odds / (1 + odds). For odds = 1.169: P = 1.169 / 2.169 ≈ 0.539.", "P(male) = 1528 / (1307+1528) = 1528/2835 ≈ 0.539.", "exp() computes e^x, converting log odds back to odds."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 1, 2, 1, 2, 3, 0, 3, 2, 3];
+var FEEDBACKS=["With no predictors, the intercept equals the log odds of the outcome (being in category 1).", "exp(0.1565) ≈ 1.169. To convert log odds to odds, use the exponential function.", "P = odds / (1 + odds). For odds = 1.169: P = 1.169 / 2.169 ≈ 0.539.", "P(male) = 1528 / (1307+1528) = 1528/2835 ≈ 0.539.", "exp() computes e^x, converting log odds back to odds.", "With no predictors, the intercept is simply the log-odds of the outcome across all observations.", "Probability is recovered from odds with P = odds/(1+odds).", "exp() reverses the natural log, converting log-odds (a coefficient) into odds.", "1528/2835 ≈ 0.539, so roughly 0.54 of the observations are coded 1.", "exp() of the intercept (log-odds) returns the odds; convert further to get the probability."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

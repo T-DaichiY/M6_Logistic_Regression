@@ -59,6 +59,7 @@
 </div>
 <div class="unit" id="u3">
   <div class="unit-header"><div class="unit-num">03</div><div><h2>オッズ比と複合モデル</h2><div class="unit-sub">exp(係数)の解釈とFull Modelへの拡張</div></div></div>
+<div class="note-box"><strong>📌 連続変数の一定性の仮定：</strong>連続予測変数の係数は「1単位増えるごとの対数オッズの一定の変化量」です。だから <code>exp(β)</code> はどの値の区間でも同じオッズ比になります（年齢55→56でも0→1でも同じ）。ただし<em>確率</em>の増え方は一定ではなく、シグモイドの形ゆえ中央付近で大きく、両端で小さくなります。「対数オッズは一定、確率は一定でない」が連続変数解釈の核心です。</div>
   <div class="code-block"><span class="cl"><span class="cm"># exp(係数) = オッズ比（連続変数）</span></span><span class="cl"><span class="kw">exp</span>(<span class="kw">coef</span>(mod_age)[<span class="st">"Age"</span>])<span class="cm">  # → 1.0186</span></span><span class="cl"><span class="cm"># 解釈：1歳増えるごとにオッズが1.0186倍（約1.86%増加）</span></span><span class="cl"><span class="cm"># ForeignWorkerとAgeを組み合わせたフルモデル</span></span><span class="cl">mod_full &lt;- <span class="kw">glm</span>(Class ~ ForeignWorker + Age,</span><span class="cl">             <span class="kw">data</span>=GermanCredit, <span class="kw">family</span>=<span class="st">binomial</span>)</span><span class="cl"><span class="kw">AIC</span>(mod_fw, mod_age, mod_full)<span class="cm">  # 最良モデルを選ぶ</span></span></div>
   <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:1.25rem;margin:1rem 0">
     <h4 style="margin-top:0">📊 バイナリ vs 連続：係数解釈の比較</h4>
@@ -76,55 +77,105 @@
 
 <section class="quiz-section">
   <h2>🎯 確認クイズ（英語）</h2>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-container" id="quiz">
-<div class="quiz-item" id="q1">
-  <div class="q-num">Q1</div>
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
   <div class="q-text">For a continuous predictor Age with coefficient 0.0184, what does exp(0.0184) represent?</div>
   <button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The probability of Good credit for each age</button>
 <button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The log odds change per year</button>
 <button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The odds ratio: for each 1-year increase in Age, the odds multiply by 1.0186</button>
 <button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The change in probability per year</button>
-<div class="q-fb" id="fb1"></div>
+<div class="q-feedback" id="fb1"></div>
 </div>
-<div class="quiz-item" id="q2">
-  <div class="q-num">Q2</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
   <div class="q-text">How do you verify a continuous predictor's coefficient by hand?</div>
   <button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Subtract P(X=1) − P(X=0)</button>
 <button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Calculate log(odds at X=1 / odds at X=0)</button>
 <button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculate exp(P(X=1) / P(X=0))</button>
 <button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Multiply the coefficient by the predictor value</button>
-<div class="q-fb" id="fb2"></div>
+<div class="q-feedback" id="fb2"></div>
 </div>
-<div class="quiz-item" id="q3">
-  <div class="q-num">Q3</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
   <div class="q-text">If you use Age=55 and Age=56 instead of Age=0 and Age=1, what happens to log(odds_56/odds_55)?</div>
   <button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>It changes depending on the age values</button>
 <button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>It becomes larger for older ages</button>
 <button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>It equals the same coefficient (0.0184)</button>
 <button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>It equals twice the coefficient</button>
-<div class="q-fb" id="fb3"></div>
+<div class="q-feedback" id="fb3"></div>
 </div>
-<div class="quiz-item" id="q4">
-  <div class="q-num">Q4</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
   <div class="q-text">What does a coefficient of 0.0184 for Age mean in plain language?</div>
   <button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Each additional year of age increases the probability of Good credit by 1.84%</button>
 <button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Each additional year of age increases the log odds of Good credit by 0.0184</button>
 <button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Customers aged 18+ have Good credit odds 0.0184 times higher</button>
 <button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Age has no practical effect since 0.0184 is small</button>
-<div class="q-fb" id="fb4"></div>
+<div class="q-feedback" id="fb4"></div>
 </div>
-<div class="quiz-item" id="q5">
-  <div class="q-num">Q5</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
   <div class="q-text">To compare models mod_fw (ForeignWorker only), mod_age (Age only), and mod_full (both), what function do you use?</div>
   <button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>summary()</button>
 <button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>anova()</button>
 <button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC()</button>
 <button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>pchisq()</button>
-<div class="q-fb" id="fb5"></div>
+<div class="q-feedback" id="fb5"></div>
 </div>
   </div>
-  <div class="quiz-score" id="score" style="display:none"></div>
-  <button class="submit-btn" onclick="submitQuiz()">答え合わせ</button>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">For a continuous predictor, exp(coefficient) is the odds ratio for:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A 10-unit increase</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A one-unit increase in the predictor</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The entire data range</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A decrease to zero</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">A continuous predictor&#x27;s coefficient is assumed constant across:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The whole range of the predictor</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Only the lowest values</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Only categorical splits</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The intercept only</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Using Age=55 vs 56 instead of 0 vs 1 to derive the coefficient gives:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A completely different value</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An undefined value</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A negative of the value</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The same coefficient value</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">A small positive Age coefficient (e.g. 0.0184) means each extra year:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Halves the odds of the outcome</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Has no effect whatsoever</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Slightly increases the log-odds of the outcome</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Removes the intercept</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">To compare nested models mod_fw, mod_age, and mod_full, you would mainly use:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Their colors</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Their file sizes</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of rows</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>AIC (and deviance) values</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+  <div class="quiz-score" id="score">0 / 10</div>
 </section>
 
 <div class="page-nav">
@@ -143,10 +194,41 @@
 
 <footer><p>🐚 ロジスティック回帰 完全ガイド · 第12章</p>
 <p style="margin-top:.5rem"><a href="ch12_easy.html">🍎 やさしい版へ</a> · <a href="index.html">🏠 目次</a></p></footer>
-<script src="quiz.js"></script>
 <script>
-var ANSWERS=[2, 1, 2, 1, 2];
-var FEEDBACKS=["exp(coefficient) = odds ratio. For each 1-unit increase in Age, the odds of Good credit multiply by exp(0.0184) ≈ 1.0186 — about a 1.86% increase per year.", "Same as binary: coefficient = log(odds_at_X+1 / odds_at_X). This ratio is constant regardless of which two consecutive values you use.", "The log odds change is constant (linear) across all values of a continuous predictor. log(odds_56/odds_55) = log(odds_1/odds_0) = coefficient.", "The coefficient is on the log-odds scale: each 1-year increase in Age adds 0.0184 to the log odds. The probability change depends on the starting value due to the non-linear sigmoid function.", "AIC(mod_fw, mod_age, mod_full) compares all three models at once. The model with the lowest AIC is preferred."];
+var ANSWERS=[2, 1, 2, 1, 2, 1, 0, 3, 2, 3];
+var FEEDBACKS=["exp(coefficient) = odds ratio. For each 1-unit increase in Age, the odds of Good credit multiply by exp(0.0184) ≈ 1.0186 — about a 1.86% increase per year.", "Same as binary: coefficient = log(odds_at_X+1 / odds_at_X). This ratio is constant regardless of which two consecutive values you use.", "The log odds change is constant (linear) across all values of a continuous predictor. log(odds_56/odds_55) = log(odds_1/odds_0) = coefficient.", "The coefficient is on the log-odds scale: each 1-year increase in Age adds 0.0184 to the log odds. The probability change depends on the starting value due to the non-linear sigmoid function.", "AIC(mod_fw, mod_age, mod_full) compares all three models at once. The model with the lowest AIC is preferred.", "exp(b) gives the multiplicative change in odds per one-unit rise in the predictor.", "Logistic regression assumes a constant log-odds change per unit, i.e. a linear effect on the logit.", "Because the per-unit log-odds change is constant, any adjacent pair of ages yields the same coefficient.", "A positive coefficient means the log-odds rise modestly with each additional year.", "AIC (alongside deviance) lets you compare model fit and complexity across the candidates."];
+var score=0,done=0,total=10;
+</script>
+<script>
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='\u2705 Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='\u274c '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<script>
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
+setTimeout(function(){units.forEach(function(u){u.classList.add('visible');});},600);
 </script>
 <script src="typewriter.js"></script>
 </body></html>

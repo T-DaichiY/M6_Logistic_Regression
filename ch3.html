@@ -95,6 +95,7 @@ p_hat   = 0.5</div>
     <div class="unit-num">④</div>
     <div><h2>logitリンクとは何か</h2><div class="unit-sub">なぜ「リンク関数」と呼ぶか</div></div>
   </div>
+<div class="note-box"><strong>📌 リンク関数の役割：</strong>線形予測子 <code>β₀+β₁x</code>（範囲 −∞〜+∞）と、確率の平均（範囲 0〜1）を「橋渡し（link）」するのがリンク関数です。ロジスティック回帰では logit がその橋であり、二項分布の<em>正準リンク</em>（最も自然な選択）です。リンクを変えれば probit など別モデルになりますが、係数が「オッズ比の対数」として解釈できるのは logit ならではの利点です。</div>
   <p>この変換（確率→対数オッズ）を<strong>logitリンク関数</strong>と呼びます。<code>glm(family=binomial)</code>と書いたとき、Rは自動的にこのlogitリンクを使います。</p>
 <div class="flow-diagram">
   <div class="flow-box input">線形予測子<br><small>β₀ + β₁X</small></div>
@@ -107,7 +108,7 @@ p_hat   = 0.5</div>
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -162,11 +163,61 @@ p_hat   = 0.5</div>
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">What shape does the relationship between log-odds and probability take?</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>An S-shaped (sigmoid) curve</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A straight diagonal line</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A flat horizontal line</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A V-shaped curve</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">If the log-odds equals 0, what is the probability?</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.0</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.25</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>1.0</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.50</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">A &#x27;link function&#x27; in a GLM serves to:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Connect the linear predictor to the mean of the outcome</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Join two separate datasets together</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Remove outliers automatically</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Standardize all predictor variables</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">If log-odds is negative, the probability is:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Exactly 1</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Greater than 0.5</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Undefined</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Less than 0.5</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">Why is the logit link the &#x27;natural&#x27; choice for binomial data?</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>It forces predictions outside 0 and 1</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>It eliminates the intercept term</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>It keeps predicted probabilities within 0 and 1</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>It only works with one predictor</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 2, 2, 1, 2];
-var FEEDBACKS=["The logit is log(P/(1-P)), i.e., the natural log of the odds. It transforms probability (0–1) to log odds (−∞ to +∞).", "Odds = 0.5/0.5 = 1. log(1) = 0. So log odds = 0 when P = 0.5.", "Positive log odds means odds > 1, which means P > 0.5.", "The sigmoid 1/(1+e^−x) is the inverse of logit. It maps log odds back to a probability between 0 and 1.", "family=binomial automatically uses the logit link function in glm()."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 2, 2, 1, 2, 0, 3, 0, 3, 2];
+var FEEDBACKS=["The logit is log(P/(1-P)), i.e., the natural log of the odds. It transforms probability (0–1) to log odds (−∞ to +∞).", "Odds = 0.5/0.5 = 1. log(1) = 0. So log odds = 0 when P = 0.5.", "Positive log odds means odds > 1, which means P > 0.5.", "The sigmoid 1/(1+e^−x) is the inverse of logit. It maps log odds back to a probability between 0 and 1.", "family=binomial automatically uses the logit link function in glm().", "Mapping log-odds back to probability follows the S-shaped sigmoid curve.", "Log-odds 0 means odds = 1, which corresponds to P = 0.5.", "The link function relates the linear predictor to the expected outcome; for logistic regression it is the logit.", "Negative log-odds means odds < 1, so the probability is below 0.5.", "The logit link is the canonical link for the binomial family and constrains fitted probabilities to [0,1]."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

@@ -91,6 +91,7 @@ diff           =  328.4   (改善量)</div>
     <div class="unit-num">④</div>
     <div><h2>カイ二乗検定で有意性を確認</h2><div class="unit-sub">改善量は統計的に有意か</div></div>
   </div>
+<div class="note-box"><strong>📌 逸脱度の直感：</strong>逸脱度（−2LL）は「モデルがデータをどれだけ説明できていないか」の不一致度で、小さいほど良い当てはまりです。ヌル逸脱度（切片のみ）と残差逸脱度（予測変数あり）の差が大きいほど、その予測変数が効いている証拠になります。差が自由度（追加したパラメータ数）に対して十分大きいかをカイ二乗分布で検定します。</div>
   <p>逸脱度の差がカイ二乗分布に従うことを利用して、<strong>予測変数を追加したことが有意に改善したか</strong>を検定できます。</p>
 <div class="code-block"><span class="cl"><span class="cm"># 自由度 = 追加した予測変数の数</span></span><span class="cl">df <span class="kw">&lt;-</span> model1$df.null <span class="kw">-</span> model1$df.residual</span><span class="cl"></span><span class="cl"><span class="cm"># カイ二乗検定のp値</span></span><span class="cl">p_val <span class="kw">&lt;-</span> <span class="kw">pchisq</span>(dev_diff, df<span class="kw">=</span>df, lower.tail<span class="kw">=</span><span class="kw">FALSE</span>)</span><span class="cl">p_val  <span class="cm"># → 非常に小さい値（有意）</span></span></div>
 <div class="output-text">p_value = 2.3e-73  ← 非常に有意（Diameterは有用な予測変数）</div>
@@ -101,7 +102,7 @@ diff           =  328.4   (改善量)</div>
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -156,11 +157,61 @@ diff           =  328.4   (改善量)</div>
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">Deviance in logistic regression is based on which quantity?</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The sum of squared residuals</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The mean of the outcome</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of predictors</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-likelihood of the model</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">A LOWER residual deviance indicates:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A worse-fitting model</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>More missing data</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A better-fitting model</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Fewer observations</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Null deviance measures the fit of:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The full model with all predictors</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The single best predictor</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A model with random coefficients</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A model with only the intercept</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">The difference (null deviance − residual deviance) approximately follows which distribution?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Chi-square distribution</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Uniform distribution</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Normal distribution</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Exponential distribution</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">Degrees of freedom for the deviance chi-square test equal:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The total sample size</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Always exactly one</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of added predictors</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The residual deviance value</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 1, 0, 2, 1];
-var FEEDBACKS=["Deviance = −2 × Log Likelihood (−2LL). Smaller deviance means better model fit.", "Null deviance is the deviance when only an intercept (no predictors) is in the model.", "model$null.deviance extracts the null deviance from the glm model object.", "The change in deviance follows a chi-square distribution. pchisq() is used in R to compute the p-value.", "A large decrease in deviance when a predictor is added indicates that the predictor significantly improves model fit."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 1, 0, 2, 1, 3, 2, 3, 0, 2];
+var FEEDBACKS=["Deviance = −2 × Log Likelihood (−2LL). Smaller deviance means better model fit.", "Null deviance is the deviance when only an intercept (no predictors) is in the model.", "model$null.deviance extracts the null deviance from the glm model object.", "The change in deviance follows a chi-square distribution. pchisq() is used in R to compute the p-value.", "A large decrease in deviance when a predictor is added indicates that the predictor significantly improves model fit.", "Deviance is −2 × log-likelihood, so it is built directly from the model's log-likelihood.", "Smaller deviance means a higher likelihood, i.e. the model fits the data better.", "Null deviance reflects a model containing only the intercept (no predictors).", "Under the null, the drop in deviance is approximately chi-square distributed, enabling a significance test.", "The df equals the number of parameters added between the two nested models."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

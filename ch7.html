@@ -71,6 +71,7 @@ AIC(k=3) = 2,720,949  ← kを3にするとペナルティが強まる</div>
     <div class="unit-num">③</div>
     <div><h2>実践上の注意点</h2><div class="unit-sub">課題ではkを変えないこと</div></div>
   </div>
+<div class="note-box"><strong>📌 KとkとBICの関係：</strong>数式の <code>K</code> は「パラメータの個数」、Rの <code>k</code> は「1個あたりの罰金の重み」で別物です。<code>k=2</code> が古典的AIC。もし <code>k=log(n)</code>（nは標本数）にすると、それはBIC（ベイズ情報量規準）に相当し、大標本ではAICより厳しくパラメータを罰します。課題ではデフォルトのk=2で統一しましょう。</div>
   <p>課題で指示がない限り、<code>k</code> は変更不要です。デフォルト（k=2）が「古典的AIC」です。</p>
 <table class="compare-table">
   <thead><tr><th>状況</th><th>対応</th></tr></thead>
@@ -87,7 +88,7 @@ AIC(k=3) = 2,720,949  ← kを3にするとペナルティが強まる</div>
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -142,11 +143,61 @@ AIC(k=3) = 2,720,949  ← kを3にするとペナルティが強まる</div>
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">In R, AIC(model, k=2) reproduces:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The null deviance</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The residual sum of squares</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The classic AIC value</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">The argument k in R&#x27;s AIC() function controls:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The per-parameter penalty weight</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The sample size</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The link function</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">If you increase k in AIC(model, k), the AIC value will:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Decrease</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Stay identical</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Become negative</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Increase</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Why should you keep k at its default in the assignment?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>To remove the intercept</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To make the model run faster</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>To match the standard AIC definition used in the course</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To avoid using glm()</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">The K in the formula and the k argument in R are:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Different concepts (parameter count vs. penalty weight)</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Exactly the same thing</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Both equal to the sample size</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Both always zero</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 1, 2, 1, 2];
-var FEEDBACKS=["In the formula, K = number of parameters (predictors + intercept). This is different from R"s k argument.", "R"s k is the penalty per parameter, defaulting to 2, which gives the classical AIC.", "The default is k=2, which corresponds to the classical AIC formula.", "AIC(model) and AIC(model, k=2) return the same value because k=2 is the default.", "A larger k means a stronger penalty per parameter, so AIC increases when k is increased."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 1, 2, 1, 2, 3, 0, 3, 2, 0];
+var FEEDBACKS=["In the formula, K = number of parameters (predictors + intercept). This is different from R\u2019s k argument.", "R\u2019s k is the penalty per parameter, defaulting to 2, which gives the classical AIC.", "The default is k=2, which corresponds to the classical AIC formula.", "AIC(model) and AIC(model, k=2) return the same value because k=2 is the default.", "A larger k means a stronger penalty per parameter, so AIC increases when k is increased.", "k=2 is the default, giving the classic AIC = −2LL + 2K.", "k sets how heavily each parameter is penalized; the default of 2 yields classic AIC.", "A larger k raises the penalty term, so the reported AIC increases.", "The default k=2 corresponds to the standard AIC; changing it would not match the course's formula.", "K counts parameters in the formula, while R's k is the penalty multiplier — distinct ideas."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

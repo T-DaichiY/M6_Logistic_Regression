@@ -69,6 +69,7 @@ z_val       = −5.168  ← summary()と完全一致</div>
     <div class="unit-num">③</div>
     <div><h2>ロジスティック回帰にR²はない</h2><div class="unit-sub">代替指標を使う</div></div>
   </div>
+<div class="note-box"><strong>📌 擬似R²の中身：</strong>線形回帰のR²は「説明された分散の割合」ですが、二値の結果には分散の分解が当てはまりません。代わりにMcFaddenの擬似R²（<code>1 − LL_model/LL_null</code>）やNagelkerkeの指標を使います。これらは対数尤度の比から作られ、0〜1の目安にはなりますが、線形回帰のR²ほど直接「当てはまりの良さ%」とは読めない点に注意します。</div>
   <p>重回帰で最重要だった<strong>R²（決定係数）</strong>は、ロジスティック回帰には存在しません。なぜなら、ロジスティック回帰は最小二乗法ではなく最尤推定（MLE）を使うためです。</p>
 <table class="compare-table">
   <thead><tr><th>指標</th><th>重回帰</th><th>ロジスティック回帰</th></tr></thead>
@@ -86,7 +87,7 @@ z_val       = −5.168  ← summary()と完全一致</div>
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -141,11 +142,61 @@ z_val       = −5.168  ← summary()と完全一致</div>
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">A predictor&#x27;s Z-value is computed as:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>coefficient × standard error</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>coefficient + standard error</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>coefficient ÷ standard error</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>standard error ÷ coefficient</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">A large absolute Z-value (e.g. |Z| = 5) suggests the predictor is:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Statistically insignificant</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Missing from the model</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Perfectly collinear</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Statistically significant</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Why does logistic regression lack a true R²?</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Because outcomes are binary, not continuous variance</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Because it has no intercept</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Because it uses lm() internally</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Because predictors must be categorical</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Which is a commonly used pseudo-R² for logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Adjusted slope</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Euclidean R²</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Sum of squares R²</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>McFadden&#x27;s R²</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">In logistic regression, individual predictors are tested with a Z-test instead of:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A chi-square test</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An F-test</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A t-test</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A sign test</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[2, 1, 1, 1, 1];
-var FEEDBACKS=["The Z-statistic (also called Wald statistic) is used: Z = coefficient / standard error.", "Z = β̂ / SE. This measures how many standard errors the coefficient is from zero.", "A Z-value of −5.17 is far from zero, indicating Diameter is highly significant. The negative sign means larger Diameter reduces log odds.", "R² is based on the least squares framework. Logistic regression uses maximum likelihood estimation (MLE), so a true R² doesn"t exist.", "Deviance (−2LL) and AIC are the primary fit metrics used in logistic regression instead of R²."];
-var score=0,done=0,total=5;
+var ANSWERS=[2, 1, 1, 1, 1, 2, 3, 0, 3, 2];
+var FEEDBACKS=["The Z-statistic (also called Wald statistic) is used: Z = coefficient / standard error.", "Z = β̂ / SE. This measures how many standard errors the coefficient is from zero.", "A Z-value of −5.17 is far from zero, indicating Diameter is highly significant. The negative sign means larger Diameter reduces log odds.", "R² is based on the least squares framework. Logistic regression uses maximum likelihood estimation (MLE), so a true R² doesn\u2019t exist.", "Deviance (−2LL) and AIC are the primary fit metrics used in logistic regression instead of R².", "Z = estimate / standard error, analogous to a t-statistic in linear regression.", "A large |Z| produces a small p-value, indicating the predictor is significant.", "R² is defined via explained variance of a continuous outcome, which does not apply to a binary response.", "McFadden's (and Nagelkerke's) pseudo-R² are common stand-ins built from log-likelihoods.", "Because the sampling distribution is approximately normal, a Z-test replaces the t-test used in linear regression."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

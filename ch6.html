@@ -74,6 +74,7 @@ AIC(model2) = 3596.1  (Diameter + Rings)
     <div class="unit-num">③</div>
     <div><h2>AICと逸脱度の違い</h2><div class="unit-sub">ペナルティがある vs ない</div></div>
   </div>
+<div class="note-box"><strong>📌 なぜペナルティが要るか：</strong>予測変数を増やせば逸脱度はほぼ必ず下がります（当てはめ自由度が増えるため）。しかしそれは「本当に良くなった」のか「データに過剰適合しただけ」かを区別できません。AICは <code>2K</code> という複雑さへの罰金を課すことで、見かけの改善に惑わされず、汎化性能の良いモデルを選べるようにします。AICは絶対値ではなく<em>モデル間の差</em>で比較するのが基本です。</div>
   <p>AICと逸脱度（Deviance）の最大の違いは<strong>予測変数数へのペナルティ</strong>です。</p>
 <table class="compare-table">
   <thead><tr><th>指標</th><th>計算式</th><th>予測変数を増やしたとき</th></tr></thead>
@@ -89,7 +90,7 @@ AIC(model2) = 3596.1  (Diameter + Rings)
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -144,11 +145,61 @@ AIC(model2) = 3596.1  (Diameter + Rings)
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">AIC penalizes models for:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Having more parameters</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Having too few observations</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Using continuous predictors</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Having a large intercept</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">When comparing models by AIC, you prefer the model with:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The highest AIC</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An AIC of exactly zero</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The lowest AIC</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The most predictors</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">In AIC = −2LL + 2K, the −2LL term reflects:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The penalty for complexity</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The sample variance</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of rows</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The goodness of fit</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Adding a useless predictor will usually:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Lower AIC substantially</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Always lower the deviance to zero</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Leave fit unchanged but raise the penalty, often raising AIC</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Have no effect on either term</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">Compared with raw deviance, AIC is more useful for:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Counting observations</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Removing outliers</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculating probabilities</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Choosing between models of different size</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 1, 1, 1, 1];
-var FEEDBACKS=["K is the number of parameters in the model, including the intercept.", "Lower AIC is preferred. Model 2 has a slightly lower AIC, but the difference (1.7) is very small in practice.", "AIC = −2LL + 2K. Adding a predictor decreases −2LL but increases 2K. If the improvement in fit is small, AIC may increase.", "AIC penalizes model complexity (via 2K), discouraging overfitting by adding too many predictors.", "AIC(model1) directly returns the AIC value of the model."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 1, 1, 1, 1, 0, 2, 3, 2, 3];
+var FEEDBACKS=["K is the number of parameters in the model, including the intercept.", "Lower AIC is preferred. Model 2 has a slightly lower AIC, but the difference (1.7) is very small in practice.", "AIC = −2LL + 2K. Adding a predictor decreases −2LL but increases 2K. If the improvement in fit is small, AIC may increase.", "AIC penalizes model complexity (via 2K), discouraging overfitting by adding too many predictors.", "AIC(model1) directly returns the AIC value of the model.", "The 2K term penalizes additional parameters, discouraging unnecessary complexity.", "Lower AIC indicates a better trade-off between fit and complexity.", "−2 × log-likelihood measures how well the model fits; 2K is the complexity penalty.", "A useless predictor barely improves fit yet adds 2 to the penalty, so AIC tends to rise.", "Because AIC penalizes parameters, it fairly compares models with different numbers of predictors."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');

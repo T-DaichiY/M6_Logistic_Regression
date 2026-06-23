@@ -108,12 +108,14 @@
   <div class="flow-box output">確率<br><small>0 〜 1</small></div>
 </div>
 <div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>シグモイド関数は「S字カーブ」の形をしています。どんな大きい数も小さい数も、必ず0と1の間に「押し込んで」くれる魔法の変換です🔄</p></div>
+<div class="note-box"><strong>📌 もう一歩深く：</strong>シグモイドは <code>p = 1/(1+e^(−z))</code> で、z（=回帰式の値、＝対数オッズ）が0のとき p=0.5、z→+∞で p→1、z→−∞で p→0 に近づきます。傾きが最も急なのは p=0.5 付近で、ここでは入力の変化が確率に最も強く反映されます。つまりロジスティック回帰は「判断が微妙な境界付近」ほど敏感に確率を動かす設計になっています。
+</div>
 </div>
 
 <div class="quiz-section" id="quiz">
   <div class="quiz-header">
     <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 5</div>
+    <div class="quiz-score" id="score">0 / 10</div>
   </div>
   <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
   <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
@@ -168,11 +170,61 @@
 </div>
   <div class="q-feedback" id="fb5"></div>
 </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">What does the sigmoid function guarantee about its output?</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The output always stays between 0 and 1</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The output is always a whole number</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The output is always greater than 1</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The output can be any real number</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">Which of these is a typical task for logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Predicting tomorrow&#x27;s exact temperature</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Estimating total monthly sales revenue</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Classifying an email as spam or not spam</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Forecasting a continuous stock price</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">In the abalone example, why is the Type &#x27;I&#x27; (infant) removed before modeling?</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Because glm() cannot read text labels</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To make the dataset larger overall</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Because infants have missing diameter values</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To keep the outcome strictly binary (Male/Female)</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">What kind of model family does glm() belong to?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A generalized linear model family</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A purely linear regression family</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A clustering model family</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A decision-tree model family</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">If a linear regression predicts 1.4 for a binary outcome, why is that a problem?</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>1.4 is too small to be useful</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The intercept is undefined</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The slope must always be negative</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A probability cannot exceed 1</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
 </div>
 <script>
-var ANSWERS=[1, 1, 1, 1, 2];
-var FEEDBACKS=["Logistic regression predicts a probability (0–1) for a binary outcome, whereas multiple regression predicts continuous values.", "glm() with family=binomial is used for logistic regression. lm() is for linear regression only.", "By convention, 0 = failure/absence/no and 1 = success/presence/yes.", "Linear regression can produce predicted values below 0 or above 1, which make no sense as probabilities.", "family = binomial tells R to use the logistic (binomial) link function."];
-var score=0,done=0,total=5;
+var ANSWERS=[1, 1, 1, 1, 2, 0, 2, 3, 0, 3];
+var FEEDBACKS=["Logistic regression predicts a probability (0–1) for a binary outcome, whereas multiple regression predicts continuous values.", "glm() with family=binomial is used for logistic regression. lm() is for linear regression only.", "By convention, 0 = failure/absence/no and 1 = success/presence/yes.", "Linear regression can produce predicted values below 0 or above 1, which make no sense as probabilities.", "family = binomial tells R to use the logistic (binomial) link function.", "The sigmoid 1/(1+e^-x) squeezes any input into the (0,1) range, so the result is always a valid probability.", "Logistic regression handles binary classification such as spam vs. not-spam, not continuous quantities.", "Binary logistic regression needs exactly two outcome classes, so the infant category is dropped to leave Male/Female.", "glm() fits Generalized Linear Models, a broad family that includes logistic regression via family=binomial.", "Predicted probabilities must lie in [0,1]; a value of 1.4 is impossible as a probability, motivating logistic regression."];
+var score=0,done=0,total=10;
 function handleQ(btn){
   var q=+btn.dataset.q, idx=+btn.dataset.idx;
   var btns=document.querySelectorAll('[data-q="'+q+'"]');
