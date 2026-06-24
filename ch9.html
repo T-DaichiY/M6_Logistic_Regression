@@ -3,271 +3,284 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第9章 応用例：ドイツ信用データ — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第9章 前進選択 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab active" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch9_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 9 · Forward Selection</div>
+    <h1>20変数なら<br>組み合わせは<span class="a">100万通り超</span>。<br>だから1つずつ足す。</h1>
+    <p class="sub">全部の組み合わせを試すのは無理。「何もない状態」から、最もAICを下げる変数を1つずつ足していく——それが前進選択。
+    ステップを進めるたびにAICが下がる様子を見ていきましょう。</p>
+    <div class="jump">
+      <a href="#u1">① 変数選択とは</a>
+      <a href="#u2">② なぜ全探索は無理</a>
+      <a href="#u3">③ 前進選択アニメ</a>
+      <a href="#u4">④ step関数</a>
+      <a href="#u5">⑤ BICに切替</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch9_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 9</div>
-  <h1>🏦 応用例：ドイツ信用データ</h1>
-  <p>caretパッケージのGermanCreditデータを使ってロジスティック回帰を実践。目的変数の確認・切片の解釈・次のステップを学ぶ。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① データの概要</a><a href="#unit2">② 目的変数を確認</a><a href="#unit3">③ 切片で基本確認</a><a href="#unit4">④ 次のステップ</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>ドイツ信用データの概要</h2><div class="unit-sub">caretパッケージのGermanCreditデータ</div></div>
-  </div>
-  <p>今までアバロンデータを使ってきましたが、新しいデータセットで練習します。<code>caret</code>パッケージの<strong>GermanCredit（ドイツ信用）データ</strong>です。</p>
-<div class="code-block"><span class="cl"><span class="kw">library</span>(caret)</span><span class="cl"><span class="kw">data</span>(GermanCredit)</span><span class="cl"></span><span class="cl"><span class="cm"># 必要な列だけ抽出</span></span><span class="cl">GC2 <span class="kw">&lt;-</span> GermanCredit[, <span class="kw">c</span>(<span class="st">"Class"</span>, <span class="st">"Age"</span>, <span class="st">"Amount"</span>, <span class="st">"ForeignWorker"</span>)]</span><span class="cl"><span class="kw">head</span>(GC2)</span></div>
-<div class="task-grid">
-  <div class="task-card"><div class="tc-icon">💳</div><div class="tc-name">Class</div><div class="tc-example">Good / Bad（信用評価）</div></div>
-  <div class="task-card"><div class="tc-icon">🎂</div><div class="tc-name">Age</div><div class="tc-example">申請者の年齢</div></div>
-  <div class="task-card"><div class="tc-icon">💰</div><div class="tc-name">Amount</div><div class="tc-example">ローンの金額</div></div>
-  <div class="task-card"><div class="tc-icon">🌍</div><div class="tc-name">ForeignWorker</div><div class="tc-example">外国人労働者か否か</div></div>
-</div>
-</div>
-
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>目的変数の確認</h2><div class="unit-sub">どちらが1でどちらが0か必ず確認</div></div>
-  </div>
-  <p>ロジスティック回帰では「どちらが1（成功）か」を必ず確認する必要があります。</p>
-<div class="code-block"><span class="cl"><span class="cm"># 件数確認</span></span><span class="cl"><span class="kw">table</span>(GC2$Class)</span><span class="cl"><span class="cm">#  Bad Good </span></span><span class="cl"><span class="cm">#  300  700</span></span><span class="cl"></span><span class="cl"><span class="cm"># コントラスト確認（どちらが1か）</span></span><span class="cl"><span class="kw">contrasts</span>(GC2$Class)</span><span class="cl"><span class="cm">#      Good</span></span><span class="cl"><span class="cm"># Bad     0</span></span><span class="cl"><span class="cm"># Good    1</span></span></div>
-<div class="output-text">Bad = 0 (300件)  →  信用評価が悪い
-Good = 1 (700件) →  信用評価が良い</div>
-<p><strong>1（Good）である確率を予測するモデル</strong>を作ります。これは直感的ですね（高いほど良い）。</p>
-<div class="note-box"><strong>📌 ForeignWorkerの罠：</strong>ForeignWorker変数のコーディングが直感と逆の場合があります（1=外国人ではない、0=外国人 など）。必ず<code>contrasts()</code>で確認しましょう。</div>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>予測変数なしモデルで確認</h2><div class="unit-sub">切片から基本確率を再現</div></div>
-  </div>
-  <p>まず予測変数なしのモデルを実行し、切片から基本確率を確認します（第4章のおさらい）。</p>
-<div class="code-block"><span class="cl"><span class="cm"># 切片のみのモデル</span></span><span class="cl">gc_model0 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Class <span class="kw">~</span> <span class="nm">1</span>, data<span class="kw">=</span>GC2, family<span class="kw">=</span>binomial)</span><span class="cl"><span class="kw">coef</span>(gc_model0)</span><span class="cl"><span class="cm"># (Intercept): 0.8473</span></span><span class="cl"></span><span class="cl"><span class="cm"># 手計算で確認</span></span><span class="cl">P_good <span class="kw">&lt;-</span> <span class="nm">700</span> <span class="kw">/</span> (<span class="nm">700</span> <span class="kw">+</span> <span class="nm">300</span>)   <span class="cm"># = 0.7</span></span><span class="cl">odds_good <span class="kw">&lt;-</span> <span class="nm">0.7</span> <span class="kw">/</span> <span class="nm">0.3</span>         <span class="cm"># = 2.333</span></span><span class="cl"><span class="kw">log</span>(odds_good)                  <span class="cm"># = 0.8473 ← 切片と一致！✅</span></span></div>
-<div class="output-text">P(Good)       = 0.7    (700/1000)
-odds(Good)    = 2.333  (0.7/0.3)
-log_odds(Good) = 0.847  ← glm切片 0.8473 と一致</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>700人が「Good」、300人が「Bad」。基本確率70%。これが最初のベースラインです。予測変数を追加することで、より正確な予測ができるようになります🏦</p></div>
-</div>
-
-<div class="unit" id="unit4">
-  <div class="unit-header">
-    <div class="unit-num">④</div>
-    <div><h2>次のステップ</h2><div class="unit-sub">予測変数を追加して解釈する</div></div>
-  </div>
-<div class="note-box"><strong>📌 最初のチェックが命：</strong>新しいデータでは、まず <code>contrasts()</code> や <code>levels()</code> で「どちらのカテゴリが1（基準は0）か」を必ず確認します。ここを取り違えると、係数の符号の解釈が丸ごと逆になります。GermanCreditのように「Good/Bad」「外国人/国内」など直感と逆のコーディングが潜んでいることがあるため、解釈の前に必ず符号の向きを押さえましょう。</div>
-  <p>第9章ではドイツ信用データの基礎確認まで行いました。次のステップは<strong>バイナリの予測変数（ForeignWorker）を追加</strong>することです。</p>
-<div class="code-block"><span class="cl"><span class="cm"># 次のステップ：ForeignWorkerを追加</span></span><span class="cl"><span class="cm"># （第10章以降で詳しく扱います）</span></span><span class="cl">gc_model1 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Class <span class="kw">~</span> ForeignWorker,</span><span class="cl">               data <span class="kw">=</span> GC2,</span><span class="cl">               family <span class="kw">=</span> binomial)</span><span class="cl"><span class="kw">summary</span>(gc_model1)</span></div>
-<div class="teal-box"><strong>🔵 M6のここまでのまとめ：</strong><br>① ロジスティック回帰 = バイナリ予測に使う<br>② 確率→オッズ→対数オッズの3変換が核心<br>③ 切片 = 予測変数がゼロ（または基準カテゴリ）のときの対数オッズ<br>④ モデル評価は逸脱度・AIC・Z値を使う（R²は使わない）<br>⑤ 次回（第10章〜）はバイナリ・連続予測変数の係数解釈へ</div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">In the GermanCredit dataset, how many observations have Good credit (coded as 1)?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>300</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>700</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>500</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>1000</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">Why should you always run contrasts() before interpreting logistic regression results?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>To speed up computation</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To confirm which category is coded as 1 (the outcome being predicted)</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>To check for multicollinearity</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To calculate AIC</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">For the GermanCredit data, if P(Good) = 0.7, what is the log odds?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.7</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>2.333</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.847</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>−0.847</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">Which R package contains the GermanCredit dataset?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>MASS</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>nycflights13</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>caret</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>ggplot2</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">What should you do FIRST when running logistic regression with a new dataset?</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Add all predictors immediately</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Check the coding of the outcome variable (which category is 0 and which is 1)</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Remove all NA values</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Scale all predictors</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">Why run contrasts() before interpreting a logistic model?</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>To confirm which category R codes as 1</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To shuffle the data randomly</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>To delete missing values</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To compute the AIC</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">The GermanCredit dataset is provided by which R package?</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>ggplot2</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>stats</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>dplyr</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>caret</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">If P(Good) = 0.7, the odds of Good credit are:</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>About 0.43</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>About 1.00</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>About 2.33</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>About 7.00</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">In an intercept-only GermanCredit model, the intercept reproduces:</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The residual deviance</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The total number of customers</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The mean loan amount</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-odds of Good credit overall</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">What is the safest FIRST step with any new logistic dataset?</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Add every predictor at once</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Compute the AIC immediately</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Confirm the outcome coding (which level is 1)</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Remove all categorical variables</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 1, 2, 2, 1, 0, 3, 2, 3, 2];
-var FEEDBACKS=["700 observations are coded as Good (1), 300 as Bad (0).", "contrasts() confirms the coding of factor variables, ensuring you know which category is coded 1 (the \u201csuccess\u201d being predicted).", "odds = 0.7/0.3 = 2.333. log(2.333) ≈ 0.847. This matches the glm intercept.", "The GermanCredit dataset is in the caret package. Load it with library(caret) then data(GermanCredit).", "Always verify which category is coded as 1 using table() and contrasts(). This is critical for correct interpretation.", "contrasts() reveals the reference vs. coded level so you interpret the direction correctly.", "GermanCredit ships with the caret package.", "Odds = 0.7/0.3 ≈ 2.33.", "With no predictors the intercept equals the overall log-odds of the outcome coded as 1.", "Always verify which class is coded 1 before interpreting coefficients."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch8.html">← 第8章</a><a href="index.html">概要へ →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">GermanCredit</div>
-      <div class="term-en">German Credit Dataset</div>
-      <div class="term-def">caretパッケージのデータセット。1000件の信用審査データ。Good/Badのクレジット評価が目的変数。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">caretパッケージ</div>
-      <div class="term-en">caret Package</div>
-      <div class="term-def">Classification And REgression Training。機械学習用の総合パッケージ。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">contrasts()</div>
-      <div class="term-en">Contrasts Function</div>
-      <div class="term-def">factor変数のコーディング（どちらが0・1か）を確認するR関数。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">ベースライン</div>
-      <div class="term-en">Baseline</div>
-      <div class="term-def">予測変数がゼロの場合のモデル。切片のみのモデルともいう。</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">What · 変数選択とは</div>
+    <h2>データに埋もれた<br>「シグナル」を見つける</h2>
+    <p class="lead">モデルを作るとき、私たちは<strong>データに隠れたパターン（シグナル）</strong>を見つけたい。
+    <strong>変数選択</strong>は、モデルにとって<strong>最良の予測変数</strong>＝データを最もよく説明し、予測に役立つ変数を選ぶプロセスです。
+    ただし「最良」の定義は、組織がどう「良さ」を定義し、どの指標を使うかによります。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      探偵が事件を解くとき、手がかりは多ければいいわけじゃない。<strong>本当に役立つ手がかりだけ</strong>を選びますよね。変数選択は「使える手がかりだけを厳選する」探偵の技です🔍
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Why not · 全探索は無理</div>
+    <h2>組み合わせ爆発</h2>
+    <p class="lead">理屈の上では、すべての組み合わせを試す<strong>全部分集合回帰</strong>が一番正確。でも計算量が爆発します。</p>
+    <table class="ctable">
+      <tr><th>予測変数の数</th><th>試すべきモデルの数（2ⁿ）</th></tr>
+      <tr><td>3個</td><td>8通り（手作業でも可能）</td></tr>
+      <tr><td>10個</td><td>2¹⁰ ＝ 1,024通り</td></tr>
+      <tr><td>20個</td><td><strong>100万通り超！</strong></td></tr>
+    </table>
+    <p>20個でも100万通り超。現実的ではありません。そこで、もっと効率的な<strong>前進選択</strong>を使います。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      20種類のトッピングから「最高の組み合わせ」を全部試食したら、100万通り…お腹がパンクします🍕 だから「一番おいしいトッピングを1つずつ足していく」賢い方法を使うのです。
+    </div>
+  </div>
+</section>
+
+<!-- U3 forward animation -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interactive · 前進選択アニメ</div>
+    <h2>空っぽから、<br>AICを最も下げる変数を足す</h2>
+    <p class="lead">「次のステップ」を押すごとに、<strong>AICを一番下げる変数を1つ追加</strong>します。
+    AICが下がり続け、<strong>もう何を足しても下がらなくなったら停止</strong>。それが前進選択の最終モデルです。</p>
+
+    <div class="machine">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">いまの操作</div>
+          <div id="fw-op" style="font-weight:800;font-size:1.15rem;color:var(--ink)">スタート：空モデル（~ 1）</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">AIC（低いほど良い）</div>
+          <div id="fw-aic" style="font-family:var(--mono);font-weight:800;font-size:1.7rem;color:var(--g)">10000</div>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);margin-bottom:6px">いまモデルに入っている変数</div>
+        <div id="fw-vars" style="display:flex;flex-wrap:wrap;gap:8px;min-height:38px"><span style="color:var(--muted);font-size:.85rem">（まだ無し＝切片だけ）</span></div>
+      </div>
+      <div style="margin-top:16px">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted)"><span>AICの低下</span><span id="fw-prog">ステップ 0 / 4</span></div>
+        <div style="height:14px;border-radius:8px;background:#eef1f8;overflow:hidden;margin-top:4px">
+          <div id="fw-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#5BD4A8,var(--g));border-radius:8px;transition:width .3s"></div>
+        </div>
+      </div>
+      <div class="btnrow">
+        <button class="btn" id="fw-next">▶ 次のステップ（足す）</button>
+        <button class="btn ghost" id="fw-reset">最初から</button>
+      </div>
+    </div>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c">null_model <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> <span class="nm">1</span>, data <span class="kw">=</span> bikes)   <span class="cm"># 切片だけ</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">full_model <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> ., data <span class="kw">=</span> bikes)  <span class="cm"># 全部入り</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">step</span>(null_model, scope <span class="kw">=</span> <span class="fn">list</span>(lower <span class="kw">=</span> null_model, upper <span class="kw">=</span> full_model),</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">     direction <span class="kw">=</span> <span class="st">"forward"</span>)</span></div>
+    </div>
+    <p style="font-size:.8rem;color:var(--muted)">※ 変数名とAIC値は前進選択の動き（＋とAIC低下）を示す<strong>教材用の例</strong>です（最終AIC 9367で停止）。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      前進選択は「空っぽのリュックに、一番役立つ道具から順に詰めていく」やり方。もう足しても便利にならなくなったら、そこでストップ🎒
+    </div>
+  </div>
+</section>
+
+<!-- U4 -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">step() · 自動化</div>
+    <h2>AICを最小化しながら自動で追加</h2>
+    <p class="lead">step関数はデフォルトで<strong>AICを最小化</strong>します（R²ではなく）。AICは当てはまりと複雑さのバランスを取り、シンプルなモデルを好みます。</p>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ AICの読み方</div>
+      AICは<strong>相対的に</strong>使います。最初のnullモデルのAIC（例10,000）の絶対値自体に意味はありません。step関数は各変数を試して<strong>AICが一番下がるもの</strong>を順に追加し、<strong>AICが増え始めたら停止</strong>します。
+    </div>
+    <p>処理の流れ：null → 一番AICを下げる変数（real_feel）を追加 → 次にdate → 次にhumidity²…と続き、<strong>これ以上足してもAICが増える</strong>点で停止。それが最終モデルです。手動例ではステップ1（1変数）はR²、ステップ2以降（2変数以上）は<strong>調整済みR²</strong>で比較します。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      step関数は「自動で道具を詰めてくれるロボット」。役立つ道具（AICを下げる）を順に詰め、「もう何を足してもリュックが重くなるだけ」になったら自動で手を止めます🤖
+    </div>
+  </div>
+</section>
+
+<!-- U5 BIC -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">BIC · 停止基準を変える</div>
+    <h2>もっとシンプルなモデルが欲しいとき</h2>
+    <p class="lead">AICの代わりに<strong>BIC</strong>も使えます。BICは複雑さへのペナルティがより強く、よりシンプルなモデルを選びます。Rでは <code>k = log(行数)</code> を指定します。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">step</span>(null_model, scope <span class="kw">=</span> <span class="fn">list</span>(lower <span class="kw">=</span> null_model, upper <span class="kw">=</span> full_model),</span></div>
+      <div class="ln"><span class="n">2</span><span class="c">     direction <span class="kw">=</span> <span class="st">"forward"</span>, k <span class="kw">=</span> <span class="fn">log</span>(<span class="fn">nrow</span>(bikes)))   <span class="cm"># これでBIC</span></span></div>
+    </div>
+    <div class="callout info">
+      <div class="ctitle">📌 注意</div>
+      出力には "AIC" と表示されますが、<code>k=log(n)</code> を指定したので<strong>実際はBIC</strong>です。BICのほうが少ない予測変数を選ぶ傾向があります。
+    </div>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ 前進選択の弱点</div>
+      前進選択（と次章の後退選択）は<strong>多重共線性を考慮しません</strong>。すでに似た変数が入っていても相関の高い変数を追加し、冗長になることがあります。
+      だからモデルを作った後に<strong>VIF（第4章）</strong>でチェックし、より簡潔（パーシモニアス）なモデルにしましょう。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      AICは「ふつうの先生」、BICは「もっと厳しくシンプルを求める先生」。どちらも「似た道具のダブり（共線性）」は見てくれないので、最後は自分でVIFチェックを！👩‍🏫
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第9章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz9" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">変数選択</div><div class="te">Variable Selection</div><div class="td">モデルに最良の予測変数を選ぶプロセス。</div></div>
+      <div class="term"><div class="tn">全部分集合回帰</div><div class="te">All-subset Regression</div><div class="td">全組み合わせを試す方法。2ⁿで爆発し大規模では非現実的。</div></div>
+      <div class="term"><div class="tn">前進選択</div><div class="te">Forward Selection</div><div class="td">空モデルから最良の変数を1つずつ追加する手法。</div></div>
+      <div class="term"><div class="tn">step関数</div><div class="te">step()</div><div class="td">変数選択を自動化。既定でAICを最小化。</div></div>
+      <div class="term"><div class="tn">~ 1（ヌルモデル）</div><div class="te">null model</div><div class="td">切片だけ・予測変数なしのモデル。前進選択の出発点。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch8.html">← 第8章：交互作用</a>
+      <a href="ch10.html">第10章：後退選択 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第9章：前進選択</p>
+  <p style="margin-top:.4rem"><a href="ch8.html">← 第8章</a> · <a href="ch10.html">第10章 →</a> · <a href="ch9_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+/* ---------- forward selection animation ---------- */
+(function(){
+  var steps=[
+    {op:'スタート：空モデル（~ 1）', aic:10000, vars:[]},
+    {op:'＋ real_feel を追加（AIC最大の低下）', aic:9520, vars:['real_feel']},
+    {op:'＋ date を追加', aic:9430, vars:['real_feel','date']},
+    {op:'＋ humidity² を追加', aic:9385, vars:['real_feel','date','humidity²']},
+    {op:'＋ windspeed を追加 → これ以上下がらず停止', aic:9367, vars:['real_feel','date','humidity²','windspeed'], final:true}
+  ];
+  var i=0;
+  var elOp=document.getElementById('fw-op'), elAic=document.getElementById('fw-aic'),
+      elVars=document.getElementById('fw-vars'), elBar=document.getElementById('fw-bar'),
+      elProg=document.getElementById('fw-prog'), btnN=document.getElementById('fw-next'), btnR=document.getElementById('fw-reset');
+  var amax=steps[0].aic, amin=steps[steps.length-1].aic;
+  function render(){
+    var s=steps[i];
+    elOp.textContent=s.op;
+    elOp.style.color = s.op.indexOf('＋')>=0? 'var(--g)' : 'var(--ink)';
+    elAic.textContent=s.aic;
+    if(s.vars.length===0) elVars.innerHTML='<span style="color:var(--muted);font-size:.85rem">（まだ無し＝切片だけ）</span>';
+    else elVars.innerHTML=s.vars.map(function(v,idx){ var hot=idx===s.vars.length-1; return '<span class="tag-pill '+(hot?'g':'p')+'">'+v+'</span>'; }).join('');
+    elBar.style.width=Math.max(2,(amax-s.aic)/(amax-amin)*100)+'%';
+    elProg.textContent='ステップ '+i+' / '+(steps.length-1);
+    btnN.disabled=s.final; btnN.style.opacity=s.final?.5:1;
+    btnN.textContent=s.final?'✓ 最終モデル（停止）':'▶ 次のステップ（足す）';
+  }
+  btnN.addEventListener('click',function(){ if(i<steps.length-1){i++;render();} });
+  btnR.addEventListener('click',function(){ i=0; render(); });
+  render();
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz9',[
+ {q:'What is variable selection?',
+  opts:[
+   {t:'Squaring every predictor in the model so that it can capture curved, non-linear relationships',ok:false},
+   {t:'The process of identifying the best predictors that explain the data and help predictions',ok:true},
+   {t:'Removing the response variable and then predicting it from all of the remaining data columns',ok:false},
+   {t:'Converting the numeric predictors into factor variables before the regression model is fitted',ok:false}],
+  exp:'変数選択は、データをよく説明し予測に役立つ「最良の予測変数」を選ぶプロセスです。'},
+ {q:'Why is all-subset regression impractical for 20 predictors?',
+  opts:[
+   {t:'It would require over 1 million (2²⁰) unique models to evaluate one by one',ok:true},
+   {t:'R simply cannot fit any model that contains more than 20 predictor variables',ok:false},
+   {t:'Having 20 predictors always causes singularity errors inside the lm function',ok:false},
+   {t:'Because adjusted R² cannot be computed once there are many predictors present',ok:false}],
+  exp:'20変数なら 2²⁰ ＞ 100万通りのモデル。多すぎて評価しきれません。'},
+ {q:'How does forward selection build a model?',
+  opts:[
+   {t:'Starts with all of the predictors and removes the single weakest one at each step instead',ok:false},
+   {t:'Randomly picks predictor variables to add until the model finally stops improving its fit',ok:false},
+   {t:'Starts with no predictors and adds the best one at a time until a stopping rule is met',ok:true},
+   {t:'Tests every one of the 2ⁿ possible subsets of the predictors all at the very same time',ok:false}],
+  exp:'前進選択は空モデルから出発し、最良の変数を1つずつ追加。停止条件で止まります。'},
+ {q:"By default, what does R's step() function minimize?",
+  opts:[
+   {t:'The p-value of the intercept term that appears in the fitted regression model',ok:false},
+   {t:'The number of rows that are kept in the training portion of the data set',ok:false},
+   {t:'R² (always preferring whichever model happens to have the largest value)',ok:false},
+   {t:'AIC (which balances goodness of fit against the complexity of the model)',ok:true}],
+  exp:'step() は既定でAICを最小化します（当てはまりと複雑さのバランス）。'},
+ {q:'What important limitation does forward selection have?',
+  opts:[
+   {t:'It cannot use AIC or BIC at all, so it has no objective way to compare the candidate models',ok:false},
+   {t:'It does not account for multicollinearity, so redundant correlated variables may be added — check VIF afterward',ok:true},
+   {t:'It can only ever include one single predictor at a time in the final model it selects for you',ok:false},
+   {t:'It always overfits the data, because it keeps every predictor variable that is offered to it',ok:false}],
+  exp:'前進選択（後退も）は共線性を見ません。作成後にVIFでチェックし、より簡潔なモデルにします。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

@@ -27,9 +27,6 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:
 .header-nav .navg a.n-easy:hover{background:var(--teal-light);color:#0e7490;border-color:transparent;}
 .header-nav .navg a.active{background:var(--primary-light);color:var(--primary);}
 .header-nav .navg a.n-easy.active{background:var(--teal-light);color:#0e7490;}
-/* log supplement link */
-.log-link{text-decoration:none;font-size:.74rem;font-weight:700;padding:.28rem .7rem;border-radius:20px;background:rgba(245,166,35,.12);color:#b45309;border:1.5px solid rgba(245,166,35,.4);white-space:nowrap;transition:all .2s;margin-left:.4rem;}
-.log-link:hover{background:rgba(245,166,35,.22);color:#92400e;border-color:rgba(245,166,35,.7);}
 
 /* ===== Hero (index) ===== */
 .hero{background:linear-gradient(135deg,#1e293b 0%,#1d4ed8 50%,#7c3aed 100%);color:white;padding:5rem 2rem 4rem;text-align:center;position:relative;overflow:hidden;}

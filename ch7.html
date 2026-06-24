@@ -3,266 +3,252 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第7章 RでAICを使う：2つのKに注意 — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第7章 日付データの処理 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab active" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch7_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 7 · Working with Dates</div>
+    <h1>1つの<span class="b">日付</span>を、<br>年・月・日に<br><span class="g">バラして</span>使う。</h1>
+    <p class="sub">「8月」と「5月」ではレンタル数が違う。でも日付が1つの列にまとまっていると、月ごとの傾向が見えません。
+    lubridateで年・月・日を取り出し、カテゴリありのVIF＝GVIFまで学びます。</p>
+    <div class="jump">
+      <a href="#u1">① なぜ分解する</a>
+      <a href="#u2">② lubridateで分解</a>
+      <a href="#u3">③ factorに変換</a>
+      <a href="#u4">④ 全変数モデル</a>
+      <a href="#u5">⑤ GVIF</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch7_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 7</div>
-  <h1>🔧 RでAICを使う：2つのKに注意</h1>
-  <p>RのAIC()関数の引数kと数式のKの違い。デフォルトk=2が古典的AIC。NYCフライトデータで動作を確認。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① 数式のKとRのkの違い</a><a href="#unit2">② AIC()関数の動作</a><a href="#unit3">③ 実践上の注意点</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>AICの公式をおさらい</h2><div class="unit-sub">数式のKとRのkは別物</div></div>
-  </div>
-  <p>AICの公式：</p>
-<div class="note-box" style="text-align:center;font-size:1.1rem;">
-  <strong>AIC = −2 × log-likelihood + 2K</strong>
-</div>
-<ul>
-  <li>ここで <strong>K（大文字）</strong> = モデルのパラメータ数（予測変数 + 切片）</li>
-  <li><strong>2</strong> = パラメータ1つあたりのペナルティの大きさ（古典的AIC）</li>
-</ul>
-<p>Rの <code>AIC()</code> 関数を使うとき、<strong>引数 <code>k</code>（小文字）</strong>が出てきます。これが混乱の原因です。</p>
-<div class="warn-box"><strong>⚠️ 重要：</strong>数式のK（パラメータ数）とRの引数k（ペナルティの大きさ）は別物！同じ文字だが意味が違います。</div>
-</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">Why · なぜ分解するか</div>
+    <h2>月を知ると、探索がはかどる</h2>
+    <p class="lead">その日が<strong>何月か</strong>を知ると、データ探索に役立ちます。8月か5月かでレンタル数の傾向が変わるから。
+    いまデータは日付が<strong>1つの列</strong>にまとまっているので、そこから<strong>年・月・日を取り出し</strong>たいわけです。</p>
 
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>RのAIC()関数の動作</h2><div class="unit-sub">引数kはペナルティ（デフォルト2）</div></div>
-  </div>
-  <p>Rの <code>AIC(model, k=...)</code> の <code>k</code> は「1パラメータあたりのペナルティ」です（デフォルト = 2）。</p>
-<div class="code-block"><span class="cl"><span class="cm"># NYC Flights データで回帰モデルを作成</span></span><span class="cl"><span class="kw">library</span>(nycflights13)</span><span class="cl">delay_reg <span class="kw">&lt;-</span> <span class="kw">lm</span>(arr_delay <span class="kw">~</span> air_time <span class="kw">+</span> distance,</span><span class="cl">               data <span class="kw">=</span> flights)</span><span class="cl"></span><span class="cl"><span class="cm"># 通常のAIC（kを指定しない → デフォルトk=2）</span></span><span class="cl"><span class="kw">AIC</span>(delay_reg)</span><span class="cl"><span class="cm"># → 2,720,944</span></span><span class="cl"></span><span class="cl"><span class="cm"># k=2 を明示的に指定（同じ結果）</span></span><span class="cl"><span class="kw">AIC</span>(delay_reg, k <span class="kw">=</span> <span class="nm">2</span>)</span><span class="cl"><span class="cm"># → 2,720,944（変わらない）</span></span><span class="cl"></span><span class="cl"><span class="cm"># k=3 に変更（ペナルティを強化）</span></span><span class="cl"><span class="kw">AIC</span>(delay_reg, k <span class="kw">=</span> <span class="nm">3</span>)</span><span class="cl"><span class="cm"># → 2,720,949（少し大きくなる）</span></span></div>
-<div class="output-text">AIC(k=2) = 2,720,944
-AIC(k=3) = 2,720,949  ← kを3にするとペナルティが強まる</div>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>実践上の注意点</h2><div class="unit-sub">課題ではkを変えないこと</div></div>
-  </div>
-<div class="note-box"><strong>📌 KとkとBICの関係：</strong>数式の <code>K</code> は「パラメータの個数」、Rの <code>k</code> は「1個あたりの罰金の重み」で別物です。<code>k=2</code> が古典的AIC。もし <code>k=log(n)</code>（nは標本数）にすると、それはBIC（ベイズ情報量規準）に相当し、大標本ではAICより厳しくパラメータを罰します。課題ではデフォルトのk=2で統一しましょう。</div>
-  <p>課題で指示がない限り、<code>k</code> は変更不要です。デフォルト（k=2）が「古典的AIC」です。</p>
-<table class="compare-table">
-  <thead><tr><th>状況</th><th>対応</th></tr></thead>
-  <tbody>
-    <tr><td>通常の分析</td><td><code>AIC(model)</code>　← k=2がデフォルト</td></tr>
-    <tr><td>課題で「古典的AICを使え」と指示</td><td><code>AIC(model)</code>　← 何も変えなくてよい</td></tr>
-    <tr><td>BICを使いたい場合</td><td><code>AIC(model, k=log(n))</code>　← kにlog(n)を指定</td></tr>
-  </tbody>
-</table>
-<div class="note-box"><strong>📌 Rがパラメータ数を自動でカウント：</strong>AIC()にモデルオブジェクトを渡すだけで、Rが予測変数の数を自動的に数えてくれます。手動でKを指定する必要はありません。</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>RのAIC()は「k=ペナルティの強さ」で、数式のK（パラメータ数）ではありません。デフォルトk=2がほとんどのケースで使う古典的AICなので、基本的に何もしなくてOKです🙆</p></div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">In the AIC formula (AIC = −2LL + 2K), what does K represent?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The penalty value (default 2)</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of model parameters (predictors + intercept)</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The sample size</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The degrees of freedom</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">In R's AIC(model, k=...) function, what does the argument k represent?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The number of predictors</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The penalty per parameter (default = 2)</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The model intercept</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-likelihood</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">What is the default value of k in R's AIC() function?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>1</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>2</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>log(n)</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">If you run AIC(model) and AIC(model, k=2) in R, what do you get?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>AIC(model, k=2) is always lower</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>They return the same value</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC(model) returns an error</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>They return different values</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">How does increasing the k argument in AIC() affect the result?</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The AIC decreases</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The AIC stays the same</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The AIC increases (stronger penalty)</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-likelihood changes</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">In R, AIC(model, k=2) reproduces:</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The null deviance</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The residual sum of squares</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The classic AIC value</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">The argument k in R&#x27;s AIC() function controls:</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The per-parameter penalty weight</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The sample size</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The link function</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">If you increase k in AIC(model, k), the AIC value will:</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Decrease</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Stay identical</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Become negative</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Increase</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">Why should you keep k at its default in the assignment?</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>To remove the intercept</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To make the model run faster</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>To match the standard AIC definition used in the course</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To avoid using glm()</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">The K in the formula and the k argument in R are:</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Different concepts (parameter count vs. penalty weight)</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Exactly the same thing</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Both equal to the sample size</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Both always zero</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 1, 2, 1, 2, 3, 0, 3, 2, 0];
-var FEEDBACKS=["In the formula, K = number of parameters (predictors + intercept). This is different from R\u2019s k argument.", "R\u2019s k is the penalty per parameter, defaulting to 2, which gives the classical AIC.", "The default is k=2, which corresponds to the classical AIC formula.", "AIC(model) and AIC(model, k=2) return the same value because k=2 is the default.", "A larger k means a stronger penalty per parameter, so AIC increases when k is increased.", "k=2 is the default, giving the classic AIC = −2LL + 2K.", "k sets how heavily each parameter is penalized; the default of 2 yields classic AIC.", "A larger k raises the penalty term, so the reported AIC increases.", "The default k=2 corresponds to the standard AIC; changing it would not match the course's formula.", "K counts parameters in the formula, while R's k is the penalty multiplier — distinct ideas."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch6.html">← 第6章</a><a href="ch8.html">第8章 →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">AIC()関数のk</div>
-      <div class="term-en">k in AIC()</div>
-      <div class="term-def">ペナルティの強さ（デフォルト2）。数式のK（パラメータ数）とは別物。</div>
+    <div class="card">
+      <div class="journey" id="j-date">
+        <div class="jbox b" data-i="0" style="opacity:1">
+          <div class="jl">date（1列）</div>
+          <div class="jv" style="font-size:1rem">2011-01-01</div>
+          <div class="jc">まとまっている</div>
+        </div>
+        <div class="jarrow"><span class="op">lubridate</span><span class="ar">→</span></div>
+        <div class="jbox l" data-i="1">
+          <div class="jl">分解</div>
+          <div class="jv" style="font-size:1rem">year/month/day</div>
+          <div class="jc">3つに分ける</div>
+        </div>
+        <div class="jarrow"><span class="op">取り出す</span><span class="ar">→</span></div>
+        <div class="jbox g" data-i="2">
+          <div class="jl">使える列に</div>
+          <div class="jv" style="font-size:.95rem">2011 / 1 / 1</div>
+          <div class="jc">分析・可視化OK</div>
+        </div>
+      </div>
+      <div class="btnrow"><button class="btn" onclick="playJourney('j-date')">▶ 分解を再生</button><button class="btn ghost" onclick="resetJourney('j-date')">リセット</button></div>
     </div>
-    <div class="term-item">
-      <div class="term-name">古典的AIC</div>
-      <div class="term-en">Classical AIC</div>
-      <div class="term-def">ペナルティが2K（k=2）の標準的なAIC。Rのデフォルト。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">BIC</div>
-      <div class="term-en">Bayesian Information Criterion</div>
-      <div class="term-def">AIC(model, k=log(n))で計算。サンプル数に応じてペナルティが変わる。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">パラメータ数</div>
-      <div class="term-en">Number of Parameters</div>
-      <div class="term-def">切片 + 予測変数の数。Rが自動的にカウントする。</div>
+
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      「2011年1月1日」という1つの情報を、「年」「月」「日」の3つの引き出しに分けて整理するイメージ。
+      月だけ取り出せば「夏はよく借りられる」みたいなパターンが見えてきます🗓️
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">lubridate · 分解する</div>
+    <h2>year() month() day() で一発</h2>
+    <p class="lead"><code>lubridate</code>（要インストール）の <code>year()</code> <code>month()</code> <code>day()</code> で、日付から各要素を取り出します。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">library</span>(lubridate)</span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(year <span class="kw">=</span> <span class="fn">year</span>(date),</span></div>
+      <div class="ln"><span class="n">3</span><span class="c">                          month <span class="kw">=</span> <span class="fn">month</span>(date),</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">                          day <span class="kw">=</span> <span class="fn">day</span>(date))</span></div>
+    </div>
+    <p>確認すると、2011年1月1日が「year=2011, month=1, day=1」に正しく分解されました。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      lubridateは「日付バラし機」。日付を入れるとボタン1つで「年・月・日」にバラバラにしてくれる便利な機械です⚙️
+    </div>
+  </div>
+</section>
+
+<!-- U3 -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">Type · factorに変換</div>
+    <h2>「1月」は数字ではなくカテゴリ</h2>
+    <p class="lead">取り出した <code>month</code> と <code>year</code> は最初は数値扱い。でも「月1（＝1月）」は数字に見えても<strong>カテゴリ</strong>。だから <code>factor()</code> で囲みます。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c">bikes <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(</span></div>
+      <div class="ln"><span class="n">2</span><span class="c">  year <span class="kw">=</span> <span class="fn">factor</span>(<span class="fn">year</span>(date)),</span></div>
+      <div class="ln"><span class="n">3</span><span class="c">  month <span class="kw">=</span> <span class="fn">factor</span>(<span class="fn">month</span>(date)),</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">  day <span class="kw">=</span> <span class="fn">day</span>(date))   <span class="cm"># 日は数値のまま（順序的なので）</span></span></div>
+    </div>
+    <div class="compare">
+      <div class="ccard b"><h4>月・年 → factor</h4><ul><li>group_byで集計・可視化したい</li><li>「1月」はラベル（カテゴリ）</li></ul></div>
+      <div class="ccard a"><h4>日 → 数値のまま</h4><ul><li>1日→2日→3日と順序がある</li><li>日ごとにグループ化は少ない</li></ul></div>
+    </div>
+    <div class="callout info">
+      <div class="ctitle">📌 ワンホットの検討</div>
+      月や年も<strong>ワンホットエンコーディング</strong>すれば、「1月は有意だが2月は有意でない」とき、1月だけ残して2月を削る操作ができます（第6章参照）。日付列そのものは冗長なので削除します（<code>-date</code>）。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      「3月」の3は、計算する数字ではなく「春の月」というラベル。だからfactor（カテゴリ）に。でも「日にち」は1日→2日→3日と順番があるので数字のままでOKです🍎
+    </div>
+  </div>
+</section>
+
+<!-- U4 -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Shortcut · 全変数モデル</div>
+    <h2>~ . で全部の列を予測変数に</h2>
+    <p class="lead">すべての列を予測変数に使いたいとき、全部タイプするのは大変。<code>~ .</code>（チルダ・ドット）で<strong>応答変数以外の全列</strong>を予測変数にできます。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># rentals を、残りすべての列で予測</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">full_model <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> ., data <span class="kw">=</span> bikes)</span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">summary</span>(full_model)</span></div>
+    </div>
+    <p>結果、<strong>day（日）は有意でない</strong>ことが多い——「1日か15日か」はあまり情報を持たないので納得。一方<strong>月と年は有意</strong>。そして調整済みR²が<strong>これまでで最大</strong>に。ノイズの多いデータからシグナルをよく捉えられた証拠です。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      <code>~ .</code> は「全員集合！」の号令。1人ずつ名前を呼ばなくても、応答変数以外の全員が予測変数として集まってくれる便利なショートカットです📣
+    </div>
+  </div>
+</section>
+
+<!-- U5 GVIF -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">GVIF · 一般化VIF</div>
+    <h2>カテゴリ変数があるときのVIF</h2>
+    <p class="lead">factor（カテゴリ）があると、ふつうのVIFは使えません。そこで<strong>一般化VIF（GVIF）</strong>。注目は最後の列、
+    <strong>GVIF^(1/(2×自由度))</strong>。これで量的データとカテゴリデータのVIFを<strong>同じ土俵で比較</strong>できます。</p>
+    <table class="ctable">
+      <tr><th>指標</th><th>基準</th></tr>
+      <tr><td>通常のVIF</td><td>5超で問題</td></tr>
+      <tr><td><strong>GVIF^(1/(2·df))</strong></td><td><strong>2超</strong>で要調査</td></tr>
+    </table>
+    <div class="callout warn">
+      <div class="ctitle">GVIF^(1/(2df)) の結果（2超は要注意）</div>
+      temperature, temperature² → 期待通り相関（自然）／<strong>real_feel</strong> → 湿度と風速から作られる → 問題あり、最初に削る候補／spring/summer/winter → 月を入れたことで季節と相関。
+    </div>
+    <p><code>real_feel</code>（体感温度）は湿度と風速から作られるので相関が出やすく、最初に削除を検討すべき変数。月を入れたことで季節とも相関。月を丸ごと削るか、ワンホット化して特定の月だけ削るか、季節を削るか——さらなる分析の余地があります。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      普通のVIFは「数字の変数」しか測れない物差し。GVIFは「カテゴリも数字も両方測れる、進化した物差し」。これで全部の変数を公平にチェックできます📐
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第7章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz7" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">lubridate</div><div class="te">lubridate package</div><div class="td">日付から年・月・日を取り出すRパッケージ。year()/month()/day()。</div></div>
+      <div class="term"><div class="tn">~ .（チルダ・ドット）</div><div class="te">tilde-dot formula</div><div class="td">応答変数以外の全列を予測変数にする書き方。</div></div>
+      <div class="term"><div class="tn">一般化VIF</div><div class="te">Generalized VIF (GVIF)</div><div class="td">カテゴリも扱えるVIF。GVIF^(1/(2df))で比較、2超で要調査。</div></div>
+      <div class="term"><div class="tn">real_feel</div><div class="te">体感温度</div><div class="td">湿度と風速から作られるため相関が出やすい変数。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch6.html">← 第6章：カテゴリ変数</a>
+      <a href="ch8.html">第8章：交互作用 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第7章：日付データの処理</p>
+  <p style="margin-top:.4rem"><a href="ch6.html">← 第6章</a> · <a href="ch8.html">第8章 →</a> · <a href="ch7_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+buildQuiz('quiz7',[
+ {q:'Which library is used to extract year, month, and day from a date column?',
+  opts:[
+   {t:'ggplot2 — the package mainly used for building plots and other data visualizations',ok:false},
+   {t:'car — the package that provides the vif() function for diagnostics work',ok:false},
+   {t:'lm.beta — the package that returns standardized regression coefficients',ok:false},
+   {t:'lubridate — the package with year(), month(), and day() helper functions',ok:true}],
+  exp:'lubridate の year()/month()/day() で日付の各要素を取り出せます。'},
+ {q:'Why convert month to a factor but keep day as numeric?',
+  opts:[
+   {t:'Month is really a category ("1" = January), while day is sequential and not usually grouped on',ok:true},
+   {t:'Because the month values are always much larger numbers than the corresponding day values',ok:false},
+   {t:'Because the day column simply cannot be stored as a factor variable anywhere in R at all',ok:false},
+   {t:'Because months carry no real meaning at all once a full date has been split into pieces',ok:false}],
+  exp:'月はカテゴリ（1＝1月）なのでfactor。日は順序があり集計も少ないので数値のままにします。'},
+ {q:'What does the formula rentals ~ . mean in R?',
+  opts:[
+   {t:'Predict rentals using only the date column as the single predictor variable',ok:false},
+   {t:'Predict the date column, using rentals as the only available predictor variable',ok:false},
+   {t:'Predict rentals using every other column in the data frame as a predictor',ok:true},
+   {t:'Remove all of the predictors and fit a model with just an intercept term',ok:false}],
+  exp:'~ . は「応答変数以外の全列を予測変数に」という意味の便利な書き方です。'},
+ {q:'In the full model, the "day" predictor was usually…',
+  opts:[
+   {t:'Always negative — later days of the month sharply lowered the rental counts',ok:false},
+   {t:'Not significant — whether it is the 1st or 15th tells us little about rentals',ok:true},
+   {t:'The most significant predictor of all, with by far the smallest p-value',ok:false},
+   {t:'The response variable that the rest of the model was actually predicting',ok:false}],
+  exp:'日は有意でないことが多い。1日か15日かは、レンタル数についてあまり情報を持ちません。'},
+ {q:'Why use Generalized VIF (GVIF) instead of ordinary VIF here?',
+  opts:[
+   {t:'GVIF removes the multicollinearity for you automatically by dropping correlated factors',ok:false},
+   {t:'Ordinary VIF only ever works on the response variable, never on any factor predictors',ok:false},
+   {t:'GVIF is much faster because it skips the separate regression run for each predictor',ok:false},
+   {t:'GVIF handles categorical (factor) variables; the GVIF^(1/(2·df)) column compares all predictors',ok:true}],
+  exp:'GVIFはfactorを扱えます。GVIF^(1/(2·df))列で量的・カテゴリの予測変数を同じ土俵で比較します。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

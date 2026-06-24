@@ -3,287 +3,400 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第2章 ロジスティック回帰モデルの仕組み — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第2章 診断 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab active" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch2_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 2 · Diagnostics</div>
+    <h1>モデルは作れた。<br>でも<span class="g">良いモデル</span>か、<br>どう見抜く？</h1>
+    <p class="sub">重回帰では予測変数の候補がたくさん。4つ入りより2つだけのほうが良いこともあります。
+    講師の鉄則は「<strong>1つの指標（特にp値だけ！）に頼らず、ホリスティック（全体的）に判断する</strong>」。
+    気温だけのモデルと、気温＋湿度＋風速のモデルを、6つの指標で“健康診断”します。</p>
+    <div class="jump">
+      <a href="#u1">① なぜ診断か</a>
+      <a href="#u2">② 調整済みR²</a>
+      <a href="#u3">③ AICとBIC</a>
+      <a href="#u4">④ SとRMSE</a>
+      <a href="#u5">⑤ F統計量</a>
+      <a href="#u6">⑥ Cp・まとめ</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch2_easy.html">🍎 コードが難しければ「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 2</div>
-  <h1>📐 ロジスティック回帰モデルの仕組み</h1>
-  <p>係数を理解するために必須の3変換：確率・オッズ・対数オッズの関係を完全マスターする。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① 3つの変換</a><a href="#unit2">② 確率とオッズ</a><a href="#unit3">③ 対数オッズ(Logit)</a><a href="#unit4">④ シグモイド関数</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>3つの変換を理解する</h2><div class="unit-sub">確率 → オッズ → 対数オッズの流れ</div></div>
-  </div>
-  <p>ロジスティック回帰の係数を理解するには、<strong>3つの概念</strong>を順番に理解する必要があります。</p>
-<div class="flow-diagram">
-  <div class="flow-box input">確率 (Probability)<br><small>0 〜 1</small></div>
-  <span class="flow-arrow">→</span>
-  <div class="flow-box model">オッズ (Odds)<br><small>0 〜 ∞</small></div>
-  <span class="flow-arrow">→</span>
-  <div class="flow-box output">対数オッズ (Log Odds)<br><small>−∞ 〜 +∞</small></div>
-</div>
-<p>これらの変換を経ることで、<strong>「確率を予測する」という問題を、線形回帰と同じ形の式で解ける</strong>ようになります。</p>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>「確率→オッズ→対数オッズ」は、お金の両替みたいなもの。円をドルに換え、さらにユーロに換える。形は変わるけど、本質は同じ情報を持っています💱</p></div>
-</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">Why · なぜ診断が必要か</div>
+    <h2>1つの指標に頼らない</h2>
+    <p class="lead">重回帰には予測変数の候補がたくさん。でも<strong>「4つ入り」より「2つだけ」のほうが良い</strong>こともあります。
+    では、どのモデルを選ぶべきか、本当に良い予測ができているのか？それを見抜くのが「診断」です。</p>
 
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>確率とオッズ</h2><div class="unit-sub">「50%」と「1対1」は同じ意味</div></div>
-  </div>
-  <p><strong>確率</strong>は「事象が起こる割合」（0〜1）。<strong>オッズ</strong>は「起こる確率」÷「起こらない確率」です。</p>
-<table class="compare-table">
-  <thead><tr><th>確率 P</th><th>オッズ P/(1-P)</th><th>解釈</th></tr></thead>
-  <tbody>
-    <tr><td>0.5（50%）</td><td>0.5/0.5 = 1.0</td><td>起こる:起こらない = 1:1</td></tr>
-    <tr><td>0.7（70%）</td><td>0.7/0.3 ≈ 2.33</td><td>起こる:起こらない ≈ 2.3:1</td></tr>
-    <tr><td>0.1（10%）</td><td>0.1/0.9 ≈ 0.11</td><td>起こる:起こらない ≈ 1:9</td></tr>
-  </tbody>
-</table>
-<div class="code-block"><span class="cl"><span class="cm"># 確率→オッズの計算（Rで）</span></span><span class="cl">p <span class="kw">&lt;-</span> <span class="nm">0.7</span></span><span class="cl">odds <span class="kw">&lt;-</span> p <span class="kw">/</span> (<span class="nm">1</span> <span class="kw">-</span> p)</span><span class="cl">odds  <span class="cm"># 2.333...</span></span></div>
-<div class="note-box"><strong>📌 オッズ比の特徴：</strong>確率が0のとき オッズ=0、確率が0.5のとき オッズ=1、確率が1に近づくにつれてオッズは∞に向かいます。</div>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>対数オッズ（Log Odds / Logit）</h2><div class="unit-sub">オッズの対数で「−∞〜+∞」に広げる</div></div>
-  </div>
-  <p>オッズは0〜∞の範囲ですが、<strong>自然対数（log）を取る</strong>と−∞〜+∞に広がります。これを<strong>対数オッズ</strong>または<strong>logit</strong>と呼びます。</p>
-<div class="code-block"><span class="cl"><span class="cm"># オッズ→対数オッズ</span></span><span class="cl">log_odds <span class="kw">&lt;-</span> <span class="kw">log</span>(odds)   <span class="cm"># log() は自然対数</span></span><span class="cl"></span><span class="cl"><span class="cm"># 確率 0.5 → オッズ 1.0 → 対数オッズ 0</span></span><span class="cl">log(<span class="nm">0.5</span> / (<span class="nm">1</span> - <span class="nm">0.5</span>))  <span class="cm"># → 0</span></span><span class="cl"></span><span class="cl"><span class="cm"># 確率 0.7 → オッズ 2.33 → 対数オッズ 0.847</span></span><span class="cl">log(<span class="nm">0.7</span> / (<span class="nm">1</span> - <span class="nm">0.7</span>))  <span class="cm"># → 0.847</span></span></div>
-<p>ロジスティック回帰の係数はこの<strong>対数オッズのスケール</strong>で表されます。これが重要です。</p>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>確率は0〜1しか動けなくて窮屈。オッズは0〜∞でまだ不便。対数オッズはマイナスもプラスも自由に動けます。回帰式と組み合わせるために、この「自由な動き」が必要なんです🎯</p></div>
-</div>
-
-<div class="unit" id="unit4">
-  <div class="unit-header">
-    <div class="unit-num">④</div>
-    <div><h2>シグモイド関数の式</h2><div class="unit-sub">ロジスティック回帰の核心</div></div>
-  </div>
-<div class="note-box"><strong>📌 3変換を一本につなぐ：</strong>確率 p → オッズ <code>p/(1−p)</code> → 対数オッズ <code>log(p/(1−p))</code>。この対数オッズ（logit）を予測変数の一次式 <code>β₀+β₁x</code> でモデル化するのがロジスティック回帰です。逆向きにたどればシグモイドで確率に戻せます。「係数は対数オッズの世界の言葉」だと覚えておくと、後の章の係数解釈がすべて一貫して理解できます。</div>
-  <p>ロジスティック回帰の予測式はこうなります：</p>
-<div class="note-box" style="text-align:center;font-size:1.1rem;">
-  <strong>P(Y=1) = 1 / (1 + e<sup>−(β₀ + β₁X₁ + β₂X₂ + …)</sup>)</strong>
-</div>
-<p>カッコの中（β₀ + β₁X₁ + …）は、重回帰で見慣れた<strong>回帰式と全く同じ形</strong>です。それをeの指数乗の形に入れることで、出力が必ず0〜1の確率になります。</p>
-<table class="compare-table">
-  <thead><tr><th>処理の段階</th><th>式</th><th>範囲</th></tr></thead>
-  <tbody>
-    <tr><td>① 線形予測子</td><td>β₀ + β₁X₁ + …</td><td>−∞ 〜 +∞</td></tr>
-    <tr><td>② 対数オッズ</td><td>logit(P) = 上記と同じ</td><td>−∞ 〜 +∞</td></tr>
-    <tr><td>③ 確率（最終出力）</td><td>1 / (1 + e<sup>−logit</sup>)</td><td>0 〜 1</td></tr>
-  </tbody>
-</table>
-<div class="note-box"><strong>📌 まとめ：</strong>係数（β）を得るためには 確率→オッズ→対数オッズ の変換が必要。最終的な確率を得るには その逆（シグモイド関数）で戻します。</div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">What is the correct order of transformations in logistic regression?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Log odds → Odds → Probability</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Probability → Odds → Log odds</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Odds → Probability → Log odds</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Log odds → Probability → Odds</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">How is 'odds' calculated from probability P?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>P × (1-P)</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>P / (1-P)</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>log(P)</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>1 / P</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">What is the range of log odds (logit)?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0 to 1</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0 to infinity</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Negative infinity to positive infinity</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>−1 to 1</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">If the probability of an event is 0.5, what is the log odds?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.5</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>1.0</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>−0.5</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">What does the sigmoid function do?</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Converts probability to log odds</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Converts log odds back to probability (0–1)</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculates the regression coefficients</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Removes outliers from the data</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">What transformation turns a probability into a value ranging from −∞ to +∞?</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Taking the square root of P</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Multiplying P by 100</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Subtracting P from 1</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-odds (logit) transformation</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">Odds of 3 (i.e. 3 to 1) corresponds to what probability?</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.75</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.30</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.50</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.90</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">Which statement about the sigmoid (logistic) function is correct?</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>It always outputs negative values</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>It converts probability into odds</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>It is the inverse of the logit function</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>It is identical to a straight line</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">As probability approaches 1, what happens to the odds?</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The odds approach zero</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The odds stay constant at 1</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The odds become negative</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The odds grow toward infinity</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">Why convert probability to log-odds before fitting a linear equation?</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>To force all coefficients to be positive</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To remove the need for an intercept</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>To make the relationship linear and unbounded</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To guarantee the data is normally distributed</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 1, 2, 2, 1, 3, 0, 2, 3, 2];
-var FEEDBACKS=["Probability is converted to Odds (P/1-P), then to Log Odds (natural log of odds). This allows a linear regression equation to be used.", "Odds = P / (1-P). If probability is 0.7, odds = 0.7/0.3 = 2.33.", "Log odds can range from −∞ to +∞, which is why it allows a standard linear regression equation to be used.", "Odds = 0.5/0.5 = 1. log(1) = 0. When probability = 0.5, log odds = 0.", "The sigmoid function 1/(1+e^−x) converts any real number back into a probability between 0 and 1.", "The logit, log(P/(1−P)), stretches the bounded probability onto the full real line.", "Odds = P/(1−P) = 3 gives P = 3/4 = 0.75.", "The sigmoid is the inverse of the logit: it maps log-odds back to a probability.", "As P→1, the denominator (1−P)→0, so odds = P/(1−P) grow without bound.", "Modeling log-odds linearly keeps predictions unbounded; the logit link makes the relationship linear in the predictors."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch1.html">← 第1章</a><a href="ch3.html">第3章 →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">オッズ</div>
-      <div class="term-en">Odds</div>
-      <div class="term-def">確率Pを(1−P)で割った値。「起こる：起こらない」の比率。</div>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ p値だけに頼らない（統計のよくある落とし穴）</div>
+      講師いわく、統計では <code>summary</code> の末尾にある<strong>星（★ ★★ ★★★＝小さなp値）だけを見て「有意だからOK」</strong>と決めてしまいがち。
+      でも診断は<strong>複数の指標を総合して（ホリスティックに）</strong>判断するのが鉄則です。
     </div>
-    <div class="term-item">
-      <div class="term-name">対数オッズ</div>
-      <div class="term-en">Log Odds / Logit</div>
-      <div class="term-def">オッズの自然対数。−∞〜+∞の範囲を取る。ロジスティック回帰の係数のスケール。</div>
+    <p>診断には多くの道具があります。<strong>残差分析</strong>（quick plot で出る残差プロット）、<strong>影響点分析</strong>（<a href="ch3_1.html">第3.1章</a>）、
+    <strong>VIF／多重共線性</strong>（<a href="ch4.html">第4章</a>）は別の章で扱います。この章で扱うのは、<strong>モデルAとBのどちらが良いかを比べる“中間の指標たち”</strong>です。</p>
+
+    <div class="compare">
+      <div class="ccard a"><h4>モデルA（単回帰）</h4><ul><li>気温だけ</li><li>シンプル</li><li>説明力は？</li></ul></div>
+      <div class="ccard b"><h4>モデルB（重回帰）</h4><ul><li>気温＋湿度＋風速</li><li>情報は多い</li><li>本当に良くなった？</li></ul></div>
     </div>
-    <div class="term-item">
-      <div class="term-name">シグモイド関数</div>
-      <div class="term-en">Sigmoid Function</div>
-      <div class="term-def">1/(1+e^−x)。対数オッズを0〜1の確率に変換する。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">e（自然対数の底）</div>
-      <div class="term-en">Euler's number</div>
-      <div class="term-def">≈2.718。自然対数の計算に使われる定数。</div>
+    <p style="text-align:center;color:var(--muted);margin-top:10px">この2つを、これから6つの指標で“健康診断”します。</p>
+
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      診断はお医者さんの「健康診断」。体温だけ見て健康とは言えません。身長・体重・血圧・心拍…
+      いろんな数値を<strong>合わせて</strong>見るから本当の状態がわかります。モデルも同じです🩺
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 Adjusted R² interactive -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">調整済みR²（高いほど良い ⬆️）</div>
+    <h2>無駄な変数を足すと、<br>2つのR²は逆方向に動く</h2>
+    <p class="lead">ふつうの<strong>R²</strong>の弱点は、<strong>役に立たない変数を足してもR²が上がってしまう</strong>こと。
+    講師の例：家の価格を予測するのに「<strong>ドアノブの数</strong>」や「<strong>ドアノブの平均直径</strong>」を入れても、価格とは無関係なのにR²は上がる。
+    <strong>調整済みR²</strong>は、こうした役立たない予測変数に<strong>ペナルティ</strong>を与えて、水増しされたR²を下げます。</p>
+
+    <div class="machine">
+      <div class="slider-row o">
+        <label>足した「無駄な変数」の数</label>
+        <input type="range" id="s-junk" min="0" max="8" value="0">
+        <div class="val" id="v-junk">0 個</div>
+      </div>
+      <div class="svgwrap">
+        <svg id="r2svg" viewBox="0 0 640 300" style="width:100%;max-width:640px;display:block;margin:0 auto"></svg>
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;margin-top:4px">※ 概念を示す<strong>イメージ図</strong>（傾向を表すための値）</div>
+      <div class="readouts">
+        <div class="ro p"><div class="lab">R²（ふつう）</div><div class="big" id="ro-r2">0.520</div><div class="meaning">変数を足すほど必ず上がる</div></div>
+        <div class="ro g"><div class="lab">調整済み R²</div><div class="big" id="ro-ar2">0.520</div><div class="meaning" id="me-ar2">無駄な変数では下がる</div></div>
+        <div class="ro l"><div class="lab">差（水増し分）</div><div class="big" id="ro-gap">0.000</div><div class="meaning">この差が大きい＝水増し</div></div>
+      </div>
+    </div>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 調整済みR²を取り出す（高いほうが良い）。$ で直接アクセス</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">summary</span>(temp_model)<span class="kw">$</span>adj.r.squared        <span class="cm"># 気温だけ</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">summary</span>(bikes_model_1)<span class="kw">$</span>adj.r.squared     <span class="cm"># 気温+湿度+風速（少し増えた）</span></span></div>
+    </div>
+    <p>結果、重回帰のほうが調整済みR²が（大きくはないが）<strong>増えました</strong>。講師いわく「<strong>湿度と風速を知ることで、レンタル数の予測がよくなる</strong>」。
+    ただし、ここで<strong>無駄な</strong>変数を足すと、上のグラフのように調整済みR²は逆に下がっていきます。</p>
+
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      R²は「荷物をいくら詰めても文句を言わないカバン」。調整済みR²は「いらない荷物を入れると重くなって怒るカバン」。
+      だから本当に必要なものだけ入れるようになります🎒
+    </div>
+  </div>
+</section>
+
+<!-- U3 AIC/BIC -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">AIC & BIC（低いほど良い ⬇️）</div>
+    <h2>「当てはまり」と「シンプルさ」の<br>バランスを採点する</h2>
+    <p class="lead"><strong>AIC（赤池情報量規準）</strong>は、<strong>データへの当てはまりの良さ</strong>と<strong>モデルの複雑さ</strong>のバランスを取ろうとする指標。
+    データによく合うけれど、複雑すぎて過学習にならないモデルを好みます。</p>
+
+    <div class="grid2">
+      <div class="card">
+        <h4 style="color:var(--p)">AIC</h4>
+        <ul style="margin:0;padding-left:1.1em;font-size:.92rem">
+          <li>当てはまり × 複雑さ のバランス</li>
+          <li><strong>低いほど良い ⬇️</strong></li>
+          <li><strong>相対指標</strong>：絶対値（例10,000）に意味はなく、他モデルと比べるためだけに使う</li>
+          <li>式はノートブック末尾の「formulas」に。<strong>暗記不要</strong>（興味があれば導出を参照）</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--l)">BIC</h4>
+        <ul style="margin:0;padding-left:1.1em;font-size:.92rem">
+          <li>AICの仲間。<strong>複雑さへの罰がもっと強い</strong></li>
+          <li>よりシンプルな（パーシモニアスな）モデルを好む</li>
+          <li>Rでは<strong>大文字</strong> <code>BIC()</code>（小文字はエラー）</li>
+          <li>別名 <strong>SBC</strong> とも呼ばれる</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">AIC</span>(temp_model)        <span class="cm"># 気温だけ</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">AIC</span>(bikes_model_1)     <span class="cm"># 気温+湿度+風速 ← こちらが少し低い＝良い</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">BIC</span>(bikes_model_1)     <span class="cm"># BICでも重回帰が好まれる（lowercase はエラー）</span></span></div>
+    </div>
+
+    <div class="callout info">
+      <div class="ctitle">📌 AIC vs BIC</div>
+      どちらも「低いほど良い」。違いは<strong>BICのほうがシンプルさを強く求める</strong>こと。変数が多いモデルでは、BICはAICより少ない変数を選びがちです。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      AICとBICは「テストの採点者」。当てはまりが良いと加点、答案が長すぎ（複雑すぎ）ると減点。
+      <strong>BICは特に厳しい先生</strong>。点数は低いほど良い＝ゴルフのスコアと同じ⛳
+    </div>
+  </div>
+</section>
+
+<!-- U4 S/RMSE -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">S & RMSE（低いほど良い ⬇️）</div>
+    <h2>予測は、実際の点から<br>どれだけ離れている？</h2>
+    <p class="lead"><strong>残差</strong>は「回帰線から観測点までの距離」。距離が大きいほど誤差が大きい。
+    だから<strong>残差標準誤差 S は小さいほど良い</strong>。すべての点が線の近くにある＝良いモデルです。
+    <code>summary</code> では <strong>Residual standard error: 1509</strong> のように出ます。</p>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># summary の "Residual standard error"（例: 1509）。$sigma で取り出す</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">summary</span>(bikes_model_1)<span class="kw">$</span>sigma   <span class="cm"># 重回帰のほうが小さい＝良い</span></span></div>
+    </div>
+
+    <h3>RMSE（二乗平均平方根誤差）は自作する</h3>
+    <p>Rに <code>RMSE</code> の組み込み関数は無いので関数を作ります。やることは名前の通り：
+    <strong>残差（実際−予測）を二乗 → 平均 → 平方根</strong>（<u>R</u>oot-<u>M</u>ean-<u>S</u>quare-<u>E</u>rror）。
+    最後に平方根を取るのは、二乗で変わった単位を元に戻すためです。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c">calculate_rmse <span class="kw">&lt;-</span> <span class="kw">function</span>(actual, predicted) {</span></div>
+      <div class="ln"><span class="n">2</span><span class="c">  residuals <span class="kw">&lt;-</span> actual <span class="kw">-</span> predicted     <span class="cm"># 残差</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c">  <span class="fn">sqrt</span>(<span class="fn">mean</span>(residuals<span class="kw">^</span><span class="nm">2</span>))        <span class="cm"># 二乗→平均→平方根</span></span></div>
+      <div class="ln"><span class="n">4</span><span class="c">}</span></div>
+      <div class="ln"><span class="n">5</span><span class="c">calculate_rmse(bikes<span class="kw">$</span>rentals, bikes_model_1<span class="kw">$</span>fitted.values)</span></div>
+    </div>
+    <div class="callout info">
+      <div class="ctitle">📌 S と RMSE の関係</div>
+      大きなデータセットでは <strong>S と RMSE はほぼ同じ値</strong>に近づきます。講義では <strong>S＝1509、RMSE＝1507</strong>。
+      どちらも重回帰のほうが小さく、良いと示しました。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      ダーツで的の中心からどれだけ外れたかを平均したのがRMSE。中心に近いほど（＝Sが小さいほど）上手なプレイヤー＝良いモデルです🎯
+    </div>
+  </div>
+</section>
+
+<!-- U5 F -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">F-statistic · モデル全体の検定</div>
+    <h2>「予測変数は全部ゼロ＝無意味」を<br>否定できるか</h2>
+    <p class="lead"><code>summary</code> の最後に出る<strong>F統計量</strong>（とても小さいp値が科学記法で出る）は、
+    モデル全体の当てはまりを検定します。ANOVAと同じ考え方で<strong>オムニバス検定</strong>と呼ばれます。</p>
+    <div class="grid2">
+      <div class="card">
+        <h4>仮説</h4>
+        <p style="margin:0;font-size:.92rem"><strong>H₀：</strong>すべての係数がゼロ＝どの予測変数もYと有意な関係がない。<br>
+        <strong>H₁：</strong>少なくとも1つの係数はゼロでない。</p>
+      </div>
+      <div class="card">
+        <h4>読み方</h4>
+        <p style="margin:0;font-size:.92rem"><strong>Fが大きい</strong>＝予測変数を入れたモデルのほうが、入れないモデルよりよく当てはまる。
+        p値が有意水準（α）より小さければ H₀ を棄却します。</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ 大事な注意</div>
+      Fが有意でも<strong>すべての予測変数が有意とは限りません</strong>。これは「モデル全体」を見るオムニバス検定。
+      「少なくとも1つは有意」とわかるだけで、<strong>どれが一番効いているか</strong>はさらに分析が必要です。
+    </div>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">summary</span>(bikes_model_1)<span class="kw">$</span>fstatistic   <span class="cm"># F値＋分子/分母の自由度も返る</span></span></div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      F統計量は「このチーム、誰か1人でも仕事してる？」という質問。答えが「YES」とわかっても、
+      <strong>誰がエースか</strong>まではわからない。それは個別に調べます⚽
+    </div>
+  </div>
+</section>
+
+<!-- U6 Cp + summary -->
+<section id="u6" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Mallows' Cp ・ まとめ</div>
+    <h2>MallowのCp と、6指標の早見表</h2>
+    <p class="lead"><strong>MallowのCp</strong>は、計算値を<strong>予測変数の数</strong>と比べます（数えるときは<strong>切片も含む</strong>）。
+    Rに組み込み関数が無いので、データとモデルを渡して自作の関数で計算します。</p>
+    <table class="ctable">
+      <tr><th>Cp の値</th><th>意味</th></tr>
+      <tr><td><strong>Cp ≒ 予測変数の数</strong></td><td>✅ 良いモデル。フルモデル並みに説明しつつ、過度に複雑でない（残差もほぼ正規）。</td></tr>
+      <tr><td>Cp &gt; 予測変数の数</td><td>⚠️ 過学習（オーバーフィット）</td></tr>
+      <tr><td>Cp &lt; 予測変数の数</td><td>⚠️ 過小学習（アンダーフィット）</td></tr>
+    </table>
+    <p>講義の例：気温モデルは「切片＋気温」で<strong>Cp＝2、予測変数の数＝2</strong>。重回帰モデルも <strong>Cp＝予測変数の数</strong>。
+    どちらも「良いモデル」と判定されました。なお、ここで挙げた6つは<strong>代表的な指標の一部</strong>で、他にも多くの診断があります。</p>
+
+    <h3>📋 診断指標 まとめ（方向に注目）</h3>
+    <table class="ctable">
+      <tr><th>指標</th><th>良いのは</th><th>何を見る</th></tr>
+      <tr><td>調整済みR²</td><td>高い ⬆️</td><td>無駄な変数を罰した説明力</td></tr>
+      <tr><td>AIC</td><td>低い ⬇️</td><td>当てはまり×複雑さのバランス</td></tr>
+      <tr><td>BIC（=SBC）</td><td>低い ⬇️</td><td>同上（シンプルさをより重視）</td></tr>
+      <tr><td>S / RMSE</td><td>低い ⬇️</td><td>予測の平均的なズレ</td></tr>
+      <tr><td>F統計量</td><td>大きい・p小 ⬆️</td><td>モデル全体が有意か</td></tr>
+      <tr><td>MallowのCp</td><td>≒ 予測変数の数</td><td>過学習 / 過小学習</td></tr>
+    </table>
+    <div class="callout good">
+      <div class="ctitle">📌 結論</div>
+      <strong>1つに頼らず複数を総合</strong>して比較を。今回はすべての指標で「重回帰モデル」が（少しだけ）良いという結論でした。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      MallowのCpは「ちょうどいい荷物の量メーター」。多すぎ（過学習）でも少なすぎ（過小学習）でもダメ。
+      <strong>予測変数の数と同じくらい</strong>がベストな旅行カバンです🧳
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第2章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz2" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">診断</div><div class="te">Diagnostics</div><div class="td">複数指標でモデルの良し悪しを総合評価すること。</div></div>
+      <div class="term"><div class="tn">調整済みR²</div><div class="te">Adjusted R²</div><div class="td">無駄な変数にペナルティを与えたR²。高いほど良い。</div></div>
+      <div class="term"><div class="tn">AIC</div><div class="te">Akaike Information Criterion</div><div class="td">当てはまり×複雑さ。低いほど良い。相対指標。</div></div>
+      <div class="term"><div class="tn">BIC / SBC</div><div class="te">Bayesian Information Criterion</div><div class="td">AICより複雑さへの罰が強い。シンプルを好む。大文字で。</div></div>
+      <div class="term"><div class="tn">残差標準誤差S</div><div class="te">Residual Standard Error</div><div class="td">予測の平均的ズレ。小さいほど良い。大データでRMSEに近づく。</div></div>
+      <div class="term"><div class="tn">F統計量</div><div class="te">F-statistic</div><div class="td">モデル全体の有意性を見るオムニバス検定（ANOVA的）。</div></div>
+      <div class="term"><div class="tn">MallowのCp</div><div class="te">Mallows' Cp</div><div class="td">予測変数の数（切片含む）とほぼ等しいとき良い。過/過小学習を検出。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch1.html">← 第1章：重回帰分析</a>
+      <a href="ch3.html">第3章：標準化回帰係数 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第2章：診断</p>
+  <p style="margin-top:.4rem"><a href="ch1.html">← 第1章</a> · <a href="ch3.html">第3章 →</a> · <a href="ch2_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+/* ---------- R² vs Adjusted R² interactive（概念図） ---------- */
+(function(){
+  var svg=document.getElementById('r2svg');
+  var W=640,H=300,PAD={l:54,r:20,t:20,b:46}, pW=W-PAD.l-PAD.r, pH=H-PAD.t-PAD.b;
+  var KMAX=8, YMIN=0.45, YMAX=0.60;
+  function r2(k){ return 0.52 + 0.04*(1-Math.exp(-k/4)); }
+  function ar2(k){ return r2(k) - k*0.012; }
+  function xOf(k){ return PAD.l + k/KMAX*pW; }
+  function yOf(v){ return PAD.t + (1-(v-YMIN)/(YMAX-YMIN))*pH; }
+  [0.45,0.50,0.55,0.60].forEach(function(v){
+    svg.appendChild(svgEl('line',{class:'grid',x1:PAD.l,y1:yOf(v),x2:PAD.l+pW,y2:yOf(v)}));
+    var t=svgEl('text',{class:'axlab',x:PAD.l-8,y:yOf(v)+4,'text-anchor':'end'}); t.textContent=v.toFixed(2); svg.appendChild(t);
+  });
+  for(var k=0;k<=KMAX;k+=2){ var t=svgEl('text',{class:'axlab',x:xOf(k),y:H-22,'text-anchor':'middle'}); t.textContent='+'+k; svg.appendChild(t); }
+  var xl=svgEl('text',{class:'axlab',x:PAD.l+pW,y:H-6,'text-anchor':'end'}); xl.textContent='足した無駄な変数の数 →'; svg.appendChild(xl);
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:PAD.t+pH}));
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t+pH,x2:PAD.l+pW,y2:PAD.t+pH}));
+  function path(fn,color){ var d=''; for(var k=0;k<=KMAX;k+=0.25){ d+=(d===''?'M':'L')+xOf(k).toFixed(1)+' '+yOf(fn(k)).toFixed(1)+' '; } svg.appendChild(svgEl('path',{d:d,fill:'none',stroke:color,'stroke-width':3})); }
+  path(r2,'#2F77C9'); path(ar2,'#1FA37A');
+  var lr=svgEl('text',{x:xOf(8),y:yOf(r2(8))-8,'text-anchor':'end','font-size':11,'font-weight':700,fill:'#2F77C9'}); lr.textContent='R²（上がり続ける）'; svg.appendChild(lr);
+  var la=svgEl('text',{x:xOf(8),y:yOf(ar2(8))+16,'text-anchor':'end','font-size':11,'font-weight':700,fill:'#1FA37A'}); la.textContent='調整済みR²（下がる）'; svg.appendChild(la);
+  var mk=svgEl('line',{stroke:'#CDD5E4','stroke-width':1.5,'stroke-dasharray':'4 4'}); svg.appendChild(mk);
+  var d1=svgEl('circle',{r:6,fill:'#2F77C9',stroke:'#fff','stroke-width':2}); svg.appendChild(d1);
+  var d2=svgEl('circle',{r:6,fill:'#1FA37A',stroke:'#fff','stroke-width':2}); svg.appendChild(d2);
+  var sj=document.getElementById('s-junk');
+  function update(){
+    var k=+sj.value; setFill(sj,0,8);
+    document.getElementById('v-junk').textContent=k+' 個';
+    var a=r2(k), b=ar2(k);
+    document.getElementById('ro-r2').textContent=a.toFixed(3);
+    document.getElementById('ro-ar2').textContent=b.toFixed(3);
+    document.getElementById('ro-gap').textContent=(a-b).toFixed(3);
+    var meAr=document.getElementById('me-ar2');
+    meAr.textContent = k===0 ? 'まだ無駄なし＝R²と一致' : ('ペナルティで '+((a-b)).toFixed(3)+' 下がった');
+    var x=xOf(k);
+    mk.setAttribute('x1',x); mk.setAttribute('y1',PAD.t); mk.setAttribute('x2',x); mk.setAttribute('y2',PAD.t+pH);
+    d1.setAttribute('cx',x); d1.setAttribute('cy',yOf(a));
+    d2.setAttribute('cx',x); d2.setAttribute('cy',yOf(b));
+  }
+  sj.addEventListener('input',update); update();
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz2',[
+ {q:'Why is adjusted R² preferred over plain R² in multiple regression?',
+  opts:[
+   {t:'It can only be computed when the model contains exactly one predictor variable',ok:false},
+   {t:'It penalizes adding predictors that don’t help, so it isn’t inflated by useless variables',ok:true},
+   {t:'It is always larger than plain R², giving a more optimistic fit score for the model',ok:false},
+   {t:'It ignores the response entirely and measures only correlations among the predictors',ok:false}],
+  exp:'ふつうのR²は無駄な変数でも上がる（ドアノブの数でも！）。調整済みR²は役立たない変数を罰します。'},
+ {q:'For AIC, BIC, and residual standard error (S), which direction is better?',
+  opts:[
+   {t:'Higher is always better, because a bigger value means more variance explained',ok:false},
+   {t:'Lower is better for AIC and BIC, but a higher value of S indicates a better model',ok:false},
+   {t:'The absolute value of each must equal zero for the model to fit the data well',ok:false},
+   {t:'Lower is better for all three of these measures',ok:true}],
+  exp:'AIC・BIC・S はいずれも誤差や複雑さを測るので、低いほど良いモデルです。'},
+ {q:'How should the actual numeric value of AIC (e.g., 10,000) be interpreted?',
+  opts:[
+   {t:'The absolute value is meaningless alone — AIC is only used to compare models with each other',ok:true},
+   {t:'It is the same as the p-value, so any AIC below 0.05 means a significant model fit',ok:false},
+   {t:'It equals the total number of predictors in the model, including the added intercept term',ok:false},
+   {t:'An AIC below 5,000 always signals a good model, regardless of the other candidate scores',ok:false}],
+  exp:'AICは相対指標。数値そのものに意味はなく、競合モデル同士で比べて低いほうを選びます。'},
+ {q:'A significant overall F-statistic tells you that…',
+  opts:[
+   {t:'Every single predictor in the model is individually statistically significant on its own',ok:false},
+   {t:'The model has no residual error left at all, so every prediction is exactly correct',ok:false},
+   {t:'At least one predictor has a non-zero coefficient — but not which particular one(s)',ok:true},
+   {t:'Adjusted R² must equal 1, meaning the predictors explain all of the variation present',ok:false}],
+  exp:'Fはオムニバス検定。有意なら「少なくとも1つの係数がゼロでない」とわかるだけです。'},
+ {q:"Using Mallows' Cp, what indicates a well-specified model?",
+  opts:[
+   {t:'Cp is much less than the number of predictors, signalling a clearly overfitted model',ok:false},
+   {t:'Cp is approximately equal to the number of predictors (including the intercept)',ok:true},
+   {t:'Cp equals exactly zero, which shows the model has captured all of the variation',ok:false},
+   {t:'Cp is much greater than the number of predictors, showing a perfectly fit model',ok:false}],
+  exp:'Cp ≒ 予測変数の数（切片含む）のとき良いモデル。大きすぎは過学習、小さすぎは過小学習です。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

@@ -3,280 +3,302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第5章 モデル評価①：逸脱度（Deviance） — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第5章 多項式回帰 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab active" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch5_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 5 · Polynomial Regression</div>
+    <h1>直線では測れない<br><span class="g">山なりの関係</span>を、<br>曲線で捉える。</h1>
+    <p class="sub">線形回帰の大前提は「予測変数と応答変数の関係が直線」。でも気温は約65度まで増えて、暑すぎると逆に減る——直線じゃなく放物線。
+    予測変数を2乗した項を加えれば、曲がった関係もモデルに取り込めます。</p>
+    <div class="jump">
+      <a href="#u1">① 直線の限界</a>
+      <a href="#u2">② 曲線フィッター</a>
+      <a href="#u3">③ 2乗項を加える</a>
+      <a href="#u4">④ 後退消去</a>
+      <a href="#u5">⑤ 多項式のVIF</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch5_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 5</div>
-  <h1>📉 モデル評価①：逸脱度（Deviance）</h1>
-  <p>対数尤度・逸脱度（−2LL）・ヌル逸脱度vs残差逸脱度・カイ二乗検定でモデルを評価する方法を学ぶ。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① モデル評価の概要</a><a href="#unit2">② 対数尤度と逸脱度</a><a href="#unit3">③ Rで値を取り出す</a><a href="#unit4">④ カイ二乗検定</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>モデル評価の考え方</h2><div class="unit-sub">何を見れば「良いモデル」かわかるか</div></div>
-  </div>
-  <p>重回帰ではR²やAICでモデルを評価しました。ロジスティック回帰でも<strong>モデル全体の当てはまりの良さ</strong>を評価する必要があります。主に使う指標は：</p>
-<div class="task-grid">
-  <div class="task-card"><div class="tc-icon">📉</div><div class="tc-name">逸脱度（Deviance）</div><div class="tc-example">−2LL。小さいほど良い。</div></div>
-  <div class="task-card"><div class="tc-icon">📊</div><div class="tc-name">AIC</div><div class="tc-example">逸脱度+予測変数のペナルティ。</div></div>
-  <div class="task-card"><div class="tc-icon">📏</div><div class="tc-name">Z値</div><div class="tc-example">個別の予測変数の有意性。</div></div>
-  <div class="task-card"><div class="tc-icon">❌</div><div class="tc-name">R²</div><div class="tc-example">ロジスティック回帰には存在しない。</div></div>
-</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>重回帰でR²（決定係数）を使ったように、ロジスティック回帰は「逸脱度」でモデルの良し悪しを測ります。考え方は似ていますが、計算方法が違います。</p></div>
-</div>
-
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>対数尤度と逸脱度</h2><div class="unit-sub">−2LL が何を意味するか</div></div>
-  </div>
-  <p><strong>対数尤度（Log Likelihood, LL）</strong>は、モデルが観測データをどのくらいうまく説明できているかを示します。重回帰の「残差平方和」に対応する概念です。</p>
-<ul>
-  <li>対数尤度が<strong>大きい（0に近い）</strong> → モデルの当てはまりが<strong>良い</strong></li>
-  <li>対数尤度が<strong>小さい（大きな負の値）</strong> → 当てはまりが<strong>悪い</strong></li>
-</ul>
-<p><strong>逸脱度（Deviance）</strong>は対数尤度に−2を掛けたものです：</p>
-<div class="note-box" style="text-align:center;font-size:1.1rem;">
-  <strong>Deviance = −2 × Log Likelihood（−2LL）</strong>
-</div>
-<p>逸脱度は<strong>小さいほど良い</strong>モデルです。Rの<code>summary(glm())</code>では：</p>
-<ul>
-  <li><strong>Null deviance</strong>：予測変数なし（切片のみ）のモデルの逸脱度</li>
-  <li><strong>Residual deviance</strong>：現在のモデルの逸脱度</li>
-</ul>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>Rでモデルを比較する</h2><div class="unit-sub">attributes()で値を取り出す</div></div>
-  </div>
-  <p>逸脱度の値をRで正確に取り出して比較するには <code>attributes()</code> を使います。</p>
-<div class="code-block"><span class="cl"><span class="cm"># Model 1: Type ~ Diameter</span></span><span class="cl">model1 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter, data<span class="kw">=</span>abalone2, family<span class="kw">=</span>binomial)</span><span class="cl"></span><span class="cl"><span class="cm"># モデルに格納されている全属性を確認</span></span><span class="cl"><span class="kw">attributes</span>(model1)</span><span class="cl"></span><span class="cl"><span class="cm"># ヌル逸脱度と残差逸脱度を取り出す</span></span><span class="cl">null_dev <span class="kw">&lt;-</span> model1$null.deviance</span><span class="cl">resid_dev <span class="kw">&lt;-</span> model1$deviance</span><span class="cl"></span><span class="cl"><span class="cm"># 逸脱度の差（改善量）</span></span><span class="cl">dev_diff <span class="kw">&lt;-</span> null_dev <span class="kw">-</span> resid_dev</span><span class="cl">dev_diff  <span class="cm"># → かなり大きな値</span></span></div>
-<div class="output-text">null.deviance  = 3924.2  (予測変数なし)
-deviance       = 3595.8  (diameter追加後)
-diff           =  328.4   (改善量)</div>
-</div>
-
-<div class="unit" id="unit4">
-  <div class="unit-header">
-    <div class="unit-num">④</div>
-    <div><h2>カイ二乗検定で有意性を確認</h2><div class="unit-sub">改善量は統計的に有意か</div></div>
-  </div>
-<div class="note-box"><strong>📌 逸脱度の直感：</strong>逸脱度（−2LL）は「モデルがデータをどれだけ説明できていないか」の不一致度で、小さいほど良い当てはまりです。ヌル逸脱度（切片のみ）と残差逸脱度（予測変数あり）の差が大きいほど、その予測変数が効いている証拠になります。差が自由度（追加したパラメータ数）に対して十分大きいかをカイ二乗分布で検定します。</div>
-  <p>逸脱度の差がカイ二乗分布に従うことを利用して、<strong>予測変数を追加したことが有意に改善したか</strong>を検定できます。</p>
-<div class="code-block"><span class="cl"><span class="cm"># 自由度 = 追加した予測変数の数</span></span><span class="cl">df <span class="kw">&lt;-</span> model1$df.null <span class="kw">-</span> model1$df.residual</span><span class="cl"></span><span class="cl"><span class="cm"># カイ二乗検定のp値</span></span><span class="cl">p_val <span class="kw">&lt;-</span> <span class="kw">pchisq</span>(dev_diff, df<span class="kw">=</span>df, lower.tail<span class="kw">=</span><span class="kw">FALSE</span>)</span><span class="cl">p_val  <span class="cm"># → 非常に小さい値（有意）</span></span></div>
-<div class="output-text">p_value = 2.3e-73  ← 非常に有意（Diameterは有用な予測変数）</div>
-<div class="note-box"><strong>📌 解釈：</strong>p値が非常に小さい → 逸脱度の減少（改善）は偶然ではない → Diameterを追加することでモデルが有意に改善した。</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>切片だけのモデル（何も知らない状態）と、Diameterを使ったモデルを比べています。「Diameterを知ることでオス・メスが予測できる確率が有意に上がった」と言えます🐚</p></div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">What is deviance in logistic regression?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The sum of squared residuals</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>−2 times the log likelihood</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The R-squared value</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The AIC value</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">In R's glm() summary, what is 'null deviance'?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The deviance of the current model</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The deviance of the intercept-only model (no predictors)</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The residual standard error</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The AIC of the null model</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">How do you access the null deviance value programmatically in R?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>model$null.deviance</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>model$deviance.null</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>attributes(model)$null</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>summary(model)$null</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">What distribution is used to test whether adding a predictor significantly improves the model?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>t-distribution</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>F-distribution</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Chi-square (χ²) distribution</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Normal distribution</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">If a model with a predictor has a much smaller residual deviance than the null deviance, this suggests:</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The predictor makes the model worse</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The predictor significantly improves model fit</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The model is overfitting</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The intercept should be removed</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">Deviance in logistic regression is based on which quantity?</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The sum of squared residuals</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The mean of the outcome</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of predictors</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-likelihood of the model</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">A LOWER residual deviance indicates:</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A worse-fitting model</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>More missing data</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A better-fitting model</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Fewer observations</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">Null deviance measures the fit of:</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The full model with all predictors</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The single best predictor</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A model with random coefficients</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A model with only the intercept</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">The difference (null deviance − residual deviance) approximately follows which distribution?</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Chi-square distribution</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Uniform distribution</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Normal distribution</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Exponential distribution</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">Degrees of freedom for the deviance chi-square test equal:</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The total sample size</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Always exactly one</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of added predictors</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The residual deviance value</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 1, 0, 2, 1, 3, 2, 3, 0, 2];
-var FEEDBACKS=["Deviance = −2 × Log Likelihood (−2LL). Smaller deviance means better model fit.", "Null deviance is the deviance when only an intercept (no predictors) is in the model.", "model$null.deviance extracts the null deviance from the glm model object.", "The change in deviance follows a chi-square distribution. pchisq() is used in R to compute the p-value.", "A large decrease in deviance when a predictor is added indicates that the predictor significantly improves model fit.", "Deviance is −2 × log-likelihood, so it is built directly from the model's log-likelihood.", "Smaller deviance means a higher likelihood, i.e. the model fits the data better.", "Null deviance reflects a model containing only the intercept (no predictors).", "Under the null, the drop in deviance is approximately chi-square distributed, enabling a significance test.", "The df equals the number of parameters added between the two nested models."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch4.html">← 第4章</a><a href="ch6.html">第6章 →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">逸脱度</div>
-      <div class="term-en">Deviance (−2LL)</div>
-      <div class="term-def">対数尤度を−2倍した値。モデル評価の基本指標。小さいほど良い。</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">Limit · 直線の限界</div>
+    <h2>線形回帰の大前提は<br>「直線の関係」</h2>
+    <p class="lead">線形回帰は、予測変数と応答変数の関係が<strong>直線（線形）</strong>であることを前提にします。でも現実はいつも直線とは限りません。対処は2つ。</p>
+    <div class="grid2">
+      <div class="card"><h4 style="color:var(--p)">① データを変換する</h4><p style="margin:0;font-size:.92rem"><strong>対数変換（log）</strong>などで、データを直線パターンに近づける。変換の種類はたくさんある。</p></div>
+      <div class="card"><h4 style="color:var(--g)">② 非線形の関係を使う（この章）</h4><p style="margin:0;font-size:.92rem">多項式回帰で、曲線そのものをモデルに取り込む。</p></div>
     </div>
-    <div class="term-item">
-      <div class="term-name">ヌル逸脱度</div>
-      <div class="term-en">Null Deviance</div>
-      <div class="term-def">予測変数なし（切片のみ）モデルの逸脱度。ベースラインとして使用。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">残差逸脱度</div>
-      <div class="term-en">Residual Deviance</div>
-      <div class="term-def">現在のモデルの逸脱度。ヌル逸脱度との差で改善量を測る。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">pchisq()</div>
-      <div class="term-en">Chi-square p-value</div>
-      <div class="term-def">Rでカイ二乗分布のp値を計算する関数。lower.tail=FALSEに注意。</div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      アイスの売上：寒い→売れない、暖かい→よく売れる、でも<strong>暑すぎると</strong>外に出たくなくて逆に減る。
+      これは直線じゃなく「山なりの曲線」。直線の定規ではこの山を測れません🍦
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 curve fitter -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interactive · 曲線フィッター</div>
+    <h2>同じ点でも、<br>直線か曲線かで差は歴然</h2>
+    <p class="lead">講義では <code>geom_smooth</code> で各予測変数（湿度・風速・気温）を個別にレンタル数と散布図にし、形を確かめます。
+    結果：<strong>湿度はやや曲線、風速もわずかに曲線、気温ははっきりした曲線</strong>。
+    気温は約65度まで上がり、暑すぎると<strong>taper（先細り）</strong>——「外が暑すぎると人は借りない」。下のボタンで直線／曲線を切り替えてください。</p>
+
+    <div class="machine">
+      <div class="btnrow" style="margin-top:0">
+        <button class="btn" id="btn-line">直線でフィット（1次）</button>
+        <button class="btn ghost" id="btn-curve">曲線でフィット（2次）</button>
+      </div>
+      <div class="svgwrap">
+        <svg id="polysvg" viewBox="0 0 640 340" style="width:100%;max-width:640px;display:block;margin:0 auto"></svg>
+      </div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;margin-top:4px">※ 気温とレンタル数の関係を示す<strong>イメージ図</strong></div>
+      <div class="readouts" style="margin-top:8px">
+        <div class="ro o"><div class="lab">モデルの形</div><div class="big" id="ro-form" style="font-size:1.2rem">直線</div><div class="meaning" id="me-form">rentals ~ temperature</div></div>
+        <div class="ro p"><div class="lab">ズレの合計（残差）</div><div class="big" id="ro-err">大</div><div class="meaning">小さいほど良いフィット</div></div>
+        <div class="ro g"><div class="lab">判定</div><div class="big" id="ro-judge" style="font-size:1.2rem">✗</div><div class="meaning" id="me-judge">山なりを捉えられない</div></div>
+      </div>
+    </div>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">ggplot</span>(bikes, <span class="fn">aes</span>(x <span class="kw">=</span> temperature, y <span class="kw">=</span> rentals)) <span class="kw">+</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">  <span class="fn">geom_point</span>() <span class="kw">+</span> <span class="fn">geom_smooth</span>()   <span class="cm"># 滑らかな曲線で関係を可視化</span></span></div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      geom_smoothは「点々を結ぶ、なめらかなロープ」。点をバラまいてロープを乗せると、直線なのか山なりか一目でわかります。気温は見事に「山」でした⛰️
+    </div>
+  </div>
+</section>
+
+<!-- U3 add quadratic -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">Method · 2乗項を加える</div>
+    <h2>予測変数を2乗して、<br>曲線を表現する</h2>
+    <p class="lead">曲がりは<strong>2次（quadratic／放物線）</strong>っぽい。そこで各予測変数を<strong>2乗</strong>した列を作ってモデルに加えます。これが<strong>多項式回帰</strong>です
+    （2乗なので、気温²・風速²の値はかなり大きくなります）。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c">bikes <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(humidity2 <span class="kw">=</span> humidity<span class="kw">^</span><span class="nm">2</span>,</span></div>
+      <div class="ln"><span class="n">2</span><span class="c">                          temperature2 <span class="kw">=</span> temperature<span class="kw">^</span><span class="nm">2</span>,</span></div>
+      <div class="ln"><span class="n">3</span><span class="c">                          windspeed2 <span class="kw">=</span> windspeed<span class="kw">^</span><span class="nm">2</span>)</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">bikes_model_3 <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> humidity <span class="kw">+</span> temperature <span class="kw">+</span> windspeed <span class="kw">+</span></span></div>
+      <div class="ln"><span class="n">5</span><span class="c">                     humidity2 <span class="kw">+</span> temperature2 <span class="kw">+</span> windspeed2, data <span class="kw">=</span> bikes)</span></div>
+    </div>
+    <table class="ctable">
+      <tr><th>モデル</th><th>予測変数</th><th>調整済みR²</th></tr>
+      <tr><td>気温のみ</td><td>1個</td><td>0.50</td></tr>
+      <tr><td>モデル2</td><td>気温+湿度+風速</td><td>0.52</td></tr>
+      <tr><td><strong>モデル3（多項式・6変数）</strong></td><td>上記＋3つの2乗項</td><td><strong>増加！（より説明できた）</strong></td></tr>
+    </table>
+    <div class="callout warn">
+      <div class="ctitle">📌 ただし注意</div>
+      モデル3では <code>windspeed2</code>（風速の2乗）の<strong>p値が大きく、有意ではありません</strong>（星なし）。
+      散布図でも風速は一番曲がりが弱かった（少しバンプがある程度）。だから風速の2乗は不要かもしれません。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      直線しか描けないクレヨンに「2乗」という魔法をかけると、急にカーブが描けるように。気温の山も湿度のゆるいカーブもバッチリ🖍️
+    </div>
+  </div>
+</section>
+
+<!-- U4 backward -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Refine · 後退消去</div>
+    <h2>いらない項を削る</h2>
+    <p class="lead">有意でない予測変数を取り除くことを<strong>後退消去（backwards elimination）</strong>と呼びます（詳しくは<a href="ch10.html">第10章</a>）。
+    ここでは有意でなかった <code>windspeed2</code> を削ります。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># windspeed2（風速の2乗）を取り除く</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes_model_3b <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> humidity <span class="kw">+</span> temperature <span class="kw">+</span> windspeed <span class="kw">+</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c">                      humidity2 <span class="kw">+</span> temperature2, data <span class="kw">=</span> bikes)</span></div>
+      <div class="ln"><span class="n">4</span><span class="c"><span class="cm"># → 残りの予測変数はすべて有意（星つき）に！</span></span></div>
+    </div>
+    <p>削った結果、<strong>すべての予測変数が有意</strong>になり、調整済みR²は約<strong>0.6</strong>まで（わずかに）上昇。無駄な項を取り除いて、すっきり良いモデルになりました。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      料理に入れた調味料のうち「これ、味に関係ないな」というもの（windspeed2）を取り除く作業。余計なものを抜くと、かえって味が引き締まります🧂
+    </div>
+  </div>
+</section>
+
+<!-- U5 VIF in poly -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">Caveat · 多項式のVIF問題</div>
+    <h2>気温と気温²は、<br>当然相関する</h2>
+    <p class="lead">多項式回帰には<strong>避けられない問題</strong>があります。VIF（許容度）を計算すると、
+    <strong>気温と気温²、湿度と湿度²</strong>が多重共線性を示し、VIFが非常に大きくなります。</p>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ なぜ起きる？</div>
+      気温²は気温<strong>から作った</strong>変数なので<strong>自動的に相関します</strong>（気温なしに気温²は計算できない）。これは構造上当たり前のことです。
+    </div>
+    <div class="callout good">
+      <div class="ctitle">📌 重要なポイント</div>
+      多項式回帰でVIFが高くても、<strong>モデルがよく機能し、未知のデータ（テストセット）でもうまく一般化するなら、この共線性を必ずしも除く必要はありません</strong>。
+      気温²のような自然な相関は許容されることが多いのです。
+    </div>
+    <p>気になるなら、湿度や気温の項を削って調整済みR²が改善するか試せます。講義では<strong>湿度を削っても調整済みR²はほぼ変わらず（改善せず）</strong>。
+    一方で湿度と風速は、他の変数が捉えていないシグナルをうまく捉えていました（だから残す価値がある）。</p>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      「身長」と「身長の2乗」が似ているのは当たり前（同じ人の数字だから）。これは“悪い共線性”ではなく“自然な親子関係”。
+      テストでちゃんと点が取れる（よく機能する）なら、この親子はそのまま残してOKです👨‍👦
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第5章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz5" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">多項式回帰</div><div class="te">Polynomial Regression</div><div class="td">2乗などの項を加え、曲線（非線形）の関係を捉える回帰。</div></div>
+      <div class="term"><div class="tn">非線形</div><div class="te">Non-linear</div><div class="td">直線でない関係。例：気温が高すぎるとレンタルが減る山なり。</div></div>
+      <div class="term"><div class="tn">geom_smooth</div><div class="te">geom_smooth()</div><div class="td">ggplotで滑らかな曲線を描き、関係の形を可視化する。</div></div>
+      <div class="term"><div class="tn">2乗項</div><div class="te">Quadratic term (x²)</div><div class="td">予測変数を2乗した項。放物線状の関係を表現できる。</div></div>
+      <div class="term"><div class="tn">後退消去</div><div class="te">Backwards Elimination</div><div class="td">有意でない予測変数を取り除く手順（第10章で詳説）。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch4.html">← 第4章：多重共線性とVIF</a>
+      <a href="ch6.html">第6章：カテゴリ変数の変換 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第5章：多項式回帰</p>
+  <p style="margin-top:.4rem"><a href="ch4.html">← 第4章</a> · <a href="ch6.html">第6章 →</a> · <a href="ch5_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+/* ---------- polynomial fitter（イメージ図） ---------- */
+(function(){
+  var svg=document.getElementById('polysvg');
+  var W=640,H=340,PAD={l:54,r:20,t:20,b:48}, pW=W-PAD.l-PAD.r, pH=H-PAD.t-PAD.b;
+  var pts=[ [3,900],[7,1500],[11,2100],[15,2700],[19,3200],[23,3500],[26,3600],
+            [29,3550],[32,3300],[35,2900],[38,2300],[40,1900] ];
+  var XMAX=42,YMAX=4200;
+  function xOf(x){return PAD.l + x/XMAX*pW;}
+  function yOf(y){return PAD.t + (1-y/YMAX)*pH;}
+  [0,1000,2000,3000,4000].forEach(function(v){
+    svg.appendChild(svgEl('line',{class:'grid',x1:PAD.l,y1:yOf(v),x2:PAD.l+pW,y2:yOf(v)}));
+    var t=svgEl('text',{class:'axlab',x:PAD.l-8,y:yOf(v)+4,'text-anchor':'end'}); t.textContent=v; svg.appendChild(t);
+  });
+  [0,10,20,30,40].forEach(function(x){ var t=svgEl('text',{class:'axlab',x:xOf(x),y:H-24,'text-anchor':'middle'}); t.textContent=x; svg.appendChild(t); });
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:PAD.t+pH}));
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t+pH,x2:PAD.l+pW,y2:PAD.t+pH}));
+  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:PAD.l+pW,y:H-8,'text-anchor':'end'});t.textContent='気温 →';return t;})());
+  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:14,y:PAD.t+6,'text-anchor':'start'});t.textContent='レンタル数';return t;})());
+  function lineY(x){return 2600 + 12*x;}
+  function quadY(x){return 600 + 230*x - 4.4*x*x;}
+  var resGroup=svgEl('g',{}); svg.appendChild(resGroup);
+  var fitPath=svgEl('path',{fill:'none','stroke-width':3}); svg.appendChild(fitPath);
+  pts.forEach(function(p){ svg.appendChild(svgEl('circle',{cx:xOf(p[0]),cy:yOf(p[1]),r:5,fill:'#2F77C9',opacity:.7,stroke:'#fff','stroke-width':1.5})); });
+  function draw(mode){
+    resGroup.innerHTML='';
+    pts.forEach(function(p){ var fy=mode==='line'?lineY(p[0]):quadY(p[0]);
+      resGroup.appendChild(svgEl('line',{x1:xOf(p[0]),y1:yOf(p[1]),x2:xOf(p[0]),y2:yOf(fy),
+        stroke:mode==='line'?'#D84C4C':'#1FA37A','stroke-width':1.5,'stroke-dasharray':'3 3',opacity:.55})); });
+    var d='',fn=mode==='line'?lineY:quadY;
+    for(var x=0;x<=XMAX;x+=0.5){ d+=(d===''?'M':'L')+xOf(x).toFixed(1)+' '+yOf(fn(x)).toFixed(1)+' '; }
+    fitPath.setAttribute('d',d); fitPath.setAttribute('stroke',mode==='line'?'#D84C4C':'#1FA37A');
+    document.getElementById('ro-form').textContent=mode==='line'?'直線':'曲線';
+    document.getElementById('me-form').textContent=mode==='line'?'rentals ~ temperature':'rentals ~ temperature + temperature²';
+    document.getElementById('ro-err').textContent=mode==='line'?'大':'小';
+    document.getElementById('ro-judge').textContent=mode==='line'?'✗':'✓';
+    document.getElementById('me-judge').textContent=mode==='line'?'山なりを捉えられない':'山なりにピッタリ！';
+    var bl=document.getElementById('btn-line'), bc=document.getElementById('btn-curve');
+    if(mode==='line'){bl.className='btn';bc.className='btn ghost';} else {bc.className='btn';bl.className='btn ghost';}
+  }
+  document.getElementById('btn-line').addEventListener('click',function(){draw('line');});
+  document.getElementById('btn-curve').addEventListener('click',function(){draw('curve');});
+  draw('line');
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz5',[
+ {q:'What assumption of linear regression does polynomial regression address?',
+  opts:[
+   {t:'That every one of the predictor variables in the model is a categorical factor variable',ok:false},
+   {t:'That the relationship between predictors and the response is linear (a straight line)',ok:true},
+   {t:'That the residuals are correlated with one another across the different observations',ok:false},
+   {t:'That the model must contain exactly one predictor variable and never any more than that',ok:false}],
+  exp:'線形回帰は直線の関係を仮定します。多項式回帰は曲線（非線形）の関係まで扱えるよう拡張します。'},
+ {q:'In the bikes data, which predictor showed the clearest curved (quadratic) pattern with rentals?',
+  opts:[
+   {t:'The intercept — its value bends as the other predictors change across the data',ok:false},
+   {t:'The date column — rentals curve upward as the season gradually progresses',ok:false},
+   {t:'Temperature — rentals rise to about 65° and then taper off when it gets too hot',ok:true},
+   {t:'Windspeed — rentals fall and then sharply rise again at high wind speeds',ok:false}],
+  exp:'気温が最もはっきりした曲線。約65度まで増え、暑すぎると taper（先細り）する放物線でした。'},
+ {q:'How do you create a quadratic term for temperature in R?',
+  opts:[
+   {t:'mutate(temperature2 = sqrt(temperature))',ok:false},
+   {t:'mutate(temperature2 = temperature / 2)',ok:false},
+   {t:'mutate(temperature2 = log(temperature))',ok:false},
+   {t:'mutate(temperature2 = temperature^2)',ok:true}],
+  exp:'temperature^2 で2乗項を作り、それをモデルに加えます。'},
+ {q:'In the polynomial model, windspeed² had a large p-value. What does this suggest?',
+  opts:[
+   {t:'Windspeed² is not significant and may be removed (windspeed was the least curved)',ok:true},
+   {t:'The whole model is invalid and every one of its coefficients must now be discarded',ok:false},
+   {t:'Windspeed² is the most important predictor and so it should never be removed at all',ok:false},
+   {t:'You must square the term one more time to make its p-value small enough to keep',ok:false}],
+  exp:'大きなp値＝有意でない。風速は曲がりが最も弱かったので、2乗項は削れます。'},
+ {q:'Why do temperature and temperature² show high VIF, and is it always a problem?',
+  opts:[
+   {t:'It is a coding error in the mutate step, so the squared term must always be deleted',ok:false},
+   {t:'temperature² comes from temperature, so they correlate naturally; if it generalizes well, keep it',ok:true},
+   {t:'Because both terms are categorical factors, and VIF is always inflated whenever factors appear',ok:false},
+   {t:'Because VIF can only ever apply to the response variable, never to a predictor term',ok:false}],
+  exp:'気温²は気温から作るので当然相関します。よく機能・一般化するなら、この自然な共線性は残してOKです。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

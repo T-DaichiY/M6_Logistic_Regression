@@ -1,150 +1,127 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>第3章 超やさしい版：ロジスティック回帰のカギ：シグモイド関数</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3章 超やさしい版：標準化回帰係数 — 完全ガイド</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="easy.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-    <nav class="header-nav">
+  <div class="logo">重回帰分析 <span>完全ガイド</span></div>
+  <nav class="header-nav">
     <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy active" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch1.html">📈 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">🩺 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">⚖️ 3</a><a class="n-easy active" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3_1.html">🎯 3.1</a><a class="n-easy" href="ch3_1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🔗 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">〰️ 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">🏷️ 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">📅 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">✖️ 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">➡️ 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">⬅️ 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🔀 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">🎓 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
+
 <div class="ch-banner easy">
   <div class="ch-banner-inner">
-    <div class="ch-tag">Chapter 3 · Easy Mode 🍎</div>
-    <h1>🍎 第3章 超やさしい版：ロジスティック回帰のカギ：シグモイド関数</h1>
-    <p>シグモイド関数（Sカーブ）をスライダーとRコードで動かして「どんな値でも0〜1に変換できる」を体感しよう。</p>
-    <div class="unit-nav"><a href="#u1">一言でいうと</a><a href="#u2">Sカーブを動かす</a><a href="#u3">Rで確認する</a><a href="ch3.html" class="easy-toplink">🔑 本編はこちら</a></div>
+    <div class="ch-tag">Chapter 3 ・ Easy Mode</div>
+    <h1>🍎 第3章 超やさしい版：標準化回帰係数</h1>
+    <p>「どの手がかりが一番効いてる?」を公平に比べる方法。キーワードは<strong>偏差値</strong>です。<a href="ch3.html" class="easy-toplink">⚖️ 本編はこちら</a></p>
+    <div class="unit-nav">
+      <a href="#u1">⚡ 一言でいうと</a>
+      <a href="#u2">① なぜ比べられない</a>
+      <a href="#u3">② 偏差値にそろえる</a>
+      <a href="#u4">③ 3つの方法</a>
+      <a href="#u5">④ 30秒セルフ確認</a>
+    </div>
   </div>
 </div>
+
 <div class="page-layout">
 <main>
 
 <div class="unit" id="u1">
-  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">シグモイド関数（Sカーブ）が「何でも確率に変える」</div></div></div>
-  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0">シグモイド関数 P = 1/(1+e^(-x)) は、どんな実数（−∞〜+∞）を入れても必ず0〜1の確率として出力する。これがロジスティック回帰の核心。X=0でP=0.5、Xが大きいほどP→1、小さいほどP→0。</p></div>
-  <p>シグモイド関数は「S字カーブ」の形をしています。左端（Xが極端に小さい）では確率がほぼ0、右端（Xが極端に大きい）ではほぼ1、真ん中（X=0）でちょうど0.5です。</p>
-  <div class="viz">
-    <div class="viz-title">シグモイド関数（Sカーブ）の形</div>
-    <svg viewBox="0 0 420 190" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:420px;display:block;margin:0 auto">
-      <line x1="30" y1="165" x2="400" y2="165" stroke="#e2e8f0" stroke-width="1.5"/>
-      <line x1="215" y1="10" x2="215" y2="170" stroke="#e2e8f0" stroke-width="1.5" stroke-dasharray="4"/>
-      <line x1="30" y1="90" x2="400" y2="90" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="5"/>
-      <text x="36" y="88" font-size="9" fill="#d97706" font-weight="700">P=0.5</text>
-      <path d="M35,162 C65,161 95,160 130,153 C160,143 180,123 200,104 C220,85 240,65 260,55 C285,45 315,27 345,21 C365,17 385,15 400,14" fill="none" stroke="#2563eb" stroke-width="3"/>
-      <circle id="sg-dot" cx="215" cy="90" r="8" fill="#dc2626" stroke="white" stroke-width="2"/>
-      <line id="sg-vline-x" x1="215" y1="165" x2="215" y2="90" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4"/>
-      <line id="sg-vline-y" x1="30" y1="90" x2="215" y2="90" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4"/>
-      <text x="215" y="179" font-size="9" fill="#64748b" text-anchor="middle" font-weight="700">x=0, P=0.5</text>
-      <text x="33" y="169" font-size="9" fill="#64748b">−6</text>
-      <text x="385" y="169" font-size="9" fill="#64748b">+6</text>
-      <text x="20" y="168" font-size="9" fill="#64748b">0</text>
-      <text x="20" y="18" font-size="9" fill="#64748b">1</text>
-      <text x="358" y="16" font-size="9" fill="#2563eb" font-weight="700">P→1</text>
-      <text x="36" y="160" font-size="9" fill="#2563eb" font-weight="700">P→0</text>
-    </svg>
-  </div>
+  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">単位をそろえて、影響の大きさを比べる</div></div></div>
+  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0;">湿度・気温・風速は<strong>単位がバラバラ</strong>。だから係数の大きさをそのまま比べてはダメ。みんなを<strong>偏差値（標準化）</strong>にそろえてから比べる。一番おすすめの道具は <code>lm.beta</code>。</p></div>
 </div>
 
 <div class="unit" id="u2">
-  <div class="unit-header"><div class="unit-num">①</div><div><h2>Sカーブを動かしてみよう</h2><div class="unit-sub">対数オッズ（X値）が変わると確率がどう変わるか</div></div></div>
-  <p>スライダーでXを変えると赤い点がSカーブ上を動きます。<strong>X=0でP=0.5</strong>、X>0でP>0.5（1側）、X&lt;0でP&lt;0.5（0側）を確認しましょう。</p>
-  <div class="widget teal">
-    <div class="widget-title">🎛️ シグモイド関数シミュレーター</div>
-    <div class="slider-row">
-      <label>📐 対数オッズ X</label>
-      <input type="range" id="sg-x" min="-6" max="6" step="0.1" value="0">
-      <span class="slider-val" id="sg-x-v">0.0</span>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
-      <div style="background:var(--bg);border-radius:10px;padding:1rem;text-align:center">
-        <div style="font-size:.78rem;font-weight:700;color:var(--text-sec)">入力（対数オッズ X）</div>
-        <div style="font-size:1.9rem;font-weight:900;color:var(--teal)" id="sg-x-v2">0.0</div>
-        <div style="font-size:.72rem;color:var(--text-sec)">−∞ 〜 +∞</div>
-      </div>
-      <div style="background:var(--teal-light);border-radius:10px;padding:1rem;text-align:center">
-        <div style="font-size:.78rem;font-weight:700;color:var(--teal)">出力（確率 P）</div>
-        <div style="font-size:1.9rem;font-weight:900;color:var(--teal)" id="sg-p-v">0.500</div>
-        <div style="font-size:.72rem;color:var(--text-sec)">0 〜 1</div>
-      </div>
-    </div>
-    <div class="verdict" id="sg-verdict">—</div>
+  <div class="unit-header"><div class="unit-num">①</div><div><h2>なぜそのまま比べられないの？</h2><div class="unit-sub">リンゴとオレンジは比べられない</div></div></div>
+  <p>「湿度の係数が一番大きいから湿度が一番重要!」── これは<strong>間違い</strong>。なぜなら物差しが違うから。</p>
+  <div class="viz">
+    <div class="viz-title">物差しがバラバラ 📏</div>
+    <svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:0 auto;">
+      <rect x="30" y="35" width="130" height="50" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="95" y="58" font-size="11" text-anchor="middle" font-weight="700">💧 湿度</text><text x="95" y="74" font-size="9" fill="#64748b" text-anchor="middle">0〜1の割合</text>
+      <rect x="195" y="35" width="130" height="50" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="2"/><text x="260" y="58" font-size="11" text-anchor="middle" font-weight="700">🌡️ 気温</text><text x="260" y="74" font-size="9" fill="#64748b" text-anchor="middle">0〜40℃</text>
+      <rect x="360" y="35" width="130" height="50" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="2"/><text x="425" y="58" font-size="11" text-anchor="middle" font-weight="700">💨 風速</text><text x="425" y="74" font-size="9" fill="#64748b" text-anchor="middle">mph</text>
+      <text x="260" y="108" font-size="11" fill="#dc2626" text-anchor="middle" font-weight="700">単位が違う → そのまま比べてはいけない！</text>
+    </svg>
   </div>
-  <div class="note-box">📌 Xが±4を超えると確率はほぼ0か1に達します。現実のモデルでは、係数が大きすぎると「完全分離」という問題が起きることがあります。</div>
+  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>身長を「cm」、体重を「kg」で測って「数字が大きいから身長が大事」とは言えない。単位が違うものは比べられない。</p></div>
 </div>
 
 <div class="unit" id="u3">
-  <div class="unit-header"><div class="unit-num">②</div><div><h2>Rで確認する</h2><div class="unit-sub">シグモイド関数を自分で書いてみよう</div></div></div>
-  <p>Rにはシグモイド関数が標準で入っていません（<code>plogis()</code>という関数がありますが、自分で書くと仕組みが理解できます）。</p>
-  <p class="code-label">▶ シグモイド関数をRで定義して確認</p>
-  <pre class="code-block">
-<span class="cl"><span class="cm"># シグモイド関数を自分で計算してみる</span></span>
-<span class="cl">sigmoid &lt;- <span class="kw">function</span>(x) {</span>
-<span class="cl">  <span class="nm">1</span> / (<span class="nm">1</span> + <span class="kw">exp</span>(-x))</span>
-<span class="cl">}</span>
-<span class="cl"><span class="cm"># x=0のとき → P=0.5（ちょうど中間）</span></span>
-<span class="cl">sigmoid(<span class="nm">0</span>)</span>
-<span class="cl"><span class="cm"># x=2のとき → P≈0.88（高確率）</span></span>
-<span class="cl">sigmoid(<span class="nm">2</span>)</span>
-<span class="cl"><span class="cm"># x=-3のとき → P≈0.05（低確率）</span></span>
-<span class="cl">sigmoid(-<span class="nm">3</span>)</span>
-</pre>
-  <p class="code-label">▶ P=0.5で「往復変換」が成り立つことを確認</p>
-  <pre class="code-block">
-<span class="cl"><span class="cm"># P=0.5で往復確認（手計算の再現）</span></span>
-<span class="cl">p &lt;- <span class="nm">0.5</span></span>
-<span class="cl">odds &lt;- p / (<span class="nm">1</span> - p)<span class="cm">  # → 1</span></span>
-<span class="cl">logit &lt;- <span class="kw">log</span>(odds)<span class="cm">     # → 0</span></span>
-<span class="cl">p_back &lt;- sigmoid(logit)<span class="cm">  # → 0.5（元に戻る）</span></span>
-<span class="cl"><span class="kw">cat</span>(<span class="st">"往復確認：P ="</span>, p_back)</span>
-</pre>
-  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin:1.25rem 0">
-    <div style="background:var(--primary-light);border-radius:8px;padding:.75rem;text-align:center;font-size:.82rem">
-      <div style="font-weight:900;font-size:1.1rem;color:var(--primary)">0.5</div>確率 P
+  <div class="unit-header"><div class="unit-num">②</div><div><h2>偏差値にそろえる（標準化）</h2><div class="unit-sub">カードをタップして確認しよう</div></div></div>
+  <p>英語と数学のテストは点数（単位）が違っても、<strong>偏差値</strong>にすれば「どっちが得意か」を公平に比べられますよね。標準化は、全部の手がかりを「偏差値」にそろえる作業です。</p>
+
+  <div class="widget purple">
+    <div class="widget-title">🃏 タップして「標準化後の影響度」を確認</div>
+    <div class="flip-grid">
+      <div class="flip-card"><div class="fc-inner"><div class="fc-front">🌡️<small>気温</small></div><div class="fc-back"><strong>1位 🥇</strong><br>標準化係数が最大<br>＝レンタル数に一番効く</div></div></div>
+      <div class="flip-card"><div class="fc-inner"><div class="fc-front">💧<small>湿度</small></div><div class="fc-back"><strong>2位 🥈</strong><br>気温の次に効く</div></div></div>
+      <div class="flip-card"><div class="fc-inner"><div class="fc-front">💨<small>風速</small></div><div class="fc-back"><strong>3位 🥉</strong><br>影響は一番小さめ</div></div></div>
     </div>
-    <div style="background:var(--green-light);border-radius:8px;padding:.75rem;text-align:center;font-size:.82rem">
-      <div style="font-weight:900;font-size:1.1rem;color:var(--green)">1.0</div>オッズ<br><small>0.5/0.5</small>
-    </div>
-    <div style="background:var(--yellow-light);border-radius:8px;padding:.75rem;text-align:center;font-size:.82rem">
-      <div style="font-weight:900;font-size:1.1rem;color:var(--yellow)">0</div>logit<br><small>log(1)</small>
-    </div>
-    <div style="background:var(--teal-light);border-radius:8px;padding:.75rem;text-align:center;font-size:.82rem">
-      <div style="font-weight:900;font-size:1.1rem;color:var(--teal)">0.5</div>sigmoid(0)
-    </div>
+    <div class="tap-hint">↑ カードをタップ／クリックでめくれます</div>
   </div>
-  <div class="checkpoint"><h4>🤔 答えられるかな？（クリックで答えが開く）</h4><div class="cp-q">Q1. シグモイド関数の式は？<span class="cp-a">A. P = 1 / (1 + e^(-x))。xに対数オッズを入れると確率Pが出てくる。Rでは plogis(x) でも計算できる。</span></div><div class="cp-q">Q2. X=0のとき確率はいくつ？なぜ？<span class="cp-a">A. e^0=1なので P = 1/(1+1) = 0.5。X=0は「どちらとも言えない」状態（50%）。</span></div><div class="cp-q">Q3. シグモイド関数の逆関数は何？<span class="cp-a">A. logit関数（対数オッズの計算）。P→logit→sigmoid→P と往復できる。</span></div></div>
+
+  <div class="viz">
+    <div class="viz-title">標準化すると「影響の大きさ」が一目でわかる</div>
+    <svg viewBox="0 0 500 150" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;display:block;margin:0 auto;">
+      <line x1="90" y1="20" x2="90" y2="130" stroke="#94a3b8"/>
+      <text x="60" y="45" font-size="11" text-anchor="end">🌡️気温</text><rect x="90" y="32" width="320" height="22" rx="4" fill="#059669" class="draw" style="stroke:#059669;stroke-width:1;"/>
+      <text x="60" y="80" font-size="11" text-anchor="end">💧湿度</text><rect x="90" y="68" width="200" height="22" rx="4" fill="#2563eb"/>
+      <text x="60" y="115" font-size="11" text-anchor="end">💨風速</text><rect x="90" y="103" width="110" height="22" rx="4" fill="#7c3aed"/>
+      <text x="420" y="48" font-size="10" fill="#059669" font-weight="700">最大</text>
+    </svg>
+    <div class="viz-cap">符号（＋−）は無視して、棒の長さ（絶対値）で重要度を比べる。気温が一番長い＝一番重要。</div>
+  </div>
 </div>
-<div class="page-nav"><a href="ch2_easy.html">← 第2章 やさしい版</a><a href="ch4_easy.html">第4章 やさしい版 →</a></div>
+
+<div class="unit" id="u4">
+  <div class="unit-header"><div class="unit-num">③</div><div><h2>3つの方法（どれも答えは同じ）</h2><div class="unit-sub">ラクなのを選べばOK</div></div></div>
+  <table class="compare-table">
+    <tr><th>方法</th><th>たとえると</th><th>おすすめ度</th></tr>
+    <tr><td>① 手動でZスコア</td><td>全部手書きで偏差値計算</td><td>仕組み理解用</td></tr>
+    <tr><td>② scale()関数</td><td>ボタン1つで偏差値表</td><td>◯ 簡潔</td></tr>
+    <tr><td>③ lm.beta</td><td>魔法の翻訳メガネ🪄</td><td>◎ 一番ラク・推奨</td></tr>
+  </table>
+  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>3つとも結果は同じ。だから一番ラクな <strong>lm.beta</strong> を使えばOK。データをいじらず、モデルを渡すだけ。</p></div>
+</div>
+
+<div class="unit" id="u5">
+  <div class="unit-header"><div class="unit-num">④</div><div><h2>30秒セルフ確認</h2><div class="unit-sub">クリックで答えが開きます</div></div></div>
+  <div class="checkpoint"><h4>🤔 答えられるかな？</h4>
+    <div class="cp-q">Q1. なぜ係数をそのまま比べられない？<span class="cp-a">A. 予測変数の単位（スケール）が違うから。</span></div>
+    <div class="cp-q">Q2. 比べるときは符号を見る？大きさを見る？<span class="cp-a">A. 符号は無視して「絶対値（大きさ）」で比べる。</span></div>
+    <div class="cp-q">Q3. 一番おすすめの方法は？<span class="cp-a">A. lm.beta。モデルを渡すだけで標準化係数が出る。</span></div>
+  </div>
+  <div class="note-box" style="background:var(--secondary-light);border-color:var(--secondary);">🎓 コードや詳しい注意点は <a href="ch3.html">第3章 本編</a> へ。</div>
+  <div class="page-nav"><a href="ch3.html">← 第3章 本編</a><a href="ch3_1_easy.html">第3.1章 やさしい版 →</a></div>
+</div>
+
 </main>
 <aside class="sidebar">
-  <div class="tip-box"><h4>💡 まとめ</h4><p style="margin:.4rem 0">• シグモイド = 1/(1+e^(-x))</p><p style="margin:.4rem 0">• X=0のとき P=0.5（50%）</p><p style="margin:.4rem 0">• Xが大きいほどPは1に近づく</p><p style="margin:.4rem 0">• 変換は可逆（往復できる）</p></div>
-  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2)">
-    <h4 style="color:var(--primary-dark)">📖 本編へ</h4>
-    <p style="color:var(--text)">詳しいコードと解説は <a href="ch3.html">第3章 本編</a> へ。英語MCQクイズもあります。</p>
-  </div>
+  <div class="tip-box"><h4>💡 結論</h4><p>単位が違う → そのまま比べない。<br><br><strong>偏差値（標準化）</strong>にそろえる。<br><br>符号を無視し<strong>絶対値</strong>で重要度を比較。<br><br>道具は <strong>lm.beta</strong> がラク。</p></div>
+  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2);"><h4 style="color:var(--primary-dark);">📖 本編</h4><p style="color:var(--text);">詳しくは <a href="ch3.html">第3章</a> へ。</p></div>
 </aside>
 </div>
-<footer><p>🐚 ロジスティック回帰 完全ガイド · 第3章 超やさしい版</p>
-<p style="margin-top:.5rem"><a href="ch3.html">← 第3章 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
+
+<footer><p>重回帰分析 完全ガイド · 第3章 超やさしい版</p><p style="margin-top:.5rem;"><a href="ch3.html">← 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script src="interactive.js"></script>
-<script src="typewriter.js"></script>
-<script>initSigmoidViz(); var sx=document.getElementById("sg-x"); if(sx) sx.addEventListener("input",function(){var v=document.getElementById("sg-x-v2");if(v)v.textContent=document.getElementById("sg-x-v").textContent;});</script>
-</body></html>
+</body>
+</html>

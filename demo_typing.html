@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>デモ：タイピング・アニメーション</title>
+<link rel="stylesheet" href="style.css">
+<style>
+.demo-wrap{max-width:780px;margin:0 auto;padding:2rem 1.5rem;}
+.demo-hero{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:white;border-radius:14px;padding:2rem;margin-bottom:2rem;}
+.demo-hero h1{font-size:1.6rem;font-weight:900;margin-bottom:.5rem;}
+.demo-hero p{opacity:.85;font-size:.95rem;}
+.demo-section{background:var(--white);border-radius:12px;padding:1.5rem;box-shadow:var(--shadow);margin-bottom:1.75rem;}
+.demo-section h2{font-size:1.05rem;font-weight:800;margin-bottom:.3rem;color:var(--primary-dark);}
+.demo-section .desc{font-size:.85rem;color:var(--text-sec);margin-bottom:1rem;}
+
+/* ===== Typing code block ===== */
+.type-code{background:var(--code-bg);color:#e2e8f0;border-radius:10px;padding:1.25rem 1.5rem;
+  font-family:'SF Mono','Fira Code',monospace;font-size:.85rem;line-height:1.8;overflow-x:auto;
+  white-space:pre-wrap;min-height:2em;position:relative;}
+.type-code .cm{color:#94a3b8;}   /* comment */
+.type-code .kw{color:#93c5fd;}   /* keyword */
+.type-code .st{color:#86efac;}   /* string */
+.type-code .nm{color:#fca5a5;}   /* number */
+/* blinking caret */
+.caret{display:inline-block;width:8px;background:#86efac;margin-left:1px;
+  animation:blink 1s step-end infinite;vertical-align:text-bottom;}
+.caret::before{content:'\00a0';}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+.caret.done{animation:none;opacity:.4;}
+
+.btn-type{background:var(--primary);color:white;border:none;border-radius:8px;padding:.55rem 1.3rem;
+  font-weight:700;font-size:.9rem;cursor:pointer;font-family:inherit;transition:all .2s;margin-top:1rem;}
+.btn-type:hover{background:var(--primary-dark);transform:translateY(-1px);}
+.speed-row{display:flex;align-items:center;gap:.75rem;margin-top:1rem;font-size:.85rem;flex-wrap:wrap;}
+.speed-row input{accent-color:var(--primary);}
+.back-link{display:inline-block;margin-bottom:1.5rem;color:var(--primary);text-decoration:none;font-weight:600;font-size:.9rem;}
+.note{background:var(--yellow-light);border-left:3px solid var(--yellow);border-radius:8px;padding:.85rem 1rem;font-size:.85rem;margin-top:1rem;}
+</style>
+</head>
+<body>
+<div class="demo-wrap">
+  <a href="index.html" class="back-link">← 目次に戻る</a>
+
+  <div class="demo-hero">
+    <h1>⌨️ タイピング・アニメーション デモ</h1>
+    <p>コードを最初から全部見せるのではなく、人間が打っているように1文字ずつ表示します。3つのパターンを用意しました。気に入ったものを各章のコードに適用できます。</p>
+  </div>
+
+  <!-- PATTERN 1: auto-play on scroll -->
+  <div class="demo-section">
+    <h2>パターン1：画面に入ったら自動で打ち始める</h2>
+    <p class="desc">スクロールしてコードが見えた瞬間に、自動でタイピングが始まります（点滅カーソルつき）。一番「映える」タイプ。</p>
+    <div class="type-code" data-typetarget="1"></div>
+  </div>
+
+  <!-- PATTERN 2: button replay -->
+  <div class="demo-section">
+    <h2>パターン2：ボタンを押すと打ち始める</h2>
+    <p class="desc">「▶ 実行する」を押すと、コードが打たれていきます。授業で「これから書くよ」と見せたいときに便利。何度でも再生できます。</p>
+    <div class="type-code" id="code2"></div>
+    <button class="btn-type" id="play2">▶ コードを打つ</button>
+  </div>
+
+  <!-- PATTERN 3: speed control -->
+  <div class="demo-section">
+    <h2>パターン3：速度を変えられる</h2>
+    <p class="desc">スライダーでタイピング速度を調整できます。ゆっくりにすると、生徒が一緒に打つペースに合わせられます。</p>
+    <div class="type-code" id="code3"></div>
+    <div class="speed-row">
+      <button class="btn-type" id="play3" style="margin-top:0;">▶ 打つ</button>
+      <label>速さ：おそい</label>
+      <input type="range" id="speed3" min="10" max="120" value="45">
+      <label>はやい</label>
+    </div>
+    <div class="note">💡 実際の教材では、コードブロックを全部このアニメーションに置き換えることも、「重要な1つだけ」アニメにすることもできます。全部だと待ち時間が増えるので、<strong>キモのコード1〜2個だけ</strong>アニメにするのがおすすめです。</div>
+  </div>
+
+</div>
+
+<script>
+// ===== Typewriter engine =====
+// We type from a "token list" so syntax highlighting stays correct while typing.
+// Each token: {t:'text', c:'cssClass or null'}
+function tokensToPlain(tokens){ return tokens.map(t=>t.t).join(''); }
+
+function typeTokens(el, tokens, speed, onDone){
+  el.innerHTML='';
+  const caret=document.createElement('span');
+  caret.className='caret';
+  el.appendChild(caret);
+  let ti=0, ci=0;
+  // current building span per token
+  let curSpan=null, curToken=null;
+  function step(){
+    if(ti>=tokens.length){ caret.classList.add('done'); if(onDone)onDone(); return; }
+    const tok=tokens[ti];
+    if(curToken!==tok){
+      curToken=tok;
+      curSpan=document.createElement('span');
+      if(tok.c) curSpan.className=tok.c;
+      el.insertBefore(curSpan, caret);
+      ci=0;
+    }
+    if(ci<tok.t.length){
+      curSpan.textContent += tok.t[ci];
+      ci++;
+      // vary delay a touch to feel human; pause longer after newlines
+      let d=speed + Math.random()*speed*0.6;
+      if(tok.t[ci-1]==='\n') d=speed*4;
+      setTimeout(step, d);
+    } else {
+      ti++; setTimeout(step, speed*0.5);
+    }
+  }
+  step();
+}
+
+// ===== Sample R code (real M5 multiple-regression code) =====
+const code1=[
+  {t:'# 重回帰モデルを作る（湿度＋気温＋風速）\n', c:'cm'},
+  {t:'bikes_model_1 ', c:null},
+  {t:'<-', c:'kw'},
+  {t:' ', c:null},
+  {t:'lm', c:'kw'},
+  {t:'(rentals ', c:null},
+  {t:'~', c:'kw'},
+  {t:' humidity ', c:null},
+  {t:'+', c:'kw'},
+  {t:' temperature ', c:null},
+  {t:'+', c:'kw'},
+  {t:' windspeed,\n', c:null},
+  {t:'                    data ', c:null},
+  {t:'=', c:'kw'},
+  {t:' bikes)\n', c:null},
+  {t:'summary', c:'kw'},
+  {t:'(bikes_model_1)', c:null},
+];
+
+const code2=[
+  {t:'# 予測してみる（データに無い値でもOK）\n', c:'cm'},
+  {t:'new_data ', c:null},
+  {t:'<-', c:'kw'},
+  {t:' ', c:null},
+  {t:'data.frame', c:'kw'},
+  {t:'(humidity ', c:null},
+  {t:'=', c:'kw'},
+  {t:' ', c:null},
+  {t:'0.65', c:'nm'},
+  {t:', temperature ', c:null},
+  {t:'=', c:'kw'},
+  {t:' ', c:null},
+  {t:'38', c:'nm'},
+  {t:', windspeed ', c:null},
+  {t:'=', c:'kw'},
+  {t:' ', c:null},
+  {t:'7', c:'nm'},
+  {t:')\n', c:null},
+  {t:'predict', c:'kw'},
+  {t:'(bikes_model_1, newdata ', c:null},
+  {t:'=', c:'kw'},
+  {t:' new_data)   ', c:null},
+  {t:'# → 2,058 台', c:'cm'},
+];
+
+const code3=[
+  {t:'# VIFで多重共線性をチェック\n', c:'cm'},
+  {t:'library', c:'kw'},
+  {t:'(car)\n', c:null},
+  {t:'vif', c:'kw'},
+  {t:'(bikes_model_1)   ', c:null},
+  {t:'# 全部 5未満なら問題なし', c:'cm'},
+];
+
+// Pattern 1: auto-play when scrolled into view
+const el1=document.querySelector('[data-typetarget="1"]');
+let played1=false;
+const obs=new IntersectionObserver(es=>{
+  es.forEach(x=>{ if(x.isIntersecting && !played1){ played1=true; typeTokens(el1, code1, 38); } });
+},{threshold:.4});
+obs.observe(el1.closest('.demo-section'));
+
+// Pattern 2: button
+const el2=document.getElementById('code2');
+function preview(el,tokens){ // show as static highlighted until first play
+  el.innerHTML=tokens.map(t=>t.c?`<span class="${t.c}">${t.t.replace(/</g,'&lt;')}</span>`:t.t.replace(/</g,'&lt;')).join('');
+  el.style.opacity='.35';
+}
+preview(el2,code2);
+document.getElementById('play2').addEventListener('click',()=>{ el2.style.opacity='1'; typeTokens(el2, code2, 40); });
+
+// Pattern 3: speed control
+const el3=document.getElementById('code3');
+preview(el3,code3);
+document.getElementById('play3').addEventListener('click',()=>{
+  el3.style.opacity='1';
+  const v=+document.getElementById('speed3').value;
+  const speed=130 - v; // slider right = faster
+  typeTokens(el3, code3, speed);
+});
+</script>
+</body>
+</html>

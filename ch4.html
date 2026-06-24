@@ -3,275 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第4章 係数の解釈：アバロンの例 — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第4章 多重共線性とVIF — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab active" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch4_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 4 · Multicollinearity & VIF</div>
+    <h1>予測変数どうしが<br><span class="a">似すぎる</span>と、<br>係数がおかしくなる。</h1>
+    <p class="sub">「多重」＝複数、「共線」＝同じ線の上。似た変数が重なると係数が暴れ、符号まで逆転し、p値も当てにならなくなります。
+    相関行列では見抜けない隠れた共線性を、<strong>VIF（分散拡大係数）</strong>で検出します。</p>
+    <div class="jump">
+      <a href="#u1">① 多重共線性とは</a>
+      <a href="#u2">② 相関行列の限界</a>
+      <a href="#u3">③ VIFゲージ</a>
+      <a href="#u4">④ Rで計算</a>
+      <a href="#u5">⑤ 対処法</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch4_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 4</div>
-  <h1>🐚 係数の解釈：アバロンの例</h1>
-  <p>予測変数なしモデルの切片が対数オッズであることを、アバロンの実データで手計算しながら確認。係数→確率への変換を完全マスター。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① 切片のみのモデル</a><a href="#unit2">② 比率から手計算</a><a href="#unit3">③ 確率への逆変換</a><a href="#unit4">④ 解釈のまとめ</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>まず予測変数なしのモデル</h2><div class="unit-sub">切片だけのモデルが示すもの</div></div>
-  </div>
-  <p>ロジスティック回帰の係数解釈を学ぶために、まず<strong>予測変数が一切ない（切片のみ）モデル</strong>から始めます。実際の分析ではやりませんが、基礎を理解するために重要です。</p>
-<div class="code-block"><span class="cl"><span class="cm"># 予測変数なし（切片のみ）のモデル</span></span><span class="cl">model0 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> <span class="nm">1</span>,</span><span class="cl">              data <span class="kw">=</span> abalone2,</span><span class="cl">              family <span class="kw">=</span> binomial)</span><span class="cl"><span class="kw">summary</span>(model0)</span></div>
-<div class="output-text">Coefficients:
-            Estimate
-(Intercept)   0.1565   ← これが何を意味するか？</div>
-<p>この係数 <strong>0.1565</strong> は何を意味するのでしょうか？答えは<strong>オスである対数オッズ</strong>です。</p>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>予測変数がないと、モデルは「データ全体でオスの割合はどのくらいか？」だけを見ています。それが対数オッズの形で係数に現れます。</p></div>
-</div>
-
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>比率から係数を手計算で再現</h2><div class="unit-sub">1307匹と1528匹から出発</div></div>
-  </div>
-  <p>アバロンデータには（不明を除いた）<strong>メス1,307匹・オス1,528匹</strong>がいます。ここからステップごとに確認しましょう。</p>
-<div class="code-block"><span class="cl"><span class="cm"># データの件数確認</span></span><span class="cl"><span class="kw">table</span>(abalone2$Type)</span><span class="cl"><span class="cm">#   F    M </span></span><span class="cl"><span class="cm"># 1307 1528</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 1: 確率（オスの割合）</span></span><span class="cl">P_male <span class="kw">&lt;-</span> <span class="nm">1528</span> <span class="kw">/</span> (<span class="nm">1307</span> <span class="kw">+</span> <span class="nm">1528</span>)</span><span class="cl"><span class="cm"># → 0.5387（約53.9%がオス）</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 2: オッズ</span></span><span class="cl">odds_male <span class="kw">&lt;-</span> P_male <span class="kw">/</span> (<span class="nm">1</span> <span class="kw">-</span> P_male)</span><span class="cl"><span class="cm"># → 1.169</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 3: 対数オッズ</span></span><span class="cl">log_odds_male <span class="kw">&lt;-</span> <span class="kw">log</span>(odds_male)</span><span class="cl"><span class="cm"># → 0.1565　← model0の切片と完全一致！✅</span></span></div>
-<div class="output-text">P_male       = 0.5387
-odds_male    = 1.169
-log_odds_male = 0.1565  ← glmの係数と一致</div>
-<div class="note-box"><strong>📌 ポイント：</strong>予測変数がないとき、切片 = そのカテゴリ（ここではオス）の単純な対数オッズです。</div>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>係数から確率に「逆変換」する</h2><div class="unit-sub">exp() と確率の計算</div></div>
-  </div>
-  <p>係数（対数オッズ）から元の確率に戻す手順：</p>
-<div class="code-block"><span class="cl"><span class="cm"># 切片を取り出す</span></span><span class="cl">coef0 <span class="kw">&lt;-</span> <span class="kw">coef</span>(model0)[<span class="st">"(Intercept)"</span>]</span><span class="cl"><span class="cm"># → 0.1565</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 1: 対数オッズ → オッズ（exp()で指数化）</span></span><span class="cl">odds_from_coef <span class="kw">&lt;-</span> <span class="kw">exp</span>(coef0)</span><span class="cl"><span class="cm"># → 1.169</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 2: オッズ → 確率</span></span><span class="cl">p_from_odds <span class="kw">&lt;-</span> odds_from_coef <span class="kw">/</span> (<span class="nm">1</span> <span class="kw">+</span> odds_from_coef)</span><span class="cl"><span class="cm"># → 0.5387（元の確率に一致！）✅</span></span></div>
-<div class="output-text">切片(log odds) = 0.1565
-exp(切片)      = 1.169  (オッズ)
-確率           = 0.5387  ← 1528/(1307+1528) と一致</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>係数を見てもすぐには意味がわからない（対数オッズだから）。exp()でオッズに戻し、さらに odds/(1+odds) で確率に直す。この2ステップが「係数の解釈」の基本です🗝️</p></div>
-</div>
-
-<div class="unit" id="unit4">
-  <div class="unit-header">
-    <div class="unit-num">④</div>
-    <div><h2>解釈のまとめと次のステップ</h2><div class="unit-sub">予測変数を追加するとどうなるか</div></div>
-  </div>
-<div class="note-box"><strong>📌 切片の意味が変わる予告：</strong>予測変数なしモデルの切片は「全体の対数オッズ」ですが、予測変数を1つでも加えると、切片は「その予測変数が0（基準）のときの対数オッズ」という<em>条件付き</em>の意味に変わります（第10章で詳述）。同じ「切片」でもモデル構成によって解釈が変わる点が、ロジスティック回帰でつまずきやすい所です。</div>
-  <p>切片のみのモデルでわかったこと：</p>
-<div class="task-grid">
-  <div class="task-card"><div class="tc-icon">📊</div><div class="tc-name">切片 = 対数オッズ</div><div class="tc-example">予測変数が0のときの log odds</div></div>
-  <div class="task-card"><div class="tc-icon">🔢</div><div class="tc-name">exp(切片) = オッズ</div><div class="tc-example">指数化で元のオッズに戻る</div></div>
-  <div class="task-card"><div class="tc-icon">📐</div><div class="tc-name">確率への変換</div><div class="tc-example">P = odds / (1 + odds)</div></div>
-</div>
-<div class="warn-box"><strong>⚠️ 次の章以降：</strong>予測変数（例：diameter）を追加すると、切片の意味が変わります。「その予測変数がゼロのときの対数オッズ」になります。係数の解釈には注意が必要です。</div>
-<div class="teal-box"><strong>🔵 覚えておくべき式：</strong><br>対数オッズ → オッズ：exp(係数)<br>オッズ → 確率：P = odds / (1 + odds)</div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">In a logistic regression with no predictors, what does the intercept represent?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The mean of the response variable</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The log odds of being in category 1</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The probability of the outcome directly</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The odds ratio between groups</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">If the intercept is 0.1565, what is the corresponding odds?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.1565</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>1.169 (= exp(0.1565))</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.5387</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.4613</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">How do you convert odds back to probability?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>P = odds × 2</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>P = log(odds)</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>P = odds / (1 + odds)</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>P = 1 / odds</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">The abalone dataset has 1307 females and 1528 males (coded as 1). What is the probability of male?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.461</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.539 (= 1528/2835)</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>1.169</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.156</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">In logistic regression, what function in R is used to exponentiate coefficients?</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>log()</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>sqrt()</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>exp()</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>abs()</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">In an intercept-only logistic model, the intercept equals:</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The residual deviance value</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The raw count of successes</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The mean of the predictors</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The log-odds of the outcome overall</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">How do you turn an odds value back into a probability?</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>P = odds / (1 + odds)</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>P = odds × 2</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>P = 1 − odds</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>P = log(odds)</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">Which R function exponentiates a coefficient to obtain odds?</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>log()</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>sqrt()</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>abs()</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>exp()</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">With 1528 males (coded 1) out of 2835 abalone, the proportion of 1s is about:</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.30</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.46</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.54</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.72</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">What does exp(intercept) give you in an intercept-only model?</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The probability directly</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of predictors</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The log-likelihood</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The odds of the outcome</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 1, 2, 1, 2, 3, 0, 3, 2, 3];
-var FEEDBACKS=["With no predictors, the intercept equals the log odds of the outcome (being in category 1).", "exp(0.1565) ≈ 1.169. To convert log odds to odds, use the exponential function.", "P = odds / (1 + odds). For odds = 1.169: P = 1.169 / 2.169 ≈ 0.539.", "P(male) = 1528 / (1307+1528) = 1528/2835 ≈ 0.539.", "exp() computes e^x, converting log odds back to odds.", "With no predictors, the intercept is simply the log-odds of the outcome across all observations.", "Probability is recovered from odds with P = odds/(1+odds).", "exp() reverses the natural log, converting log-odds (a coefficient) into odds.", "1528/2835 ≈ 0.539, so roughly 0.54 of the observations are coded 1.", "exp() of the intercept (log-odds) returns the odds; convert further to get the probability."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch3.html">← 第3章</a><a href="ch5.html">第5章 →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">切片</div>
-      <div class="term-en">Intercept</div>
-      <div class="term-def">予測変数がゼロのときの対数オッズ。予測変数なしモデルでは単純な対数オッズ。</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">What · 多重共線性とは</div>
+    <h2>「同じことを言う友達」が<br>複数いる状態</h2>
+    <p class="lead"><strong>多重共線性</strong>とは、モデル内の<strong>2つ以上の予測変数が互いに強く相関し</strong>、強い線形関係を示す状態。
+    これが起きると問題が連鎖します。</p>
+    <div class="grid3">
+      <div class="card trap"><div class="num">問題 01</div><h4>係数がうまく推定できない</h4><p>推定が不安定になり、<strong>異常に大きく（inflated）</strong>なる。</p></div>
+      <div class="card trap"><div class="num">問題 02</div><h4>符号が直感に反する</h4><p>プラスのはずが<strong>マイナス</strong>になるなど、期待と逆の符号が出る。</p></div>
+      <div class="card trap"><div class="num">問題 03</div><h4>標準誤差が膨らむ</h4><p>それに依存する<strong>t統計量やp値が信頼できなくなる</strong>。</p></div>
     </div>
-    <div class="term-item">
-      <div class="term-name">exp()</div>
-      <div class="term-en">Exponential Function</div>
-      <div class="term-def">eのx乗を計算する関数。対数オッズをオッズに変換する。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">オッズ比</div>
-      <div class="term-en">Odds Ratio</div>
-      <div class="term-def">2つのオッズの比率。係数をexp()した値。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">対数変換</div>
-      <div class="term-en">Log Transformation</div>
-      <div class="term-def">自然対数を取ること。オッズを対数オッズに変換する際に使う。</div>
+    <p style="margin-top:18px">このクラスでは、2つの予測変数の<strong>相関の絶対値が 0.5 を超えたら</strong>共線性ありとみなします（符号は無視、大きさだけ見る）。</p>
+    <table class="ctable">
+      <tr><th>予測したいもの</th><th>共線性が起きる予測変数</th><th>なぜ似ているか（講義の例）</th></tr>
+      <tr><td>血圧</td><td>体重・身長・BMI</td><td>BMIは体重と身長から計算 → 当然相関。回帰すると「体重↑で血圧↑、BMI↓で血圧↑」のような変な符号が出ることも。</td></tr>
+      <tr><td>家の価格</td><td>寝室の数・築年数・延床面積</td><td>寝室が多い家は面積も広い → 寝室数と延床面積が相関する。</td></tr>
+    </table>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      多重共線性は「同じことを言う友達が2人いる」状態。クイズの答えを2人に聞いても同じことしか返ってこないなら、1人で十分。
+      似た情報を持つ変数を2つ入れると、モデルが混乱します👬
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 correlation matrix limit -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">First check · 相関行列</div>
+    <h2>相関行列は便利。でも限界あり</h2>
+    <p class="lead">まず<strong>相関行列</strong>で予測変数どうしの相関を見ます。応答変数Yと強く相関するのは良いこと。
+    でも<strong>予測変数X1とX2どうし</strong>が強く相関していたら要注意です。</p>
+    <p>講義の<strong>偽データ</strong>の例：Y を X1〜X4 で予測。X1・X2 は Y と強く相関していて期待が高まりますが、
+    よく見ると <strong>X1 と X2 が互いに相関 0.98</strong>。これは明確な多重共線性です（|r|&gt;0.5）。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 自転車データ：数値列だけ選んで相関行列（real_feel は除外）</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes <span class="kw">%&gt;%</span> <span class="fn">select</span>(rentals, humidity, temperature, windspeed) <span class="kw">%&gt;%</span> <span class="fn">cor</span>()</span></div>
+    </div>
+    <p>自転車データでは、temperature は rentals と強く相関（良い）。予測変数どうしで |相関|&gt;0.5 のペアは無く、共線性の問題は無さそうでした ✅</p>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ 相関行列の落とし穴</div>
+      相関行列は<strong>2つの変数のペア</strong>しか調べられません。<strong>3つ以上が一緒に絡み合った共線性は見逃します</strong>。
+      実際、偽データでは相関行列で見えたのは X1–X2 の 0.98 だけ。でも本当は <strong>X4 も X1・X2 と絡んでいた</strong>のに気づけませんでした。だから次のVIFが必要です。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      相関行列は「2人組のケンカ」しか見つけられない先生。「3人グループで結託してる」のは見抜けない。
+      3人以上のグルを暴くには、もっと賢い探知機（VIF）が必要です🕵️
+    </div>
+  </div>
+</section>
+
+<!-- U3 VIF gauge interactive -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interactive · VIFゲージ</div>
+    <h2>変数が似るほど、<br>VIFは爆発的に膨らむ</h2>
+    <p class="lead"><strong>VIF＝1 / (1 − R²)</strong>。ここでの R² は「<strong>ある予測変数を、他の予測変数で予測したときの R²</strong>」。
+    たとえば <span class="mono">temperature ~ humidity + windspeed</span> の R²。気温を他の変数で説明できてしまう（R²が高い）なら、気温は他と被っている＝VIFが大きくなります。
+    VIFの逆数が<strong>許容度（Tolerance）</strong>です。スライダーで“2変数の似ぐあい”を上げてみてください。</p>
+
+    <div class="machine">
+      <div class="slider-row o">
+        <label>2変数の相関 r</label>
+        <input type="range" id="s-cor" min="0" max="98" value="30">
+        <div class="val" id="v-cor">0.30</div>
+      </div>
+      <div class="eq" id="vif-eq" style="margin-top:14px"></div>
+      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;margin-top:6px">※ VIF=1/(1−R²) の<strong>正確な式</strong>で計算しています（イメージではなく実計算）</div>
+      <div style="margin-top:18px">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--muted);margin-bottom:6px"><span>VIF メーター</span><span id="vif-zone">安全</span></div>
+        <div style="position:relative;height:30px;border-radius:8px;background:#eef1f8;overflow:hidden">
+          <div id="vif-bar" style="height:100%;width:10%;border-radius:8px;transition:width .2s,background .2s"></div>
+          <div style="position:absolute;top:0;bottom:0;left:25%;width:2px;background:#DB8A24"></div>
+          <div style="position:absolute;top:0;bottom:0;left:50%;width:2px;background:#D84C4C"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.66rem;color:var(--muted);margin-top:2px">
+          <span>VIF 1</span><span style="color:#DB8A24">5 ⚠️</span><span style="color:#D84C4C">10 🚨</span><span>20+</span>
+        </div>
+      </div>
+      <div class="readouts" style="margin-top:18px">
+        <div class="ro o"><div class="lab">VIF</div><div class="big" id="ro-vif">1.10</div><div class="meaning" id="me-vif">5未満なら安全</div></div>
+        <div class="ro p"><div class="lab">許容度 Tolerance</div><div class="big" id="ro-tol">0.91</div><div class="meaning">他で説明されない割合</div></div>
+        <div class="ro l"><div class="lab">係数の安定性</div><div class="big" id="ro-stab">高い</div><div class="meaning" id="me-stab">標準誤差の膨らみ具合</div></div>
+      </div>
+    </div>
+    <p style="font-size:.85rem;color:var(--muted);margin-top:10px">
+      📌 VIF&gt;5（＝Tolerance&lt;0.2）で<strong>共線性あり・対処すべき</strong>。VIF&gt;10（Tolerance&lt;0.1）で<strong>非常に深刻</strong>。</p>
+
+    <h3>許容度（Tolerance）のほうが直感的</h3>
+    <p>許容度は<strong>「ある予測変数の分散のうち、他の変数で説明されない割合」</strong>。講義の例：</p>
+    <div class="compare">
+      <div class="ccard good"><h4>許容度 = 0.88</h4><ul><li>✅ 良い。その変数は他にない情報（シグナル）を多く持つ</li><li>残すべき</li></ul></div>
+      <div class="ccard bad"><h4>許容度 &lt; 0.2</h4><ul><li>⚠️ 他の変数とほぼ同じ情報</li><li>無くても他が説明できる → 不要かも</li></ul></div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      VIFは「この子の発言、どれくらい他の子とかぶってる？」メーター。VIFが大きい＝かぶりまくり。
+      許容度はその逆で「どれくらいオリジナルな意見を持ってるか」。オリジナルが多いほど、チームに必要な人材です🗣️
+    </div>
+  </div>
+</section>
+
+<!-- U4 R -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">In R · 計算する</div>
+    <h2>car または olsrr パッケージで</h2>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># car パッケージの vif()</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">library</span>(car)</span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">vif</span>(bikes_model_1)        <span class="cm"># 全部 5未満 → 共線性なし ✅</span></span></div>
+      <div class="ln"><span class="n">4</span><span class="c"><span class="fn">ols_vif_tol</span>(bikes_model_1) <span class="cm"># olsrr：VIFと許容度を同時に</span></span></div>
+    </div>
+    <p>自転車モデルの3変数はすべて VIF&lt;5・許容度&gt;0.2 ＝ 共線性なし。たとえば湿度は他の変数で説明されない独自の情報を多く持つので、残すべきです。</p>
+    <div class="callout warn">
+      <div class="ctitle">偽データでの例（共線性あり）</div>
+      X1・X2 の VIF は5超。とくに <strong>X2 の VIF は 115</strong> と巨大で深刻。さらに相関行列では見えなかった <strong>X4 も</strong>巻き込まれていたと判明。これがVIFの威力です。
+    </div>
+  </div>
+</section>
+
+<!-- U5 fix -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">Fix · 見つけたらどうする</div>
+    <h2>削るか、まとめるか</h2>
+    <div class="grid2">
+      <div class="card">
+        <h4 style="color:var(--p)">対処法1：1つを削除</h4>
+        <p style="margin:0;font-size:.92rem">絡み合った変数のうち<strong>1つだけ残して他を削る</strong>。偽データでは一番VIFが高い<strong>X2（VIF=115）を削除</strong>。
+        再計算すると残りはすべて5未満に。<strong>X4とX1の問題も同時に解消</strong>しました。</p>
+      </div>
+      <div class="card">
+        <h4 style="color:var(--g)">対処法2：まとめる</h4>
+        <p style="margin:0;font-size:.92rem">相関する変数を<strong>合体させて新しい1変数</strong>に。
+        例：「延床面積」と「階数」を掛けて「総床面積」に。偽データなら X1 と X2 の積や商で新変数 X5 を作る、など。</p>
+      </div>
+    </div>
+
+    <h3>手順（ループ）</h3>
+    <div class="recipe">
+      <div class="rstep"><div class="rn"></div><div class="rt">VIFを計算する</div></div>
+      <div class="rstep"><div class="rn"></div><div class="rt"><code>VIF &gt; 5</code> の変数があるか確認する</div></div>
+      <div class="rstep"><div class="rn"></div><div class="rt">一番VIFが高い1つを<strong>削除（または合体）</strong>する</div></div>
+      <div class="rstep final"><div class="rn"></div><div class="rt">全部 <code>VIF &lt; 5</code> になるまで<strong>繰り返す</strong></div></div>
+    </div>
+    <div class="callout info">
+      <div class="ctitle">📌 さらに高度な手法</div>
+      主成分分析（PCA）やLassoなどの正則化もありますが、これらはこの講義の範囲外です。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      同じことを言う友達が3人いたら、1人だけ残せばOK（対処法1）。あるいは3人の意見を「みんなの総意」として1つにまとめる（対処法2）。
+      どちらもダブった情報を整理してスッキリさせるのが目的です🧹
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第4章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz4" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">多重共線性</div><div class="te">Multicollinearity</div><div class="td">予測変数どうしが強く相関し係数が不安定になる状態。</div></div>
+      <div class="term"><div class="tn">VIF</div><div class="te">Variance Inflation Factor</div><div class="td">1/(1−R²)。R²は他の予測変数からその変数を予測した値。5超で共線性。</div></div>
+      <div class="term"><div class="tn">許容度</div><div class="te">Tolerance</div><div class="td">VIFの逆数。他で説明されない分散の割合。0.2未満で問題。</div></div>
+      <div class="term"><div class="tn">相関行列</div><div class="te">Correlation Matrix</div><div class="td">変数ペアの相関一覧。3変数以上の共線性は見逃す。</div></div>
+      <div class="term"><div class="tn">car / olsrr</div><div class="te">car / olsrr packages</div><div class="td">VIFや許容度を計算するRパッケージ。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch3_1.html">← 第3.1章：影響点分析</a>
+      <a href="ch5.html">第5章：多項式回帰 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第4章：多重共線性とVIF</p>
+  <p style="margin-top:.4rem"><a href="ch3_1.html">← 第3.1章</a> · <a href="ch5.html">第5章 →</a> · <a href="ch4_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+/* ---------- VIF gauge（VIF=1/(1-r^2) の実計算） ---------- */
+(function(){
+  var sc=document.getElementById('s-cor');
+  function update(){
+    var r=+sc.value/100; setFill(sc,0,98);
+    var r2=r*r, vif=1/(1-r2), tol=1-r2;
+    document.getElementById('v-cor').textContent=r.toFixed(2);
+    document.getElementById('vif-eq').innerHTML =
+      'VIF = <span class="frac"><span class="nu">1</span><span class="de">1 − R²</span></span> = '
+      + '<span class="frac"><span class="nu">1</span><span class="de">1 − '+r2.toFixed(3)+'</span></span> = '
+      + '<span class="'+(vif>=10?'bad':(vif>=5?'':'res'))+'">'+vif.toFixed(2)+'</span>';
+    document.getElementById('ro-vif').textContent=vif.toFixed(2);
+    document.getElementById('ro-tol').textContent=tol.toFixed(2);
+    var bar=document.getElementById('vif-bar'), zone=document.getElementById('vif-zone'), meVif=document.getElementById('me-vif');
+    var w=Math.min(100, vif/20*100); bar.style.width=Math.max(4,w)+'%';
+    var color,zt,stab,mestab;
+    if(vif<5){ color='var(--g)'; zt='安全 ✅'; stab='高い'; mestab='係数は安定'; meVif.textContent='5未満なら安全'; }
+    else if(vif<10){ color='var(--o)'; zt='要対処 ⚠️'; stab='ぐらつく'; mestab='標準誤差が膨らむ'; meVif.textContent='5超：共線性あり'; }
+    else { color='var(--neg)'; zt='深刻 🚨'; stab='不安定'; mestab='係数が暴れる・符号逆転も'; meVif.textContent='10超：非常に深刻'; }
+    bar.style.background=color; zone.textContent=zt; zone.style.color=color;
+    var st=document.getElementById('ro-stab'); st.textContent=stab; st.style.color=color;
+    document.getElementById('me-stab').textContent=mestab;
+  }
+  sc.addEventListener('input',update); update();
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz4',[
+ {q:'What is multicollinearity?',
+  opts:[
+   {t:'When two or more predictor variables are highly correlated with each other',ok:true},
+   {t:'When the model has too few predictors to explain the response variable well',ok:false},
+   {t:'When the residuals are normally distributed around the fitted regression line',ok:false},
+   {t:'When a single predictor is strongly correlated with the response variable',ok:false}],
+  exp:'多重共線性は「予測変数どうし」が強く相関すること（応答変数との相関ではありません）。'},
+ {q:"Why isn't a correlation matrix enough to detect all multicollinearity?",
+  opts:[
+   {t:'It can only show positive correlations, never any negative relationships between variables',ok:false},
+   {t:'It cannot be computed in R without first standardizing every predictor variable involved',ok:false},
+   {t:'It requires categorical data and so will not work for numeric predictors at all',ok:false},
+   {t:'It only checks pairs of variables and misses cases where 3+ variables are jointly correlated',ok:true}],
+  exp:'相関行列はペアしか調べられず、X1・X2・X4 のように3つ以上が絡む共線性を見逃します。'},
+ {q:'A VIF greater than 5 indicates…',
+  opts:[
+   {t:'No multicollinearity — the variable is fine and adds plenty of unique information',ok:false},
+   {t:'Multicollinearity is present and should be addressed (tolerance below 0.2)',ok:true},
+   {t:'The response variable is categorical rather than being a numeric outcome',ok:false},
+   {t:'The model has a perfect fit with no residual error remaining at all',ok:false}],
+  exp:'VIF>5（許容度<0.2）は対処すべき共線性のサイン。VIF>10はさらに深刻です。'},
+ {q:'A tolerance of 0.88 means…',
+  opts:[
+   {t:'A bad thing — it means the VIF equals 0.88, below the usual safe cutoff of one',ok:false},
+   {t:'A warning that the variable is redundant and ought to be removed from the model',ok:false},
+   {t:'A good thing — most of the variable’s variance is not explained by the other predictors',ok:true},
+   {t:'A serious multicollinearity problem, because most of the variable’s variance is shared',ok:false}],
+  exp:'許容度0.88は良い状態。その変数の分散の大部分は他で説明できない独自情報なので残します。'},
+ {q:'Which is a recommended way to deal with multicollinearity?',
+  opts:[
+   {t:'Remove one of the correlated variables, or combine them into a single predictor',ok:true},
+   {t:'Ignore it entirely, because the VIF of a predictor never affects the model at all',ok:false},
+   {t:'Add even more correlated predictors so that the shared variance gets spread out',ok:false},
+   {t:'Always delete the response variable and then refit the model on the predictors',ok:false}],
+  exp:'一番VIFが高い変数を削る（X2=115を削除）か、相関する変数を合体させて1つにまとめます。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

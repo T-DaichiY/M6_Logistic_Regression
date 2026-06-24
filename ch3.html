@@ -3,286 +3,336 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第3章 ロジスティック回帰のカギ：変換を理解する — ロジスティック回帰 完全ガイド</title>
-<link rel="stylesheet" href="style.css">
+<title>第3章 標準化回帰係数 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
 </head>
 <body>
-<header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-      <nav class="header-nav">
-    <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main active" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
-  </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab active" href="ch3.html">3</a>
+    <a class="tab" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch3_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 3 · Standardized Coefficients</div>
+    <h1>単位がバラバラなら、<br><span class="g">物差しをそろえて</span>から<br>比べる。</h1>
+    <p class="sub">湿度は0〜1、気温は別の尺度、風速はまた別。係数の大きさをそのまま比べても「どれが一番効くか」はわかりません。
+    Zスコアで単位をそろえ、影響力を<strong>公平に</strong>比べる方法を、講義の実際の値で学びます。</p>
+    <div class="jump">
+      <a href="#u1">① なぜ比べられない</a>
+      <a href="#u2">② 影響力スイッチ</a>
+      <a href="#u3">③ 方法1・2</a>
+      <a href="#u4">④ lm.beta（推奨）</a>
+      <a href="#u5">⑤ 解釈と注意</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch3_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
 </header>
-<div class="ch-banner">
-<div class="ch-banner-inner">
-  <div class="ch-tag">Chapter 3</div>
-  <h1>🔑 ロジスティック回帰のカギ：変換を理解する</h1>
-  <p>確率→オッズ→対数オッズの変換をグラフと手計算で完全理解。シグモイド関数で元に戻る仕組みも確認。</p>
-  <div class="ch-banner unit-nav" style="background:none;padding:0;">
-    <a href="#unit1">① 変換の全体像</a><a href="#unit2">② P=0.5で手計算</a><a href="#unit3">③ 確率を変えて確認</a><a href="#unit4">④ logitリンクとは</a><a href="#quiz">📝 Quiz</a>
-  </div>
-</div>
-</div>
-<div class="page-layout">
-<main>
 
-<div class="unit" id="unit1">
-  <div class="unit-header">
-    <div class="unit-num">①</div>
-    <div><h2>グラフで直感的に理解する</h2><div class="unit-sub">変換のプロセスをS字カーブで視覚化</div></div>
-  </div>
-  <p>ロジスティック回帰のカギは、確率(0〜1)という狭い範囲を対数オッズ(−∞〜+∞)という広い範囲に変換し、線形回帰の式を使えるようにすること。そして最後にシグモイドで戻すことです。</p>
-<div class="iter-loop">
-  <div class="loop-step">① 確率 P（0 〜 1）</div>
-  <div class="loop-arrow">↓ オッズ変換 P/(1-P)</div>
-  <div class="loop-step">② オッズ（0 〜 ∞）</div>
-  <div class="loop-arrow">↓ 自然対数 log(odds)</div>
-  <div class="loop-step">③ 対数オッズ（−∞ 〜 +∞）</div>
-  <div class="loop-arrow">↓ 線形回帰式と組み合わせて係数を推定</div>
-  <div class="loop-step">④ シグモイド 1/(1+e⁻ˣ) で逆変換</div>
-  <div class="loop-arrow">↓</div>
-  <div class="loop-step">⑤ 予測確率 P̂（0 〜 1）✅</div>
-</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>例えば「確率 → オッズ」は、勝率50%の試合を「引き分けに等しい（1対1）」と言い換えるようなもの。数学的な変換ですが、伝えている情報は同じです。</p></div>
-</div>
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">Problem · なぜ比べられないか</div>
+    <h2>リンゴとオレンジを<br>比べてはいけない</h2>
+    <p class="lead">前章のモデル（湿度・気温・風速でレンタル数を予測）の係数を、そのまま比べるのは厄介です。
+    講師いわく「<strong>単位（スケール）が違う</strong>から」。風速・湿度・気温はそれぞれ別の物差しで測られています。</p>
 
-<div class="unit" id="unit2">
-  <div class="unit-header">
-    <div class="unit-num">②</div>
-    <div><h2>具体的な数値で手計算</h2><div class="unit-sub">p = 0.5 のとき何が起きるか</div></div>
-  </div>
-  <p>確率が <strong>P = 0.5</strong> のケースで、全変換を手で追ってみましょう。</p>
-<div class="code-block"><span class="cl"><span class="cm"># Step 1: 確率 → オッズ</span></span><span class="cl">P <span class="kw">&lt;-</span> <span class="nm">0.5</span></span><span class="cl">odds <span class="kw">&lt;-</span> P <span class="kw">/</span> (<span class="nm">1</span> <span class="kw">-</span> P)</span><span class="cl">odds  <span class="cm"># 0.5 / 0.5 = 1.0</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 2: オッズ → 対数オッズ</span></span><span class="cl">log_odds <span class="kw">&lt;-</span> <span class="kw">log</span>(odds)</span><span class="cl">log_odds  <span class="cm"># log(1) = 0</span></span><span class="cl"></span><span class="cl"><span class="cm"># Step 3: 対数オッズ → 確率（シグモイドで逆変換）</span></span><span class="cl">p_hat <span class="kw">&lt;-</span> <span class="nm">1</span> <span class="kw">/</span> (<span class="nm">1</span> <span class="kw">+</span> <span class="kw">exp</span>(<span class="kw">-</span>log_odds))</span><span class="cl">p_hat  <span class="cm"># → 0.5 ✅（元に戻った！）</span></span></div>
-<div class="output-text">odds    = 1.0
-log_odds = 0
-p_hat   = 0.5</div>
-<p>P=0.5 を変換して最後に戻すと、ちゃんと0.5が返ってきます。変換は可逆（reversible）なので、情報は失われていません。</p>
-</div>
-
-<div class="unit" id="unit3">
-  <div class="unit-header">
-    <div class="unit-num">③</div>
-    <div><h2>確率が変わるとどうなるか</h2><div class="unit-sub">P=0.7 と P=0.1 で確認</div></div>
-  </div>
-  <p>他の確率でも同じ変換をしてみます。</p>
-<table class="compare-table">
-  <thead><tr><th>確率 P</th><th>オッズ</th><th>対数オッズ</th><th>シグモイドで戻す</th></tr></thead>
-  <tbody>
-    <tr><td>0.1（10%）</td><td>0.1/0.9 ≈ 0.111</td><td>log(0.111) ≈ −2.20</td><td>→ 0.1 ✅</td></tr>
-    <tr><td>0.5（50%）</td><td>0.5/0.5 = 1.000</td><td>log(1.0) = 0.00</td><td>→ 0.5 ✅</td></tr>
-    <tr><td>0.7（70%）</td><td>0.7/0.3 ≈ 2.333</td><td>log(2.333) ≈ 0.847</td><td>→ 0.7 ✅</td></tr>
-    <tr><td>0.9（90%）</td><td>0.9/0.1 = 9.000</td><td>log(9.0) ≈ 2.197</td><td>→ 0.9 ✅</td></tr>
-  </tbody>
-</table>
-<div class="note-box"><strong>📌 重要なパターン：</strong>確率が0.5のとき対数オッズ=0。確率が0.5より大きければ正の値、小さければ負の値になります。</div>
-<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>確率50%は「フィフティフィフティ」で対数オッズ0。50%より確率が上がると対数オッズがプラスになり、下がるとマイナスになる。真ん中（0）が50%という感覚を覚えておきましょう！</p></div>
-</div>
-
-<div class="unit" id="unit4">
-  <div class="unit-header">
-    <div class="unit-num">④</div>
-    <div><h2>logitリンクとは何か</h2><div class="unit-sub">なぜ「リンク関数」と呼ぶか</div></div>
-  </div>
-<div class="note-box"><strong>📌 リンク関数の役割：</strong>線形予測子 <code>β₀+β₁x</code>（範囲 −∞〜+∞）と、確率の平均（範囲 0〜1）を「橋渡し（link）」するのがリンク関数です。ロジスティック回帰では logit がその橋であり、二項分布の<em>正準リンク</em>（最も自然な選択）です。リンクを変えれば probit など別モデルになりますが、係数が「オッズ比の対数」として解釈できるのは logit ならではの利点です。</div>
-  <p>この変換（確率→対数オッズ）を<strong>logitリンク関数</strong>と呼びます。<code>glm(family=binomial)</code>と書いたとき、Rは自動的にこのlogitリンクを使います。</p>
-<div class="flow-diagram">
-  <div class="flow-box input">線形予測子<br><small>β₀ + β₁X</small></div>
-  <span class="flow-arrow">logit⁻¹</span>
-  <div class="flow-box output">確率 P̂<br><small>0 〜 1</small></div>
-</div>
-<div class="teal-box"><strong>🔵 まとめ：ロジスティック回帰の仕組み</strong><br>係数（β）は「対数オッズのスケール」で推定される → exp() で「オッズ比」に戻せる → さらに確率に変換できる。この一連の流れが第4章以降の解釈の基礎になります。</div>
-</div>
-
-<div class="quiz-section" id="quiz">
-  <div class="quiz-header">
-    <h2>📝 確認クイズ</h2>
-    <div class="quiz-score" id="score">0 / 10</div>
-  </div>
-  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
-  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
-  
-<div class="quiz-q" id="q1">
-  <div class="q-num">Question 1</div>
-  <div class="q-text">What is the logit link function?</div>
-  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The sigmoid function</button>
-<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The natural log of the odds ratio</button>
-<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The square root of probability</button>
-<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The exponential of probability</button>
-</div>
-  <div class="q-feedback" id="fb1"></div>
-</div>
-<div class="quiz-q" id="q2">
-  <div class="q-num">Question 2</div>
-  <div class="q-text">When probability P = 0.5, what is the log odds?</div>
-  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.5</button>
-<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>1.0</button>
-<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0</button>
-<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Undefined</button>
-</div>
-  <div class="q-feedback" id="fb2"></div>
-</div>
-<div class="quiz-q" id="q3">
-  <div class="q-num">Question 3</div>
-  <div class="q-text">If log odds is positive, what does that imply about probability?</div>
-  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Probability is less than 0.5</button>
-<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Probability equals 0.5</button>
-<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Probability is greater than 0.5</button>
-<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Probability is undefined</button>
-</div>
-  <div class="q-feedback" id="fb3"></div>
-</div>
-<div class="quiz-q" id="q4">
-  <div class="q-num">Question 4</div>
-  <div class="q-text">What does the inverse sigmoid (logistic) function do?</div>
-  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Converts probability to log odds</button>
-<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Converts log odds back to probability</button>
-<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculates model coefficients</button>
-<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Removes negative values</button>
-</div>
-  <div class="q-feedback" id="fb4"></div>
-</div>
-<div class="quiz-q" id="q5">
-  <div class="q-num">Question 5</div>
-  <div class="q-text">In R, which family argument applies the logit link automatically?</div>
-  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>family=gaussian</button>
-<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>family=poisson</button>
-<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>family=binomial</button>
-<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>family=logit</button>
-</div>
-  <div class="q-feedback" id="fb5"></div>
-</div>
-<div class="quiz-q" id="q6">
-  <div class="q-num">Question 6</div>
-  <div class="q-text">What shape does the relationship between log-odds and probability take?</div>
-  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>An S-shaped (sigmoid) curve</button>
-<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A straight diagonal line</button>
-<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A flat horizontal line</button>
-<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A V-shaped curve</button>
-</div>
-  <div class="q-feedback" id="fb6"></div>
-</div>
-<div class="quiz-q" id="q7">
-  <div class="q-num">Question 7</div>
-  <div class="q-text">If the log-odds equals 0, what is the probability?</div>
-  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>0.0</button>
-<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>0.25</button>
-<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>1.0</button>
-<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>0.50</button>
-</div>
-  <div class="q-feedback" id="fb7"></div>
-</div>
-<div class="quiz-q" id="q8">
-  <div class="q-num">Question 8</div>
-  <div class="q-text">A &#x27;link function&#x27; in a GLM serves to:</div>
-  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Connect the linear predictor to the mean of the outcome</button>
-<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Join two separate datasets together</button>
-<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Remove outliers automatically</button>
-<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Standardize all predictor variables</button>
-</div>
-  <div class="q-feedback" id="fb8"></div>
-</div>
-<div class="quiz-q" id="q9">
-  <div class="q-num">Question 9</div>
-  <div class="q-text">If log-odds is negative, the probability is:</div>
-  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Exactly 1</button>
-<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Greater than 0.5</button>
-<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Undefined</button>
-<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Less than 0.5</button>
-</div>
-  <div class="q-feedback" id="fb9"></div>
-</div>
-<div class="quiz-q" id="q10">
-  <div class="q-num">Question 10</div>
-  <div class="q-text">Why is the logit link the &#x27;natural&#x27; choice for binomial data?</div>
-  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>It forces predictions outside 0 and 1</button>
-<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>It eliminates the intercept term</button>
-<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>It keeps predicted probabilities within 0 and 1</button>
-<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>It only works with one predictor</button>
-</div>
-  <div class="q-feedback" id="fb10"></div>
-</div>
-</div>
-<script>
-var ANSWERS=[1, 2, 2, 1, 2, 0, 3, 0, 3, 2];
-var FEEDBACKS=["The logit is log(P/(1-P)), i.e., the natural log of the odds. It transforms probability (0–1) to log odds (−∞ to +∞).", "Odds = 0.5/0.5 = 1. log(1) = 0. So log odds = 0 when P = 0.5.", "Positive log odds means odds > 1, which means P > 0.5.", "The sigmoid 1/(1+e^−x) is the inverse of logit. It maps log odds back to a probability between 0 and 1.", "family=binomial automatically uses the logit link function in glm().", "Mapping log-odds back to probability follows the S-shaped sigmoid curve.", "Log-odds 0 means odds = 1, which corresponds to P = 0.5.", "The link function relates the linear predictor to the expected outcome; for logistic regression it is the logit.", "Negative log-odds means odds < 1, so the probability is below 0.5.", "The logit link is the canonical link for the binomial family and constrains fitted probabilities to [0,1]."];
-var score=0,done=0,total=10;
-function handleQ(btn){
-  var q=+btn.dataset.q, idx=+btn.dataset.idx;
-  var btns=document.querySelectorAll('[data-q="'+q+'"]');
-  btns.forEach(function(b){b.disabled=true;});
-  var fb=document.getElementById('fb'+q);
-  fb.classList.add('show');
-  if(idx===ANSWERS[q-1]){
-    btn.classList.add('correct');
-    fb.className='q-feedback show correct-fb';
-    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
-    score++;
-  }else{
-    btn.classList.add('wrong');
-    btns[ANSWERS[q-1]].classList.add('correct');
-    fb.className='q-feedback show wrong-fb';
-    fb.textContent='❌ '+FEEDBACKS[q-1];
-  }
-  done++;
-  document.getElementById('score').textContent=score+' / '+total;
-  document.getElementById('prog').style.width=(done/total*100)+'%';
-}
-</script>
-<div class="page-nav"><a href="ch2.html">← 第2章</a><a href="ch4.html">第4章 →</a></div>
-</main>
-<aside class="sidebar">
-
-  <div class="glossary">
-    <h3>📖 用語集</h3>
-    <div class="term-item">
-      <div class="term-name">logitリンク関数</div>
-      <div class="term-en">Logit Link Function</div>
-      <div class="term-def">確率を対数オッズに変換する関数。glm(family=binomial)で自動使用される。</div>
+    <div class="grid3">
+      <div class="card" style="border-top:4px solid var(--p)"><h4 style="color:var(--p)">湿度</h4><p style="margin:0;font-size:.9rem">0〜1 の割合<br><span class="mono" style="color:var(--muted)">小さな範囲</span></p></div>
+      <div class="card" style="border-top:4px solid var(--o)"><h4 style="color:var(--o)">気温</h4><p style="margin:0;font-size:.9rem">温度の尺度<br><span class="mono" style="color:var(--muted)">別の物差し</span></p></div>
+      <div class="card" style="border-top:4px solid var(--g)"><h4 style="color:var(--g)">風速</h4><p style="margin:0;font-size:.9rem">速さの尺度<br><span class="mono" style="color:var(--muted)">また別の物差し</span></p></div>
     </div>
-    <div class="term-item">
-      <div class="term-name">シグモイドの逆変換</div>
-      <div class="term-en">Inverse Sigmoid</div>
-      <div class="term-def">対数オッズを確率に戻す変換。1/(1+e^−x)。</div>
+
+    <div class="callout warn">
+      <div class="ctitle">⚠️ よくある勘違い</div>
+      講義のモデルでは<strong>湿度の係数が −3100</strong> で一番大きな推定値。「じゃあ湿度が一番重要？」── <strong>そうとは言えません</strong>。
+      湿度が小さな範囲（0〜1）だから係数が大きく見えるだけ。しかも全予測変数の<strong>p値はとても小さい（みんな有意）</strong>。
+      では本当はどれが一番効いているのでしょう？
     </div>
-    <div class="term-item">
-      <div class="term-name">可逆変換</div>
-      <div class="term-en">Reversible Transformation</div>
-      <div class="term-def">情報を失わずに元に戻せる変換のこと。確率↔対数オッズは可逆。</div>
-    </div>
-    <div class="term-item">
-      <div class="term-name">線形予測子</div>
-      <div class="term-en">Linear Predictor</div>
-      <div class="term-def">β₀ + β₁X₁ + …という回帰式の部分。</div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      身長を「センチ」、体重を「キロ」で測って「数字が大きいから身長のほうが大事」とは言えません。
+      単位が違うものはそのまま比べられない。だから<strong>みんな同じ物差しにそろえてから</strong>比べます📏
     </div>
   </div>
-<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
-</aside>
-</div>
+</section>
+
+<!-- U2 影響力スイッチ -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interactive · 影響力スイッチ</div>
+    <h2>物差しをそろえると、<br>順位が入れ替わる</h2>
+    <p class="lead">ボタンで<strong>生の係数</strong>と<strong>標準化係数</strong>を切り替えてください。生では湿度（−3100）が一番大きく見えますが、
+    単位をそろえると<strong>本当の主役＝気温</strong>が浮かび上がります（順位は講義どおり：気温＞湿度＞風速）。</p>
+
+    <div class="machine">
+      <div class="btnrow" style="margin-top:0">
+        <button class="btn" id="btn-raw">生の係数（単位バラバラ）</button>
+        <button class="btn ghost" id="btn-std">標準化係数（物差し統一）</button>
+      </div>
+      <div id="bars" style="margin-top:20px;display:grid;gap:16px"></div>
+      <div id="bar-caption" class="callout info" style="margin-bottom:0"></div>
+    </div>
+    <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-top:8px">
+      ※ 生の係数（湿度 −3100）は講義の実値。標準化係数のバー長は<strong>順位を示すイメージ図</strong>（気温が最大、の関係を表す）。</div>
+
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      Zスコアは「テストの偏差値」。点数（単位）が違う英語と数学のテストも、偏差値にすれば「どっちが得意か」を
+      公平に比べられます。標準化＝みんなを偏差値にそろえる作業です📝
+    </div>
+  </div>
+</section>
+
+<!-- U3 methods 1 & 2 -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">3 methods · 方法1・2</div>
+    <h2>手動Zスコア／scale()</h2>
+    <p class="lead">3つの方法があります（推奨は方法3）。まず仕組みを理解するため手動で。<strong>Zスコア＝(値 − 平均) ÷ 標準偏差</strong>。</p>
+
+    <div class="card" style="margin-bottom:16px">
+      <h4 style="margin-top:0">Zスコアのイメージ（講義の実例）</h4>
+      <div class="svgwrap" style="margin-top:6px">
+        <svg viewBox="0 0 600 120" style="width:100%;max-width:600px;display:block;margin:0 auto">
+          <line class="axis" x1="40" y1="80" x2="560" y2="80"></line>
+          <line x1="300" y1="40" x2="300" y2="90" stroke="#7C53D6" stroke-width="2"></line>
+          <text x="300" y="32" text-anchor="middle" font-size="11" font-weight="700" fill="#7C53D6">平均 (z=0)</text>
+          <circle cx="150" cy="80" r="7" fill="#D84C4C" stroke="#fff" stroke-width="2"></circle>
+          <text x="150" y="105" text-anchor="middle" font-size="11" fill="#D84C4C">985件の日 → z = −1.8</text>
+          <text x="40" y="70" font-size="10" fill="#5C6779">−2σ</text>
+          <text x="545" y="70" font-size="10" fill="#5C6779">+2σ</text>
+        </svg>
+      </div>
+      <p style="margin:8px 0 0;font-size:.88rem;color:var(--muted)">講義の例：レンタル<strong>985件</strong>の日のZスコアは<strong>−1.8</strong>。「平均より約2標準偏差ぶん下」という意味です。</p>
+    </div>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 方法1：手動Zスコア（mutateで新しい列。z_ を頭につけて区別、見やすく並べ替え）</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes_for_beta <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(</span></div>
+      <div class="ln"><span class="n">3</span><span class="c">  z_rentals <span class="kw">=</span> (rentals <span class="kw">-</span> <span class="fn">mean</span>(rentals)) <span class="kw">/</span> <span class="fn">sd</span>(rentals),</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">  z_temp    <span class="kw">=</span> (temperature <span class="kw">-</span> <span class="fn">mean</span>(temperature)) <span class="kw">/</span> <span class="fn">sd</span>(temperature))   <span class="cm"># …湿度・風速も同様</span></span></div>
+      <div class="ln"><span class="n">5</span><span class="c">model_std <span class="kw">&lt;-</span> <span class="fn">lm</span>(z_rentals <span class="kw">~</span> z_humidity <span class="kw">+</span> z_temp <span class="kw">+</span> z_wind, data <span class="kw">=</span> bikes_for_beta)</span></div>
+    </div>
+    <p>符号を無視して<strong>絶対値（大きさ）</strong>を見ると、<strong>気温が一番大きい</strong>＝レンタル数に最も影響。
+    これは2つの別の角度からも裏づけられます：<strong>相関</strong>（rentals と最も強く相関するのも気温）と、<strong>t統計量</strong>（summary の3列目で気温が最大の絶対値）。</p>
+
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 方法2：scale() なら全列を一発でZスコア化（結果は方法1と同じ・とても簡潔）</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes_for_beta2 <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">select</span>(rentals, humidity, temperature, windspeed) <span class="kw">%&gt;%</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c">  <span class="fn">as.data.frame</span>() <span class="kw">%&gt;%</span> <span class="fn">scale</span>()</span></div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      方法1が「全部手書きで偏差値を計算」なら、方法2は「計算機のボタン1つで偏差値表を作る」。同じ答えなら、ラクなほうがいい😊
+    </div>
+  </div>
+</section>
+
+<!-- U4 lm.beta -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Recommended · 方法3</div>
+    <h2>lm.beta パッケージ（一番おすすめ）</h2>
+    <p class="lead">さらに効率的なのが <code>lm.beta</code>。データを標準化する必要がなく、<strong>作ったモデルを“引数として”渡すだけ</strong>で標準化係数が出ます（前2つの方法と違い、データ側をいじらない）。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># install.packages("lm.beta") が必要</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">library</span>(lm.beta)</span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">lm.beta</span>(bikes_model_1)              <span class="cm"># 標準化係数（気温が絶対値で最大）</span></span></div>
+      <div class="ln"><span class="n">4</span><span class="c"><span class="fn">summary</span>(<span class="fn">lm.beta</span>(bikes_model_1))     <span class="cm"># 元の推定値＋"Standardized"列を併記</span></span></div>
+    </div>
+    <div class="callout violet">
+      <div class="ctitle">🔢 コードグレード対策</div>
+      「最良の予測変数の標準化係数」だけを取り出すには、<code>$coefficients</code> の<strong>3行目（気温）・2列目（標準化）</strong>を抜き出します：
+      <div class="codeblk" style="margin-top:8px">
+        <div class="ln"><span class="n">1</span><span class="c"><span class="fn">summary</span>(<span class="fn">lm.beta</span>(bikes_model_1))<span class="kw">$</span>coefficients[<span class="nm">3</span>, <span class="nm">2</span>]</span></div>
+      </div>
+    </div>
+    <div class="callout warn">
+      <div class="ctitle">⚠️ "beta" という言葉に注意（4つの意味）</div>
+      「beta」は多義語で混乱のもと：① <strong>標準化</strong>回帰係数の記号（だから lm.beta）、② 一部の教科書では<strong>非標準化</strong>係数 β₀,β₁,β<sub>k</sub>、
+      ③ <strong>母集団</strong>の回帰直線の傾き、④ 統計的<strong>検出力</strong>の話でも登場。課題では「標準化回帰係数」または「lm.beta」と明示します。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      方法3は「魔法の翻訳メガネ」。データをいじらなくても、メガネをかける（lm.betaに通す）だけで、
+      バラバラの単位が一瞬で「同じ物差し」に見える！一番ラクで一番おすすめ🪄
+    </div>
+  </div>
+</section>
+
+<!-- U5 interpret -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interpret · 解釈と注意点</div>
+    <h2>「X₂はX₁の2倍重要」と<br>言える。ただし前提つき</h2>
+    <p class="lead">標準化係数で β₁＝0.5、β₂＝1 なら、<strong>「X₂はX₁の2倍、Yの予測に重要」</strong>と言えます。
+    ただし前提として、<strong>両者がだいたい同じ分布で、標準偏差が大きく違わない</strong>ことが必要です（これは現実には大きな仮定になりうる）。</p>
+    <div class="compare">
+      <div class="ccard good">
+        <h4>👍 メリット</h4>
+        <ul>
+          <li>元々スケールが違う予測変数の<strong>相対的重要度を直接比較</strong>できる</li>
+          <li>変数の重要度をすばやく把握でき、データ探索に役立つ</li>
+          <li>同じ物差しなので、非専門家にも説明しやすい</li>
+        </ul>
+      </div>
+      <div class="ccard bad">
+        <h4>👎 注意点（カウション）</h4>
+        <ul>
+          <li><strong>実用的な意味が失われる</strong>ことも：「登録1件あたり$100」のほうが「0.2標準偏差」より直感的</li>
+          <li>予測がやや複雑（標準化を戻す必要）</li>
+          <li>同じ分布・似た標準偏差という前提が大きな仮定</li>
+          <li>サンプルのばらつきに影響され、<strong>他データへの一般化がしにくい</strong></li>
+        </ul>
+      </div>
+    </div>
+    <div class="callout good">
+      <div class="ctitle">📌 おすすめ</div>
+      聞き手に応じて、<strong>元の係数と標準化係数の両方を報告</strong>しましょう。状況によって両方必要になります。
+      （さらに知りたい人向け：講義は "Pros and Cons of Standardized Regression Coefficients" などのリンクを紹介しています。）
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      偏差値は「学校内の順位」を比べるのに便利だけど、「実際に何点だったか」も大事ですよね。
+      標準化係数（偏差値）と元の係数（実際の点数）、両方を見せるのが親切なやり方です🎓
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第3章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz3" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">標準化回帰係数</div><div class="te">Standardized Coefficient</div><div class="td">単位をそろえた係数。相対的重要度を比較できる。</div></div>
+      <div class="term"><div class="tn">標準化 / Zスコア</div><div class="te">Standardization / z-score</div><div class="td">(値−平均)÷標準偏差。平均0・標準偏差1にそろえる。</div></div>
+      <div class="term"><div class="tn">scale関数</div><div class="te">scale()</div><div class="td">列を一括でZスコア化するR関数。</div></div>
+      <div class="term"><div class="tn">lm.beta</div><div class="te">lm.beta package</div><div class="td">モデルを渡すだけで標準化係数を出す。推奨。</div></div>
+      <div class="term"><div class="tn">t統計量</div><div class="te">t-statistic</div><div class="td">summary3列目。絶対値が大きいほど影響が強い目安。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch2.html">← 第2章：診断</a>
+      <a href="ch3_1.html">第3.1章：影響点分析 →</a>
+    </div>
+  </div>
+</section>
 
 <footer>
-  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
-  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
+  <p>🚲 重回帰分析 完全ガイド · 第3章：標準化回帰係数</p>
+  <p style="margin-top:.4rem"><a href="ch2.html">← 第2章</a> · <a href="ch3_1.html">第3.1章 →</a> · <a href="ch3_easy.html">🍎 やさしい版</a></p>
 </footer>
+
+<script src="m6.js"></script>
 <script>
-var units=document.querySelectorAll('.unit');
-var obs=new IntersectionObserver(function(entries){
-  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
-},{threshold:0.1});
-units.forEach(function(u){obs.observe(u);});
+/* ---------- 影響力スイッチ ---------- */
+(function(){
+  var raw=[
+    {n:'湿度 humidity', v:3100, c:'var(--p)'},
+    {n:'気温 temperature', v:75, c:'var(--o)'},
+    {n:'風速 windspeed', v:90, c:'var(--g)'}
+  ];
+  var std=[
+    {n:'湿度 humidity', v:0.30, c:'var(--p)'},
+    {n:'気温 temperature', v:0.55, c:'var(--o)'},
+    {n:'風速 windspeed', v:0.18, c:'var(--g)'}
+  ];
+  var box=document.getElementById('bars'), cap=document.getElementById('bar-caption');
+  function render(data, mode){
+    var max=Math.max.apply(null,data.map(function(d){return d.v;}));
+    box.innerHTML = data.map(function(d){
+      var w=Math.max(3, d.v/max*100);
+      var label = mode==='raw' ? ('係数 '+(d.n.indexOf('湿度')>=0?'−3100':'(小さい)')) : ('順位イメージ '+d.v.toFixed(2));
+      return '<div><div style="display:flex;justify-content:space-between;font-size:.85rem;font-weight:700"><span>'+d.n+'</span><span class="mono">'+label+'</span></div>'
+        + '<div style="height:26px;border-radius:8px;background:#eef1f8;overflow:hidden;margin-top:3px">'
+        + '<div style="height:100%;width:'+w+'%;background:'+d.c+';border-radius:8px;transition:width .5s ease"></div></div></div>';
+    }).join('');
+    if(mode==='raw'){
+      cap.className='callout warn'; cap.style.marginBottom='0';
+      cap.innerHTML='<b>生の係数：</b>湿度の係数 −3100 が圧倒的に大きく見える。でも湿度は 0〜1 の小さな範囲だから係数が大きいだけ。<strong>単位が違うので比べてはいけません。</strong>';
+    } else {
+      cap.className='callout good'; cap.style.marginBottom='0';
+      cap.innerHTML='<b>標準化係数：</b>物差しをそろえると順位が逆転。<strong>気温が最大＝本当の主役</strong>（相関でもt統計量でも気温が最大）。湿度が2番手、風速が3番手。';
+    }
+  }
+  var br=document.getElementById('btn-raw'), bs=document.getElementById('btn-std');
+  function setMode(mode){
+    if(mode==='raw'){ br.className='btn'; bs.className='btn ghost'; render(raw,'raw'); }
+    else { bs.className='btn'; br.className='btn ghost'; render(std,'std'); }
+  }
+  br.addEventListener('click',function(){setMode('raw');});
+  bs.addEventListener('click',function(){setMode('std');});
+  setMode('raw');
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz3',[
+ {q:"Why can't you compare raw regression coefficients to judge predictor importance?",
+  opts:[
+   {t:'Because the intercept term is always missing from a standardized regression model',ok:false},
+   {t:'Because R rounds all of the coefficients to exactly the same number of digits',ok:false},
+   {t:'Because the predictors are measured on different scales and units',ok:true},
+   {t:'Because raw coefficients are always forced to take positive values only',ok:false}],
+  exp:'湿度・気温・風速は単位が違うので、生の係数（湿度 −3100 など）はそのまま比べられません。'},
+ {q:'How is a z-score calculated?',
+  opts:[
+   {t:'(value − mean) ÷ standard deviation',ok:true},
+   {t:'value ÷ mean, expressed relative to the column average value',ok:false},
+   {t:'(mean − value) ÷ the full range of that variable',ok:false},
+   {t:'(value + mean) × the standard deviation of that variable',ok:false}],
+  exp:'Zスコア＝(値−平均)÷標準偏差。例：985件の日は z=−1.8（平均より約2SD下）。'},
+ {q:'After standardizing, which predictor had the greatest influence on rentals?',
+  opts:[
+   {t:'They were all exactly equal once the variables had been standardized',ok:false},
+   {t:'Humidity — its raw coefficient was the largest before any standardizing',ok:false},
+   {t:'Windspeed — its standardized coefficient was the largest in absolute value',ok:false},
+   {t:'Temperature — it had the largest standardized coefficient in absolute value',ok:true}],
+  exp:'標準化後は気温が絶対値で最大。相関（rentalsと最も相関）とt統計量でも気温が最大でした。'},
+ {q:'What is the main advantage of the lm.beta package over manual z-scores or scale()?',
+  opts:[
+   {t:'It changes the model’s predictions so they become noticeably more accurate on new data',ok:false},
+   {t:'It takes the existing fitted model as an argument — no need to standardize data first',ok:true},
+   {t:'It only works on categorical predictors that were first converted into factor variables',ok:false},
+   {t:'It removes any multicollinearity automatically before the regression model is fitted',ok:false}],
+  exp:'lm.beta は作ったモデルをそのまま引数に渡せるので、データを事前に標準化する手間がいりません。'},
+ {q:'What is the recommended reporting practice for standardized coefficients?',
+  opts:[
+   {t:'Only report standardized coefficients, since the raw units just confuse the reader',ok:false},
+   {t:'Only report raw coefficients, because they keep the original measured units intact',ok:false},
+   {t:'Report both the original and the standardized coefficients, depending on the audience',ok:true},
+   {t:'Never report either of them; show only the p-values for each of the predictors',ok:false}],
+  exp:'元の係数（$100/件など実用的な意味）と標準化係数（相対的重要度）を両方報告するのが親切です。'}
+]);
 </script>
-<script src="typewriter.js"></script>
-</body></html>
+</body>
+</html>

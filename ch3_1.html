@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第3.1章 影響点分析 — 重回帰分析 完全ガイド（M5）</title>
+<link rel="stylesheet" href="m6.css">
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
+  <div class="tabs">
+    <a class="tab home" href="index.html">🏠 概要</a>
+    <a class="tab" href="ch1.html">1</a>
+    <a class="tab" href="ch2.html">2</a>
+    <a class="tab" href="ch3.html">3</a>
+    <a class="tab active" href="ch3_1.html">3.1</a>
+    <a class="tab" href="ch4.html">4</a>
+    <a class="tab" href="ch5.html">5</a>
+    <a class="tab" href="ch6.html">6</a>
+    <a class="tab" href="ch7.html">7</a>
+    <a class="tab" href="ch8.html">8</a>
+    <a class="tab" href="ch9.html">9</a>
+    <a class="tab" href="ch10.html">10</a>
+    <a class="tab" href="ch11.html">11</a>
+    <a class="tab" href="ch12.html">12</a>
+    <a class="tab easy" href="ch3_1_easy.html">🍎 やさしい版</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="chap">Chapter 3.1 · Influential Points</div>
+    <h1>「外れ値」と<br><span class="a">「影響点」</span>は、<br>別ものだ。</h1>
+    <p class="sub">外れ値でも回帰線をほとんど動かさない点もあれば、たった1点で線を大きくゆがめる点もあります。
+    “悪い影響を与える点”をクックの距離（Cook's D）で自動的に見つける方法を学びます。点を入れたり外したりして、線が傾く様子を確かめましょう。</p>
+    <div class="jump">
+      <a href="#u1">① 外れ値の3タイプ</a>
+      <a href="#u2">② 影響点エクスプローラ</a>
+      <a href="#u3">③ クックの距離</a>
+      <a href="#u4">④ Rで探す</a>
+      <a href="#u5">⑤ 除いて比較</a>
+      <a href="#quiz">📝 Quiz</a>
+    </div>
+    <br>
+    <a class="easy-hero" href="ch3_1_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
+  </div>
+</header>
+
+<!-- U1 -->
+<section id="u1">
+  <div class="wrap reveal">
+    <div class="eyebrow">Types · 外れ値の3タイプ</div>
+    <h2>外れ値だからといって、<br>必ず悪さをするとは限らない</h2>
+    <p class="lead">大事な前提：<strong>すべての外れ値が「影響点」ではありません</strong>。外れ値の現れ方には3タイプあります。</p>
+    <div class="grid3">
+      <div class="card" style="border-top:4px solid var(--neg)">
+        <h4 style="color:var(--neg)">① Y方向の外れ値</h4>
+        <p style="margin:0;font-size:.9rem">Xは平均的だが Y が大きくズレている。残差が大きい。</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--o)">
+        <h4 style="color:var(--o)">② X方向（高レバレッジ）</h4>
+        <p style="margin:0;font-size:.9rem">Yは平均的だが X が他から大きく離れている。回帰線を自分のほうへ強く引っ張る。</p>
+      </div>
+      <div class="card" style="border-top:4px solid var(--g)">
+        <h4 style="color:var(--g)">③ 線の傾向に沿う</h4>
+        <p style="margin:0;font-size:.9rem">XもYも極端だが、回帰線の延長上にある。除いても線はほぼ変わらない＝<strong>影響 小</strong>。</p>
+      </div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      クラスの平均身長を考えるとき、すごく背が高い子（外れ値）がいても、その子が「みんなの傾向」から外れていなければ平均はあまり変わりません。
+      でも、たった1人だけ全然違う場所にいる子は、平均をグイッと動かす。これが「影響点」です🏫
+    </div>
+  </div>
+</section>
+
+<!-- U2 influential point explorer -->
+<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Interactive · 影響点エクスプローラ</div>
+    <h2>たった1点で、<br>回帰線はこんなに傾く</h2>
+    <p class="lead">右下にぽつんと離れた<strong>高レバレッジ点（赤）</strong>があります。ボタンでこの点を「含める／除く」と切り替えてください。
+    回帰線（青）がどれだけ傾くかに注目。1点の有無で線が大きく動くなら、それが<strong>影響点</strong>です。</p>
+
+    <div class="machine">
+      <div class="btnrow" style="margin-top:0">
+        <button class="btn" id="btn-with">赤い点を含める</button>
+        <button class="btn ghost" id="btn-without">赤い点を除く</button>
+      </div>
+      <div class="svgwrap">
+        <svg id="inflsvg" viewBox="0 0 640 320" style="width:100%;max-width:640px;display:block;margin:0 auto"></svg>
+      </div>
+      <div class="readouts" style="margin-top:8px">
+        <div class="ro o">
+          <div class="lab">回帰線の傾き</div>
+          <div class="big" id="ro-slope" style="font-size:1.2rem">下向きに歪む</div>
+          <div class="meaning" id="me-slope">赤い点に引っ張られている</div>
+        </div>
+        <div class="ro l">
+          <div class="lab">Cook's D（赤い点）</div>
+          <div class="big" id="ro-cook">大</div>
+          <div class="meaning">しきい値を大きく超える</div>
+        </div>
+        <div class="ro g">
+          <div class="lab">判定</div>
+          <div class="big" id="ro-judge" style="font-size:1.2rem">影響点</div>
+          <div class="meaning" id="me-judge">除くと線が戻る＝影響大</div>
+        </div>
+      </div>
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      影響点を手で探すのは「砂浜から特定の貝殻を1つずつ拾って確かめる」ようなもの。大変すぎます。
+      だから自動で見つけてくれる「金属探知機」＝クックの距離を使うのです🏖️
+    </div>
+  </div>
+</section>
+
+<!-- U3 Cook's D -->
+<section id="u3">
+  <div class="wrap reveal">
+    <div class="eyebrow">Cook's D · クックの距離</div>
+    <h2>点を1つ取り除いたら、<br>どれだけ変わる？</h2>
+    <p class="lead"><strong>クックの距離</strong>は「ある観測を除いたとき、モデルがどれだけ変わるか」を測ります。
+    点を1つ取り出して全部を再計算し、しきい値と比べるだけ。値が大きいほど、その点の影響は大きいということです。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># このクラスの基準: 4 / (N - K - 1) より大きければ影響点</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">しきい値 = <span class="nm">4</span> <span class="kw">/</span> (N <span class="kw">-</span> K <span class="kw">-</span> <span class="nm">1</span>)   <span class="cm"># N=観測数, K=予測変数の数</span></span></div>
+    </div>
+    <p>例：自転車データは <strong>N＝731行</strong>、予測変数 <strong>K＝3</strong> なので、しきい値は <code>4/(731−3−1) ≈ 0.0055</code>。これより大きいCook's Dの点を影響点とみなします。</p>
+    <table class="ctable">
+      <tr><th>別のしきい値（覚えやすい版）</th><th>判定</th></tr>
+      <tr><td>D &gt; 0.5</td><td>影響点の<strong>可能性あり</strong></td></tr>
+      <tr><td>D &gt; 1.0</td><td><strong>かなり高い確率で</strong>影響点</td></tr>
+      <tr><td>D &gt; 4/N</td><td>予測変数の数を使わない簡易版</td></tr>
+    </table>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      クックの距離は「その人がいなくなったら、クラスの雰囲気がどれだけ変わるか」のメーター。
+      1人抜けても何も変わらない人もいれば、抜けると一気に変わる“ムードメーカー”もいる。後者が影響点です🎭
+    </div>
+  </div>
+</section>
+
+<!-- U4 R -->
+<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">In R · 影響点を探す</div>
+    <h2>OLSRR パッケージで一目瞭然</h2>
+    <p class="lead"><code>OLSRR</code> にはCook's Dを可視化する関数があります。棒グラフで全データ点を表示し、しきい値の線を引いてくれます。</p>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">library</span>(olsrr)</span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">ols_plot_cooksd_bar</span>(my_model)     <span class="cm"># 棒グラフ（赤=影響点, 青=正常）</span></span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">ols_plot_cooksd_chart</span>(my_model)   <span class="cm"># もう少しきれいな版</span></span></div>
+    </div>
+    <p>例では、<strong>69行目</strong>がしきい値をはるかに超える巨大なCook's Dを示しました。調べてみると…</p>
+    <div class="callout warn">
+      <div class="ctitle">69行目（2011年3月10日）の中身</div>
+      祝日ではない／3月の日／レンタル数＝たった623件（とても少ない）／<strong>湿度＝0（異常！通常の最小は0.18）</strong>／風速＝かなり速い／気温＝低め。
+      → モデルの予測は5,000件超。実際は623件 → <strong>巨大な残差！</strong>
+    </div>
+    <div class="callout info">
+      <div class="ctitle">📌 分析者の視点</div>
+      湿度0%は明らかに異常です。<strong>データ入力ミスの可能性</strong>を疑い、「2011年3月10日について別の情報はないか」と会社に確認するのが実務的な対応。むやみに削除せず、まず原因を考えましょう。
+    </div>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># Cook's D を大きい順に上位10件</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">head</span>(<span class="fn">sort</span>(<span class="fn">cooks.distance</span>(my_model), decreasing <span class="kw">=</span> <span class="kw">TRUE</span>), <span class="nm">10</span>)</span></div>
+      <div class="ln"><span class="n">3</span><span class="c">cooks_d <span class="kw">&lt;-</span> <span class="fn">cooks.distance</span>(my_model)</span></div>
+      <div class="ln"><span class="n">4</span><span class="c">influential <span class="kw">&lt;-</span> <span class="fn">unique</span>(<span class="fn">which</span>(cooks_d <span class="kw">&gt;</span> <span class="nm">0.0055</span>))   <span class="cm"># 29個見つかった</span></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- U5 remove & compare -->
+<section id="u5">
+  <div class="wrap reveal">
+    <div class="eyebrow">Compare · 除いて比較する</div>
+    <h2>本当に良くなった？を確かめる</h2>
+    <div class="codeblk">
+      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 影響点を除いたデータ（先頭の −（マイナス）に注目）</span></span></div>
+      <div class="ln"><span class="n">2</span><span class="c">bikes_no_infl <span class="kw">&lt;-</span> bikes[<span class="kw">-</span>influential, ]</span></div>
+      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">nrow</span>(bikes_no_infl) <span class="kw">/</span> <span class="fn">nrow</span>(bikes)   <span class="cm"># → 0.96（96%が残る = 4%除外）</span></span></div>
+    </div>
+    <p>702行が残り、<strong>96%のデータを保持</strong>（4%を影響点として除外）。除去前後でモデルを比べると…</p>
+    <table class="ctable">
+      <tr><th>項目</th><th>全データ（除去前）</th><th>影響点を除去後</th></tr>
+      <tr><td>係数の推定値</td><td>元の値</td><td>変化した（影響があった証拠）</td></tr>
+      <tr><td>調整済みR²</td><td>0.45</td><td><strong>より高い（改善！）</strong></td></tr>
+    </table>
+    <div class="callout good">
+      <div class="ctitle">📌 結論</div>
+      影響点を除いたら調整済みR²が上がりました。これは<strong>モデルがシグナルをよりよく捉え、ノイズを無視できるようになった</strong>こと。Cook's Dの判断通り、除去は有益でした。
+    </div>
+    <div class="simple">
+      <div class="stitle">🍎 かんたん説明</div>
+      クラス写真で1人だけブレている子がいると全体がぼやけて見える。その子（影響点）を外して撮り直すと、みんながくっきり写る＝モデルがクリアに📸
+      ただし「外す前になぜブレたのか」を確認するのを忘れずに！
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
+  <div class="wrap reveal">
+    <div class="eyebrow">Check · 確認クイズ</div>
+    <h2>第3.1章 確認クイズ</h2>
+    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
+    <div class="quiz" id="quiz31" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section>
+  <div class="wrap reveal">
+    <div class="eyebrow">Glossary · 重要用語</div>
+    <h2 style="font-size:1.4rem">この章の用語</h2>
+    <div class="gloss">
+      <div class="term"><div class="tn">影響点</div><div class="te">Influential Point</div><div class="td">回帰線の係数や統計量を大きく変えてしまう (X,Y) の点。</div></div>
+      <div class="term"><div class="tn">外れ値</div><div class="te">Outlier</div><div class="td">他から大きく離れた点。必ずしも影響点とは限らない。</div></div>
+      <div class="term"><div class="tn">高レバレッジ点</div><div class="te">High Leverage Point</div><div class="td">X方向に遠い外れ値。回帰線を引っ張る力が強い。</div></div>
+      <div class="term"><div class="tn">クックの距離</div><div class="te">Cook's Distance</div><div class="td">点を除いたときのモデル変化量。影響度の自動判定に使う。</div></div>
+      <div class="term"><div class="tn">OLSRR</div><div class="te">olsrr package</div><div class="td">Cook's Dの可視化など回帰診断に便利なRパッケージ。</div></div>
+    </div>
+    <div class="pagenav">
+      <a href="ch3.html">← 第3章：標準化回帰係数</a>
+      <a href="ch4.html">第4章：多重共線性とVIF →</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <p>🚲 重回帰分析 完全ガイド · 第3.1章：影響点分析</p>
+  <p style="margin-top:.4rem"><a href="ch3.html">← 第3章</a> · <a href="ch4.html">第4章 →</a> · <a href="ch3_1_easy.html">🍎 やさしい版</a></p>
+</footer>
+
+<script src="m6.js"></script>
+<script>
+/* ---------- influential point explorer ---------- */
+(function(){
+  var svg=document.getElementById('inflsvg');
+  var W=640,H=320,PAD={l:48,r:20,t:20,b:44}, pW=W-PAD.l-PAD.r, pH=H-PAD.t-PAD.b;
+  var XMIN=0,XMAX=10,YMIN=0,YMAX=10;
+  function xOf(x){return PAD.l + x/XMAX*pW;}
+  function yOf(y){return PAD.t + (1-y/YMAX)*pH;}
+  // normal points roughly y = 1 + 0.9x
+  var normal=[[1,2.0],[2,2.7],[3,3.8],[4,4.6],[5,5.4],[6,6.3],[7,7.1],[8,8.0]];
+  var infl=[9.5,1.2]; // high leverage, low Y -> pulls line down on the right
+  // axes
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:PAD.t+pH}));
+  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t+pH,x2:PAD.l+pW,y2:PAD.t+pH}));
+  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:PAD.l+pW,y:H-6,'text-anchor':'end'});t.textContent='X →';return t;})());
+  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:14,y:PAD.t+6});t.textContent='Y';return t;})());
+  var fitLine=svgEl('line',{'stroke-width':3,stroke:'#2F77C9'}); svg.appendChild(fitLine);
+  // normal points
+  normal.forEach(function(p){ svg.appendChild(svgEl('circle',{cx:xOf(p[0]),cy:yOf(p[1]),r:5,fill:'#2F77C9',opacity:.75,stroke:'#fff','stroke-width':1.5})); });
+  // influential point (red) — toggle visibility
+  var redDot=svgEl('circle',{cx:xOf(infl[0]),cy:yOf(infl[1]),r:7,fill:'#D84C4C',stroke:'#fff','stroke-width':2});
+  svg.appendChild(redDot);
+  var redLabel=svgEl('text',{x:xOf(infl[0]),y:yOf(infl[1])+22,'text-anchor':'middle','font-size':10,'font-weight':700,fill:'#D84C4C'});
+  redLabel.textContent='高レバレッジ点'; svg.appendChild(redLabel);
+  // two fitted lines (precomputed slope/intercept)
+  // without: y = 1.1 + 0.86x  -> at x=0 ->1.1, x=10 ->9.7
+  // with red point pulling down on right: y = 1.6 + 0.55x -> x=0 ->1.6, x=10 ->7.1
+  function setLine(mode){
+    if(mode==='with'){ fitLine.setAttribute('x1',xOf(0)); fitLine.setAttribute('y1',yOf(1.6));
+      fitLine.setAttribute('x2',xOf(10)); fitLine.setAttribute('y2',yOf(7.1));
+      redDot.style.display='';redLabel.style.display='';
+      document.getElementById('ro-slope').textContent='下向きに歪む';
+      document.getElementById('me-slope').textContent='赤い点に引っ張られている';
+      document.getElementById('ro-judge').textContent='影響点';
+      document.getElementById('me-judge').textContent='線が大きくズレている';
+    } else { fitLine.setAttribute('x1',xOf(0)); fitLine.setAttribute('y1',yOf(1.1));
+      fitLine.setAttribute('x2',xOf(10)); fitLine.setAttribute('y2',yOf(9.7));
+      redDot.style.display='none';redLabel.style.display='none';
+      document.getElementById('ro-slope').textContent='本来の傾き';
+      document.getElementById('me-slope').textContent='点を除くと線が戻った';
+      document.getElementById('ro-judge').textContent='線が戻った';
+      document.getElementById('me-judge').textContent='= 赤い点は影響点だった';
+    }
+    var bw=document.getElementById('btn-with'), bo=document.getElementById('btn-without');
+    if(mode==='with'){bw.className='btn';bo.className='btn ghost';} else {bo.className='btn';bw.className='btn ghost';}
+  }
+  document.getElementById('btn-with').addEventListener('click',function(){setLine('with');});
+  document.getElementById('btn-without').addEventListener('click',function(){setLine('without');});
+  setLine('with');
+})();
+
+/* ---------- quiz ---------- */
+buildQuiz('quiz31',[
+ {q:'Are all outliers influential points?',
+  opts:[
+   {t:'Yes, absolutely every outlier strongly changes the slope of the fitted regression line',ok:false},
+   {t:'Only outliers in the Y direction can ever turn out to be influential on the model fit',ok:false},
+   {t:'Outliers and influential points are exactly the same thing under two different names',ok:false},
+   {t:'No — an outlier that lies along the trend of the line has only a low influence',ok:true}],
+  exp:'すべての外れ値が影響点ではありません。線の傾向に沿う外れ値は、傾きをほとんど変えません。'},
+ {q:'An outlier far away in the X direction is also called a…',
+  opts:[
+   {t:'A large residual point sitting far away in the Y direction of the plot',ok:false},
+   {t:'A high leverage point',ok:true},
+   {t:'A null point that has no real effect on the fitted regression line',ok:false},
+   {t:'An intercept-shifting point that only moves the line up or down',ok:false}],
+  exp:'X方向に遠い外れ値は高レバレッジ点。回帰線を自分のほうへ強く引っ張ります。'},
+ {q:"What does Cook's distance measure?",
+  opts:[
+   {t:'The physical distance between two separate data points in the scatter plot',ok:false},
+   {t:'The correlation between two predictors that share some overlapping information',ok:false},
+   {t:"The effect of removing an observation on the model's coefficients and statistics",ok:true},
+   {t:'The number of predictors a model needs in order to reach a good level of fit',ok:false}],
+  exp:'Cook\'s D は、ある観測を除いたときモデルの係数や統計量がどれだけ変わるかを測ります。'},
+ {q:'Using the class threshold 4/(N−K−1) with N=731 and K=3, what is it approximately?',
+  opts:[
+   {t:'About 0.0055',ok:true},
+   {t:'About 1.0',ok:false},
+   {t:'About 0.5',ok:false},
+   {t:'About 4.0',ok:false}],
+  exp:'4/(731−3−1) = 4/727 ≈ 0.0055。これを超える点を影響点とみなします。'},
+ {q:'After removing the 29 influential points, what happened to adjusted R²?',
+  opts:[
+   {t:'It stayed exactly the same — removing the points had no measurable effect at all',ok:false},
+   {t:'It dropped sharply, so removing the influential points turned out to be harmful',ok:false},
+   {t:'It became negative, meaning the new model fit worse than a simple flat line',ok:false},
+   {t:'It increased — the model captured the signal better and ignored the noise',ok:true}],
+  exp:'影響点を除くと調整済みR²が上昇。モデルがシグナルをよく捉え、ノイズを無視できた証拠です。'}
+]);
+</script>
+</body>
+</html>

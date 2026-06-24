@@ -1,127 +1,101 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>第7章 超やさしい版：RでAICを使う：2つのK</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第7章 超やさしい版:日付データ — 完全ガイド</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="easy.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
-    <nav class="header-nav">
+  <div class="logo">重回帰分析 <span>完全ガイド</span></div>
+  <nav class="header-nav">
     <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy active" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch1.html">📈 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">🩺 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">⚖️ 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3_1.html">🎯 3.1</a><a class="n-easy" href="ch3_1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🔗 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">〰️ 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">🏷️ 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">📅 7</a><a class="n-easy active" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">✖️ 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">➡️ 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">⬅️ 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🔀 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">🎓 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
-  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
-  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
+
 <div class="ch-banner easy">
   <div class="ch-banner-inner">
-    <div class="ch-tag">Chapter 7 · Easy Mode 🍎</div>
-    <h1>🍎 第7章 超やさしい版：RでAICを使う：2つのK</h1>
-    <p>数式のK（パラメータ数）とRのk（ペナルティの強さ）は別物。ボタンで違いを確認してRコードで使い方を理解しよう。</p>
-    <div class="unit-nav"><a href="#u1">一言でいうと</a><a href="#u2">kを変えてみる</a><a href="#u3">実際の使い方</a><a href="ch7.html" class="easy-toplink">🔧 本編はこちら</a></div>
+    <div class="ch-tag">Chapter 7 ・ Easy Mode</div>
+    <h1>📅 第7章 超やさしい版:日付データの処理</h1>
+    <p>1つの日付を「年・月・日」に分けて使う話。短くてやさしい章です。<a href="ch7.html" class="easy-toplink">📅 本編はこちら</a></p>
+    <div class="unit-nav">
+      <a href="#u1">⚡ 一言でいうと</a>
+      <a href="#u2">① 引き出しに分ける</a>
+      <a href="#u3">② 月はカテゴリ</a>
+      <a href="#u4">③ 全変数モデル</a>
+      <a href="#u5">④ 30秒セルフ確認</a>
+    </div>
   </div>
 </div>
+
 <div class="page-layout">
 <main>
 
 <div class="unit" id="u1">
-  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">数式のK（パラメータ数）とRのk（ペナルティ強さ）は別物</div></div></div>
-  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0">AICの数式に出てくるK（パラメータ数）と、RのAIC()関数の引数k（ペナルティの強さ）は同じ文字で全く別の意味。Rのkのデフォルトは2で、通常そのまま使えばOK。混乱の原因はここだけ。</p></div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin:1.5rem 0">
-    <div style="background:var(--primary-light);border-radius:12px;padding:1.25rem;border:2px solid var(--primary)">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--primary);margin-bottom:.5rem">K（大文字）</div>
-      <div style="font-size:.88rem">数式の中のK<br><strong>= パラメータ数</strong><br>（切片 + 予測変数の数）<br><br>例：切片1＋予測変数2 → K=3<br><span style="font-size:.8rem;color:var(--text-sec)">Rが自動でカウントする</span></div>
-    </div>
-    <div style="background:var(--red-light);border-radius:12px;padding:1.25rem;border:2px solid var(--red)">
-      <div style="font-size:1.5rem;font-weight:900;color:var(--red);margin-bottom:.5rem">k（小文字）</div>
-      <div style="font-size:.88rem">Rの引数のk<br><strong>= ペナルティの強さ</strong><br>（デフォルト = 2）<br><br>例：AIC(model, k=2) ← 変えなくてOK<br><span style="font-size:.8rem;color:var(--text-sec)">k=log(n)にするとBICになる</span></div>
-    </div>
-  </div>
-  <div class="warn-box">⚠️ 同じ文字なのに意味が全く違う！これだけ覚えれば混乱しない。</div>
+  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">日付を年・月・日にバラして使う</div></div></div>
+  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0;">「8月」と「5月」でレンタル数は違う。だから日付を<strong>lubridate</strong>で年・月・日に分解。<strong>月と年はfactor（カテゴリ）、日は数値</strong>のまま。カテゴリありのVIFは<strong>GVIF</strong>を使う。</p></div>
 </div>
 
 <div class="unit" id="u2">
-  <div class="unit-header"><div class="unit-num">①</div><div><h2>kの値を変えるとAICはどうなる？</h2><div class="unit-sub">ボタンで切り替えて違いを確認</div></div></div>
-  <p>k=2が古典的AIC、k=log(n)がBIC（ベイズ情報量規準）に相当します。サンプルサイズが大きいほどBICのペナルティが強くなります。</p>
-  <div class="widget teal">
-    <div class="widget-title">🔧 RのAIC()関数 kシミュレーター</div>
-    <div class="btn-row" style="margin-bottom:1rem">
-      <button class="btn-step k-btn active-k" data-k="2">k=2（デフォルト・古典的AIC）</button>
-      <button class="btn-step k-btn" data-k="3" style="background:var(--secondary)">k=3（強めのペナルティ）</button>
-      <button class="btn-step k-btn" data-k="6" style="background:var(--teal)">k≈log(n)（BIC相当）</button>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
-      <div style="background:var(--bg);border-radius:10px;padding:1rem;text-align:center">
-        <div style="font-size:.78rem;color:var(--text-sec);font-weight:700">ペナルティ（k×params）</div>
-        <div style="font-size:1.6rem;font-weight:900;color:var(--red)" id="k-penalty">6</div>
-      </div>
-      <div style="background:var(--primary-light);border-radius:10px;padding:1rem;text-align:center">
-        <div style="font-size:.78rem;color:var(--primary-dark);font-weight:700">AIC値</div>
-        <div style="font-size:1.6rem;font-weight:900;color:var(--primary-dark)" id="k-result">—</div>
-      </div>
-    </div>
-    <div style="margin-top:.75rem;font-size:.83rem;color:var(--text-sec)" id="k-note">—</div>
+  <div class="unit-header"><div class="unit-num">①</div><div><h2>引き出しに分ける</h2><div class="unit-sub">lubridateで一発</div></div></div>
+  <p>「2011年1月1日」という1つの情報を、「年」「月」「日」の3つの引き出しに整理します。月だけ取り出せば「夏はよく借りられる」パターンが見えます。</p>
+  <div class="viz">
+    <div class="viz-title">日付バラし機 ⚙️</div>
+    <svg viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:520px;display:block;margin:0 auto;">
+      <rect x="20" y="40" width="140" height="44" rx="8" fill="#dbeafe" stroke="#2563eb" stroke-width="2"/><text x="90" y="67" font-size="12" text-anchor="middle" font-weight="700">2011-01-01</text>
+      <text x="195" y="67" font-size="22" fill="#0891b2" text-anchor="middle">→</text>
+      <rect x="240" y="20" width="90" height="34" rx="8" fill="#d1fae5" stroke="#059669" stroke-width="1.5" class="float-y"/><text x="285" y="42" font-size="11" text-anchor="middle" font-weight="700">年 2011</text>
+      <rect x="340" y="42" width="90" height="34" rx="8" fill="#fef3c7" stroke="#d97706" stroke-width="1.5" class="float-y"/><text x="385" y="64" font-size="11" text-anchor="middle" font-weight="700">月 1</text>
+      <rect x="240" y="78" width="90" height="34" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5" class="float-y"/><text x="285" y="100" font-size="11" text-anchor="middle" font-weight="700">日 1</text>
+    </svg>
   </div>
 </div>
 
 <div class="unit" id="u3">
-  <div class="unit-header"><div class="unit-num">②</div><div><h2>実際の使い方</h2><div class="unit-sub">課題では何も変えなくてOK</div></div></div>
-  <div class="big-rule">
-    <div class="ru-arrow">✅</div>
-    <div class="ru-text">
-      <code>AIC(model)</code> だけで古典的AIC（k=2）<br>
-      <span style="font-size:.83rem;color:var(--text-sec)">課題で「k=2を使う」と指示されても → 何も変えなくてOK</span>
-    </div>
-  </div>
-  <p class="code-label">▶ AIC()の使い方とNYCフライト例</p>
-  <pre class="code-block">
-<span class="cl"><span class="cm"># 古典的AIC（k=2、デフォルト）</span></span>
-<span class="cl"><span class="kw">AIC</span>(model)<span class="cm">           # k=2がデフォルト</span></span>
-<span class="cl"><span class="kw">AIC</span>(model, k=<span class="nm">2</span>)<span class="cm">    # 同じ結果</span></span>
-<span class="cl"><span class="cm"></span></span>
-<span class="cl"><span class="cm"># k=log(n) → BIC（ベイズ情報量規準）に相当</span></span>
-<span class="cl">n &lt;- <span class="kw">nrow</span>(Abalone)</span>
-<span class="cl"><span class="kw">AIC</span>(model, k=<span class="kw">log</span>(n))<span class="cm">  # ペナルティが強くなる</span></span>
-</pre>
-  <p class="code-label">▶ 2モデルをAIC()で一括比較</p>
-  <pre class="code-block">
-<span class="cl"><span class="cm"># NYC flightsの例でAICを比較</span></span>
-<span class="cl">m1 &lt;- <span class="kw">glm</span>(delayed ~ dep_hour + month,</span>
-<span class="cl">       <span class="kw">data</span>=flights, <span class="kw">family</span>=<span class="st">binomial</span>)</span>
-<span class="cl">m2 &lt;- <span class="kw">glm</span>(delayed ~ dep_hour + month + carrier,</span>
-<span class="cl">       <span class="kw">data</span>=flights, <span class="kw">family</span>=<span class="st">binomial</span>)</span>
-<span class="cl"><span class="cm"># AICで比較（課題ではk=2のまま使う）</span></span>
-<span class="cl"><span class="kw">AIC</span>(m1, m2)</span>
-</pre>
-  <div class="checkpoint"><h4>🤔 答えられるかな？（クリックで答えが開く）</h4><div class="cp-q">Q1. RのAIC()関数の引数kは何を表す？<span class="cp-a">A. ペナルティの強さ（デフォルト=2）。数式のK（パラメータ数）とは全く別の意味。</span></div><div class="cp-q">Q2. AIC(model)とAIC(model, k=2)の結果は？<span class="cp-a">A. 完全に同じ。k=2がデフォルトなので、何も指定しなくても古典的AICが計算される。</span></div><div class="cp-q">Q3. k=log(n)にするとどうなる？<span class="cp-a">A. BIC（ベイズ情報量規準）に相当する値が計算される。サンプルサイズnが大きいほどペナルティが強くなる。</span></div></div>
+  <div class="unit-header"><div class="unit-num">②</div><div><h2>月はカテゴリ、日は数値</h2><div class="unit-sub">「3月」の3は計算する数字じゃない</div></div></div>
+  <p>「3月」の3は、3個のリンゴのような数字ではなく「春の月」というラベル。だから月・年は<strong>factor</strong>にします。でも日にちは1→2→3と順番があるので<strong>数値</strong>のまま。</p>
+  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>月は名前（カテゴリ）、日は順番（数値）。だから扱いを変える。</p></div>
 </div>
-<div class="page-nav"><a href="ch6_easy.html">← 第6章 やさしい版</a><a href="ch8_easy.html">第8章 やさしい版 →</a></div>
+
+<div class="unit" id="u4">
+  <div class="unit-header"><div class="unit-num">③</div><div><h2>全変数モデル「~ .」</h2><div class="unit-sub">全員集合の号令</div></div></div>
+  <p>全部の列を予測変数にしたいとき、1つずつ書くのは大変。<code>rentals ~ .</code> と書けば、応答変数以外の全列が予測変数になります。結果、<strong>日は有意でない</strong>（1日か15日かは関係薄い）ことが多く、月と年は有意でした。</p>
+  <div class="note-box">カテゴリ変数があるとき、VIFの代わりに<strong>GVIF（一般化VIF）</strong>を使います。<strong>GVIF^(1/(2·df))が2を超えたら要調査</strong>です。</div>
+</div>
+
+<div class="unit" id="u5">
+  <div class="unit-header"><div class="unit-num">④</div><div><h2>30秒セルフ確認</h2><div class="unit-sub">クリックで答えが開きます</div></div></div>
+  <div class="checkpoint"><h4>🤔 答えられるかな？</h4>
+    <div class="cp-q">Q1. 日付から年月日を取り出すライブラリは？<span class="cp-a">A. lubridate（year()/month()/day()）。</span></div>
+    <div class="cp-q">Q2. 月はfactor、日は数値。なぜ？<span class="cp-a">A. 月はカテゴリ（1=1月）、日は順番がある連続値だから。</span></div>
+    <div class="cp-q">Q3. カテゴリがあるときのVIFは？<span class="cp-a">A. GVIF（一般化VIF）。GVIF^(1/(2df))が2超で要調査。</span></div>
+  </div>
+  <div class="note-box" style="background:var(--secondary-light);border-color:var(--secondary);">🎓 コードと詳しい説明は <a href="ch7.html">第7章 本編</a> へ。</div>
+  <div class="page-nav"><a href="ch7.html">← 第7章 本編</a><a href="ch8_easy.html">第8章 やさしい版 →</a></div>
+</div>
+
 </main>
 <aside class="sidebar">
-  <div class="tip-box"><h4>💡 まとめ</h4><p style="margin:.4rem 0">• 数式のK = パラメータ数（Rが自動カウント）</p><p style="margin:.4rem 0">• Rのk = ペナルティの強さ（デフォルト2）</p><p style="margin:.4rem 0">• AIC(model)だけで古典的AIC</p><p style="margin:.4rem 0">• k=log(n)にするとBIC相当</p></div>
-  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2)">
-    <h4 style="color:var(--primary-dark)">📖 本編へ</h4>
-    <p style="color:var(--text)">詳しいコードと解説は <a href="ch7.html">第7章 本編</a> へ。英語MCQクイズもあります。</p>
-  </div>
+  <div class="tip-box"><h4>💡 結論</h4><p>日付 → <strong>lubridate</strong>で年月日に分解。<br><br>月・年は <strong>factor</strong>、日は <strong>数値</strong>。<br><br>全変数モデルは <strong>~ .</strong><br><br>カテゴリありVIFは <strong>GVIF</strong>（2超で注意）。</p></div>
+  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2);"><h4 style="color:var(--primary-dark);">📖 本編</h4><p style="color:var(--text);">詳しくは <a href="ch7.html">第7章</a> へ。</p></div>
 </aside>
 </div>
-<footer><p>🐚 ロジスティック回帰 完全ガイド · 第7章 超やさしい版</p>
-<p style="margin-top:.5rem"><a href="ch7.html">← 第7章 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
+
+<footer><p>重回帰分析 完全ガイド · 第7章 超やさしい版</p><p style="margin-top:.5rem;"><a href="ch7.html">← 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script src="interactive.js"></script>
-<script src="typewriter.js"></script>
-<script>initKDemo();</script>
-</body></html>
+</body>
+</html>
