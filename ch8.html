@@ -3,299 +3,265 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第8章 交互作用 — 重回帰分析 完全ガイド（M5）</title>
-<link rel="stylesheet" href="m6.css">
+<title>第8章 モデル評価③：Z値とR² — ロジスティック回帰 完全ガイド</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<nav class="topnav">
-  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
-  <div class="tabs">
-    <a class="tab home" href="index.html">🏠 概要</a>
-    <a class="tab" href="ch1.html">1</a>
-    <a class="tab" href="ch2.html">2</a>
-    <a class="tab" href="ch3.html">3</a>
-    <a class="tab" href="ch3_1.html">3.1</a>
-    <a class="tab" href="ch4.html">4</a>
-    <a class="tab" href="ch5.html">5</a>
-    <a class="tab" href="ch6.html">6</a>
-    <a class="tab" href="ch7.html">7</a>
-    <a class="tab active" href="ch8.html">8</a>
-    <a class="tab" href="ch9.html">9</a>
-    <a class="tab" href="ch10.html">10</a>
-    <a class="tab" href="ch11.html">11</a>
-    <a class="tab" href="ch12.html">12</a>
-    <a class="tab easy" href="ch8_easy.html">🍎 やさしい版</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="chap">Chapter 8 · Interaction</div>
-    <h1>運動だけ、食事だけでも効く。<br>でも<span class="g">両方</span>だと、<br>足し算以上になる。</h1>
-    <p class="sub">2つの変数が「組み合わさったとき」に生まれる特別な効果が交互作用。風と雨が重なると、レンタル数は単なる足し算を超えて激減します。
-    2本の線の傾きが違う＝交互作用あり、を切り替えて確かめましょう。</p>
-    <div class="jump">
-      <a href="#u1">① 交互作用とは</a>
-      <a href="#u2">② 共線性との違い</a>
-      <a href="#u3">③ Rでの書き方</a>
-      <a href="#u4">④ 予測の計算</a>
-      <a href="#u5">⑤ 効果を確かめる</a>
-      <a href="#quiz">📝 Quiz</a>
-    </div>
-    <br>
-    <a class="easy-hero" href="ch8_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
-  </div>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+      <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main active" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
+<div class="ch-banner">
+<div class="ch-banner-inner">
+  <div class="ch-tag">Chapter 8</div>
+  <h1>📏 モデル評価③：Z値とR²</h1>
+  <p>個別の予測変数はZ統計量（係数÷SE）で評価。ロジスティック回帰にR²は存在しない理由と代替指標を理解する。</p>
+  <div class="ch-banner unit-nav" style="background:none;padding:0;">
+    <a href="#unit1">① Z統計量とは</a><a href="#unit2">② Rで手動計算</a><a href="#unit3">③ R²は存在しない</a><a href="#quiz">📝 Quiz</a>
+  </div>
+</div>
+</div>
+<div class="page-layout">
+<main>
 
-<!-- U1 -->
-<section id="u1">
-  <div class="wrap reveal">
-    <div class="eyebrow">Idea · 交互作用とは</div>
-    <h2>1+1 が 2 より大きくなる</h2>
-    <p class="lead">ときどき、<strong>2つの変数が「組み合わさったとき」に応答変数へ特別な効果</strong>を生みます。これが<strong>交互作用</strong>。</p>
-    <table class="ctable">
-      <tr><th>目標</th><th>単独でも効く</th><th>組み合わせると…</th></tr>
-      <tr><td>コレステロールを下げる</td><td>運動 / 食事</td><td>運動＋食事で<strong>さらに大きな効果</strong></td></tr>
-      <tr><td>血圧を改善する</td><td>薬 / 生活習慣</td><td>両方の組み合わせで<strong>より大きな改善</strong></td></tr>
-      <tr><td>生産性を上げる</td><td>研修 / 経験</td><td>研修＋経験の両方が欲しい</td></tr>
-    </table>
-    <p>つまり、個々でも良いけれど、<strong>2つの交互作用は単独の効果を足し合わせた以上</strong>になることがあるのです。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      カレーのルウだけ、ごはんだけでもおいしい。でも「カレーライス」にすると、おいしさが単なる足し算を超えますよね。これが交互作用＝組み合わせの魔法です🍛
+<div class="unit" id="unit1">
+  <div class="unit-header">
+    <div class="unit-num">①</div>
+    <div><h2>個別の予測変数：Z統計量</h2><div class="unit-sub">T検定の代わりにZ検定</div></div>
+  </div>
+  <p>重回帰では個別の予測変数の有意性を<strong>T統計量</strong>で確認しました。ロジスティック回帰では代わりに<strong>Z統計量（Wald統計量）</strong>を使います。</p>
+<div class="note-box" style="text-align:center;font-size:1.1rem;">
+  <strong>Z = 係数（β̂）÷ 標準誤差（SE）</strong>
+</div>
+<p>これは統計学の基本から来ており、見た目は全く同じです。「係数がゼロから何標準誤差分離れているか」を測ります。</p>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>Z値は「係数が偶然ゼロになった可能性はどのくらいか」を示します。Z値が大きい（絶対値）ほど、その予測変数は有意です。重回帰のT値と全く同じ発想です🎯</p></div>
+</div>
+
+<div class="unit" id="unit2">
+  <div class="unit-header">
+    <div class="unit-num">②</div>
+    <div><h2>RでZ値を手動計算</h2><div class="unit-sub">係数と標準誤差を取り出す</div></div>
+  </div>
+  <p>Z値はsummary()の表に表示されますが、手動で計算して確認してみましょう。</p>
+<div class="code-block"><span class="cl"><span class="cm"># モデルの係数テーブルを取り出す</span></span><span class="cl">coef_table <span class="kw">&lt;-</span> <span class="kw">summary</span>(model1)$coefficients</span><span class="cl"></span><span class="cl"><span class="cm"># Diameterの係数（2行目）</span></span><span class="cl">b_diameter <span class="kw">&lt;-</span> coef_table[<span class="nm">2</span>, <span class="nm">1</span>]   <span class="cm"># Estimate</span></span><span class="cl">se_diameter <span class="kw">&lt;-</span> coef_table[<span class="nm">2</span>, <span class="nm">2</span>]  <span class="cm"># Std. Error</span></span><span class="cl"></span><span class="cl"><span class="cm"># Z値を手計算</span></span><span class="cl">z_val <span class="kw">&lt;-</span> b_diameter <span class="kw">/</span> se_diameter</span><span class="cl">z_val  <span class="cm"># → −5.168（summaryの値と一致）✅</span></span></div>
+<div class="output-text">b_diameter  = −2.847
+se_diameter =  0.551
+z_val       = −5.168  ← summary()と完全一致</div>
+<div class="note-box"><strong>📌 負のZ値：</strong>Diameterが大きい → オスである対数オッズが下がる（負の係数）。符号は関係の方向を示します。</div>
+</div>
+
+<div class="unit" id="unit3">
+  <div class="unit-header">
+    <div class="unit-num">③</div>
+    <div><h2>ロジスティック回帰にR²はない</h2><div class="unit-sub">代替指標を使う</div></div>
+  </div>
+<div class="note-box"><strong>📌 擬似R²の中身：</strong>線形回帰のR²は「説明された分散の割合」ですが、二値の結果には分散の分解が当てはまりません。代わりにMcFaddenの擬似R²（<code>1 − LL_model/LL_null</code>）やNagelkerkeの指標を使います。これらは対数尤度の比から作られ、0〜1の目安にはなりますが、線形回帰のR²ほど直接「当てはまりの良さ%」とは読めない点に注意します。</div>
+  <p>重回帰で最重要だった<strong>R²（決定係数）</strong>は、ロジスティック回帰には存在しません。なぜなら、ロジスティック回帰は最小二乗法ではなく最尤推定（MLE）を使うためです。</p>
+<table class="compare-table">
+  <thead><tr><th>指標</th><th>重回帰</th><th>ロジスティック回帰</th></tr></thead>
+  <tbody>
+    <tr><td>全体的な当てはまり</td><td>R²、調整済みR²</td><td>逸脱度（Deviance）</td></tr>
+    <tr><td>モデル比較</td><td>AIC、BIC</td><td>AIC、BIC（同じ）</td></tr>
+    <tr><td>個別予測変数</td><td>T統計量</td><td>Z統計量</td></tr>
+    <tr><td>疑似R²</td><td>—</td><td>McFadden's R²（参考程度）</td></tr>
+  </tbody>
+</table>
+<div class="warn-box"><strong>⚠️ 疑似R²（Pseudo R²）について：</strong>Nagelkerke R²やMcFadden R²など「R²もどき」の指標が存在しますが、本物のR²ではありません。解釈は慎重に行いましょう。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>R²がないことを悲しまないで。逸脱度とAICがちゃんとその役割を果たしてくれます。ロジスティック回帰の世界では「これが当たり前」です🤝</p></div>
+</div>
+
+<div class="quiz-section" id="quiz">
+  <div class="quiz-header">
+    <h2>📝 確認クイズ</h2>
+    <div class="quiz-score" id="score">0 / 10</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
+  
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">In logistic regression, what statistic is used to test individual predictor significance?</div>
+  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>T-statistic</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>F-statistic</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Z-statistic (Wald statistic)</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Chi-square statistic</button>
+</div>
+  <div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">How is the Z-value calculated?</div>
+  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Z = coefficient × standard error</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Z = coefficient / standard error</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Z = log(coefficient)</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Z = coefficient²</button>
+</div>
+  <div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">If Z = −5.17 for the Diameter predictor, what can we conclude?</div>
+  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Diameter is not significant</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Diameter has a significant negative relationship with the outcome</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Diameter increases the probability</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Diameter should be removed</button>
+</div>
+  <div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">Why is there no R² in logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>R² is always zero for binary outcomes</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Logistic regression uses maximum likelihood estimation, not least squares — so R² is not defined</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>R² requires normally distributed residuals</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The glm() function doesn't support R²</button>
+</div>
+  <div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">Which alternative metrics are used instead of R² in logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Adjusted R² and Mallows' Cp</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Deviance and AIC</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Correlation and covariance</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>RMSE and MAE</button>
+</div>
+  <div class="q-feedback" id="fb5"></div>
+</div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">A predictor&#x27;s Z-value is computed as:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>coefficient × standard error</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>coefficient + standard error</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>coefficient ÷ standard error</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>standard error ÷ coefficient</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">A large absolute Z-value (e.g. |Z| = 5) suggests the predictor is:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Statistically insignificant</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Missing from the model</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Perfectly collinear</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Statistically significant</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Why does logistic regression lack a true R²?</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Because outcomes are binary, not continuous variance</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Because it has no intercept</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Because it uses lm() internally</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Because predictors must be categorical</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Which is a commonly used pseudo-R² for logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Adjusted slope</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Euclidean R²</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Sum of squares R²</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>McFadden&#x27;s R²</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">In logistic regression, individual predictors are tested with a Z-test instead of:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A chi-square test</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An F-test</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A t-test</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A sign test</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+</div>
+<script>
+var ANSWERS=[2, 1, 1, 1, 1, 2, 3, 0, 3, 2];
+var FEEDBACKS=["The Z-statistic (also called Wald statistic) is used: Z = coefficient / standard error.", "Z = β̂ / SE. This measures how many standard errors the coefficient is from zero.", "A Z-value of −5.17 is far from zero, indicating Diameter is highly significant. The negative sign means larger Diameter reduces log odds.", "R² is based on the least squares framework. Logistic regression uses maximum likelihood estimation (MLE), so a true R² doesn\u2019t exist.", "Deviance (−2LL) and AIC are the primary fit metrics used in logistic regression instead of R².", "Z = estimate / standard error, analogous to a t-statistic in linear regression.", "A large |Z| produces a small p-value, indicating the predictor is significant.", "R² is defined via explained variance of a continuous outcome, which does not apply to a binary response.", "McFadden's (and Nagelkerke's) pseudo-R² are common stand-ins built from log-likelihoods.", "Because the sampling distribution is approximately normal, a Z-test replaces the t-test used in linear regression."];
+var score=0,done=0,total=10;
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='❌ '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<div class="page-nav"><a href="ch7.html">← 第7章</a><a href="ch9.html">第9章 →</a></div>
+</main>
+<aside class="sidebar">
+
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">Z統計量</div>
+      <div class="term-en">Z-statistic / Wald statistic</div>
+      <div class="term-def">β̂ / SE。個別の予測変数の有意性を検定する統計量。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">最尤推定</div>
+      <div class="term-en">Maximum Likelihood Estimation (MLE)</div>
+      <div class="term-def">ロジスティック回帰の係数推定法。観測データが最も起こりやすくなるパラメータを求める。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">疑似R²</div>
+      <div class="term-en">Pseudo R²</div>
+      <div class="term-def">McFadden R²やNagelkerke R²など。参考程度の指標で、本物のR²とは異なる。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">標準誤差</div>
+      <div class="term-en">Standard Error (SE)</div>
+      <div class="term-def">係数推定値のばらつきを示す値。Z = 係数 ÷ SEで使用。</div>
     </div>
   </div>
-</section>
-
-<!-- U2 -->
-<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">vs · 共線性との違い</div>
-    <h2>似ているようで、まったく別もの</h2>
-    <table class="ctable">
-      <tr><th></th><th>多重共線性（第4章）</th><th>交互作用（この章）</th></tr>
-      <tr><td>2変数の関係</td><td>互いに<strong>相関している</strong>（似ている）</td><td>必ずしも相関していない</td></tr>
-      <tr><td>問題か効果か</td><td>⚠️ 問題（係数が不安定に）</td><td>✅ 効果（予測がよくなる）</td></tr>
-      <tr><td>ポイント</td><td>変数同士が被っている</td><td>変数を<strong>組み合わせた効果</strong>が応答に効く</td></tr>
-    </table>
-    <p>交互作用では、2つの変数は<strong>互いに関連していなくてもよい</strong>のです。組み合わせたときに、別々にしておくのとは違う効果が現れる——これが交互作用です。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      多重共線性は「同じことを言う双子」（被ってて困る）。交互作用は「性格の違う2人がチームを組むと、すごい力を発揮する」（組み合わせが強い）。似て非なるものです👥
-    </div>
-  </div>
-</section>
-
-<!-- U3 R -->
-<section id="u3">
-  <div class="wrap reveal">
-    <div class="eyebrow">In R · 書き方（* と :）</div>
-    <h2>風速 × 天気 の組み合わせ効果</h2>
-    <p class="lead"><strong>天気が悪化し、かつ風速も上がった</strong>ら、それぞれ単独より大きくレンタル数に効くはず。Rでは <code>*</code> を使います。出力では交互作用が <code>:</code>（コロン）で表示されます。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 交互作用なし</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c">model <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> windspeed <span class="kw">+</span> weather, data <span class="kw">=</span> bikes_clean)</span></div>
-      <div class="ln"><span class="n">3</span><span class="c"><span class="cm"># 交互作用あり: * は両方を個別＋交互作用で含める近道</span></span></div>
-      <div class="ln"><span class="n">4</span><span class="c">model_int <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> windspeed <span class="kw">*</span> weather, data <span class="kw">=</span> bikes_clean)</span></div>
-    </div>
-    <div class="callout info">
-      <div class="ctitle">📌 * と : の違い</div>
-      <code>windspeed * weather</code> は「windspeed」「weather」「windspeed:weather（交互作用）」の<strong>3つすべて</strong>を自動で含める近道。
-      出力では交互作用項が <code>windspeed:weatherHeavy</code> のようにコロンで表示されます。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      <code>*</code> は「2人を別々に呼んで、さらにペアとしても呼ぶ」という便利な記号。<code>:</code> は出力の中で「これがペアの効果だよ」と教えてくれる印です✖️
-    </div>
-  </div>
-</section>
-
-<!-- U4 predict -->
-<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Predict · 交互作用つきの予測</div>
-    <h2>交互作用項にも値を代入する</h2>
-    <p class="lead">交互作用つきモデルの式（係数は例）。天気は「大雨か？」「小雨か？」のYes/No（0/1）で、両方0なら晴れです。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c">予測 = 切片 <span class="kw">-</span> <span class="nm">132</span> <span class="kw">×</span> 風速 <span class="kw">-</span> <span class="nm">1878</span> <span class="kw">×</span> 大雨(0/1) <span class="kw">-</span> … <span class="kw">×</span> 小雨(0/1)</span></div>
-      <div class="ln"><span class="n">2</span><span class="c">       <span class="kw">+</span> 係数 <span class="kw">×</span> (風速 <span class="kw">×</span> 大雨)   <span class="cm"># ← 交互作用項</span></span></div>
-      <div class="ln"><span class="n">3</span><span class="c">       <span class="kw">+</span> 係数 <span class="kw">×</span> (風速 <span class="kw">×</span> 小雨)</span></div>
-    </div>
-    <p><strong>例：風速10mph・晴れの日</strong>（大雨=0, 小雨=0）。交互作用項はすべて0になり、計算すると<strong>約4,579台</strong>の予測。</p>
-    <div class="callout warn">
-      <div class="ctitle">💡 実務のヒント</div>
-      手計算は理解のためで、実際は <code>predict()</code> 関数や自作関数を使うほうが効率的です。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      交互作用つきの式は「材料費＋ペアセット割引」みたいなもの。風速と天気を別々に足すだけでなく、「風速×天気のペア効果」も計算に入れる。だから現実に近い予測ができます🧮
-    </div>
-  </div>
-</section>
-
-<!-- U5 interaction line plot interactive -->
-<section id="u5">
-  <div class="wrap reveal">
-    <div class="eyebrow">Interactive · 効果を確かめる</div>
-    <h2>2本の線が平行でない＝<br>交互作用がある</h2>
-    <p class="lead">風速（弱風 vs 強風）と天気（晴れ→小雨→大雨）でレンタル予測を比べます。
-    ボタンで「交互作用なし（平行）」と「あり（非平行）」を切り替えてください。<strong>傾きが違う＝風と雨のダブルパンチ</strong>が起きている証拠です。</p>
-
-    <div class="machine">
-      <div class="btnrow" style="margin-top:0">
-        <button class="btn" id="btn-int">交互作用あり（非平行）</button>
-        <button class="btn ghost" id="btn-noint">交互作用なし（平行）</button>
-      </div>
-      <div class="svgwrap">
-        <svg id="intsvg" viewBox="0 0 600 300" style="width:100%;max-width:600px;display:block;margin:0 auto"></svg>
-      </div>
-      <div class="readouts" style="margin-top:8px">
-        <div class="ro g"><div class="lab">弱風 + 大雨</div><div class="big" id="ro-light">3,815</div><div class="meaning">緩やかに減る</div></div>
-        <div class="ro neg" style="background:#fbeaea;border-color:#f3c9c9"><div class="lab" style="color:var(--neg)">強風 + 大雨</div><div class="big" id="ro-heavy" style="color:var(--neg)">1,940</div><div class="meaning">急降下！ダブルパンチ</div></div>
-        <div class="ro l"><div class="lab">判定</div><div class="big" id="ro-int" style="font-size:1.2rem">交互作用あり</div><div class="meaning" id="me-int">傾きが違う</div></div>
-      </div>
-    </div>
-
-    <table class="ctable">
-      <tr><th>条件</th><th>予測レンタル数</th></tr>
-      <tr><td>強風(10) ＋ 晴れ</td><td>4,579</td></tr>
-      <tr><td>強風(10) ＋ 小雨</td><td>3,815 付近</td></tr>
-      <tr><td><strong>強風(10) ＋ 大雨</strong></td><td><strong>1,940（大きく激減！）</strong></td></tr>
-      <tr><td>弱風(1) ＋ 大雨</td><td>3,815（強風時よりずっと多い）</td></tr>
-    </table>
-    <div class="callout info">
-      <div class="ctitle">📌 補足</div>
-      交互作用は<strong>線プロット</strong>で判定できます（2本の線が平行でなければ交互作用あり）。また<strong>ANOVA</strong>も交互作用を扱います。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      「弱い風＋大雨」より「強い風＋大雨」のほうが、自転車を借りる人がずっと減る。風と雨が<strong>重なると</strong>ダブルパンチ。
-      別々に足し算しただけでは、このダブルパンチを見逃します🌧️💨
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ -->
-<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Check · 確認クイズ</div>
-    <h2>第8章 確認クイズ</h2>
-    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
-    <div class="quiz" id="quiz8" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<!-- GLOSSARY -->
-<section>
-  <div class="wrap reveal">
-    <div class="eyebrow">Glossary · 重要用語</div>
-    <h2 style="font-size:1.4rem">この章の用語</h2>
-    <div class="gloss">
-      <div class="term"><div class="tn">交互作用</div><div class="te">Interaction</div><div class="td">2変数を組み合わせたときに生じる、別々とは異なる応答への効果。</div></div>
-      <div class="term"><div class="tn">* （アスタリスク）</div><div class="te">interaction operator</div><div class="td">A*B で A・B・A:B の3つを自動で含める近道。</div></div>
-      <div class="term"><div class="tn">: （コロン）</div><div class="te">colon</div><div class="td">出力で交互作用項を表す記号（例 windspeed:weatherHeavy）。</div></div>
-      <div class="term"><div class="tn">線プロット</div><div class="te">Line plot</div><div class="td">2本の線が平行でなければ交互作用ありと判定できる。</div></div>
-    </div>
-    <div class="pagenav">
-      <a href="ch7.html">← 第7章：日付データ</a>
-      <a href="ch9.html">第9章：前進選択 →</a>
-    </div>
-  </div>
-</section>
+<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
+</aside>
+</div>
 
 <footer>
-  <p>🚲 重回帰分析 完全ガイド · 第8章：交互作用</p>
-  <p style="margin-top:.4rem"><a href="ch7.html">← 第7章</a> · <a href="ch9.html">第9章 →</a> · <a href="ch8_easy.html">🍎 やさしい版</a></p>
+  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
+  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
 </footer>
-
-<script src="m6.js"></script>
 <script>
-/* ---------- interaction line plot ---------- */
-(function(){
-  var svg=document.getElementById('intsvg');
-  var W=600,H=300,PAD={l:60,r:60,t:24,b:48}, pW=W-PAD.l-PAD.r, pH=H-PAD.t-PAD.b;
-  var YMIN=1500,YMAX=5000;
-  var xs=[0,1,2]; // 晴れ, 小雨, 大雨
-  function xOf(i){return PAD.l + i/2*pW;}
-  function yOf(y){return PAD.t + (1-(y-YMIN)/(YMAX-YMIN))*pH;}
-  // axes + x labels
-  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:PAD.t+pH}));
-  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t+pH,x2:PAD.l+pW,y2:PAD.t+pH}));
-  ['晴れ','小雨','大雨'].forEach(function(lab,i){
-    var t=svgEl('text',{class:'axlab',x:xOf(i),y:H-24,'text-anchor':'middle'}); t.textContent=lab; svg.appendChild(t);
-  });
-  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:14,y:PAD.t+4});t.textContent='予測';return t;})());
-  // weak (green) line: gentle slope both modes
-  var weak={int:[4750,4300,3815], no:[4750,4300,3815]};
-  // strong (red): interaction -> steep; no-interaction -> parallel to weak (shifted down)
-  var strong={int:[4579,3815,1940], no:[4300,3850,3365]};
-  var weakLine=svgEl('polyline',{fill:'none',stroke:'#1FA37A','stroke-width':3});
-  var strongLine=svgEl('polyline',{fill:'none',stroke:'#D84C4C','stroke-width':3});
-  svg.appendChild(weakLine); svg.appendChild(strongLine);
-  var dots=svgEl('g',{}); svg.appendChild(dots);
-  function draw(mode){
-    var w=weak[mode], s=strong[mode];
-    weakLine.setAttribute('points', xs.map(function(i){return xOf(i)+','+yOf(w[i]);}).join(' '));
-    strongLine.setAttribute('points', xs.map(function(i){return xOf(i)+','+yOf(s[i]);}).join(' '));
-    dots.innerHTML='';
-    xs.forEach(function(i){
-      dots.appendChild(svgEl('circle',{cx:xOf(i),cy:yOf(w[i]),r:5,fill:'#1FA37A',stroke:'#fff','stroke-width':1.5}));
-      dots.appendChild(svgEl('circle',{cx:xOf(i),cy:yOf(s[i]),r:5,fill:'#D84C4C',stroke:'#fff','stroke-width':1.5}));
-    });
-    dots.appendChild((function(){var t=svgEl('text',{x:xOf(2)+6,y:yOf(w[2])+4,'font-size':10,'font-weight':700,fill:'#1FA37A'});t.textContent='弱風';return t;})());
-    dots.appendChild((function(){var t=svgEl('text',{x:xOf(2)+6,y:yOf(s[2])+4,'font-size':10,'font-weight':700,fill:'#D84C4C'});t.textContent='強風';return t;})());
-    document.getElementById('ro-heavy').textContent=s[2].toLocaleString();
-    document.getElementById('ro-light').textContent=w[2].toLocaleString();
-    var ri=document.getElementById('ro-int'), me=document.getElementById('me-int');
-    if(mode==='int'){ ri.textContent='交互作用あり'; ri.style.color='var(--l)'; me.textContent='2本の線が非平行'; }
-    else { ri.textContent='交互作用なし'; ri.style.color='var(--muted)'; me.textContent='2本の線が平行'; }
-    var bi=document.getElementById('btn-int'), bn=document.getElementById('btn-noint');
-    if(mode==='int'){bi.className='btn';bn.className='btn ghost';} else {bn.className='btn';bi.className='btn ghost';}
-  }
-  document.getElementById('btn-int').addEventListener('click',function(){draw('int');});
-  document.getElementById('btn-noint').addEventListener('click',function(){draw('no');});
-  draw('int');
-})();
-
-/* ---------- quiz ---------- */
-buildQuiz('quiz8',[
- {q:'What is an interaction effect?',
-  opts:[
-   {t:'When two variables combined have an effect on the response that differs from their separate effects',ok:true},
-   {t:'When a predictor variable is dropped from the model in order to reduce overfitting on the data',ok:false},
-   {t:'When two predictors are so perfectly correlated that they end up carrying the same information',ok:false},
-   {t:'When the response variable happens to be categorical rather than a continuous numeric quantity',ok:false}],
-  exp:'交互作用は、2変数を組み合わせたときに、別々の効果とは異なる効果が応答に現れることです。'},
- {q:'How does interaction differ from multicollinearity?',
-  opts:[
-   {t:'They are exactly the same statistical idea, just described using two slightly different names',ok:false},
-   {t:'Multicollinearity is a problem from correlated predictors; interaction is a useful combined effect',ok:true},
-   {t:'Interaction can only ever occur between the response variable and one single model predictor',ok:false},
-   {t:'Multicollinearity always improves the predictions, while interaction terms always harm the model',ok:false}],
-  exp:'共線性は相関した予測変数による「問題」。交互作用は組み合わせの「効果」で、相関は必須ではありません。'},
- {q:'In R, what does windspeed * weather include in the model?',
-  opts:[
-   {t:'Only windspeed as a single main-effect predictor in the model',ok:false},
-   {t:'Only the interaction term, without either of the two main effects',ok:false},
-   {t:'It removes both variables and fits a model with only an intercept',ok:false},
-   {t:'windspeed, weather, AND their interaction (windspeed:weather)',ok:true}],
-  exp:'A * B は A・B・A:B（交互作用）の3つを自動で含める近道です。'},
- {q:"How is an interaction term shown in R's summary output?",
-  opts:[
-   {t:'With a plus sign joining the two variable names (windspeed+weather)',ok:false},
-   {t:'It is never shown — interaction terms are hidden from the summary table',ok:false},
-   {t:'With a colon between the two variable names (e.g., windspeed:weatherHeavy)',ok:true},
-   {t:'With a minus sign separating the two variable names (windspeed−weather)',ok:false}],
-  exp:'交互作用項は コロン（:）で表示されます（例 windspeed:weatherHeavy）。'},
- {q:'Why does considering the interaction of wind and rain matter for predictions?',
-  opts:[
-   {t:'The combination (e.g., heavy wind + heavy rain) gives very different estimates than treating them separately',ok:true},
-   {t:'It never changes the prediction at all, since the two separate effects simply add together cleanly',ok:false},
-   {t:'Because wind and rain are actually the response variable that the regression model is predicting',ok:false},
-   {t:'Because adding the interaction term automatically removes the intercept from the fitted model',ok:false}],
-  exp:'強風＋大雨のような組み合わせは、別々に扱うのとは大きく異なる予測になります。だから交互作用が重要です。'}
-]);
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
 </script>
-</body>
-</html>
+<script src="typewriter.js"></script>
+</body></html>

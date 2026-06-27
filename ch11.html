@@ -1,325 +1,264 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第11章 ステップワイズ＆階層的選択 — 重回帰分析 完全ガイド（M5）</title>
-<link rel="stylesheet" href="m6.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>第11章：バイナリ予測変数②：係数の解釈 — ロジスティック回帰ガイド</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<nav class="topnav">
-  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
-  <div class="tabs">
-    <a class="tab home" href="index.html">🏠 概要</a>
-    <a class="tab" href="ch1.html">1</a>
-    <a class="tab" href="ch2.html">2</a>
-    <a class="tab" href="ch3.html">3</a>
-    <a class="tab" href="ch3_1.html">3.1</a>
-    <a class="tab" href="ch4.html">4</a>
-    <a class="tab" href="ch5.html">5</a>
-    <a class="tab" href="ch6.html">6</a>
-    <a class="tab" href="ch7.html">7</a>
-    <a class="tab" href="ch8.html">8</a>
-    <a class="tab" href="ch9.html">9</a>
-    <a class="tab" href="ch10.html">10</a>
-    <a class="tab active" href="ch11.html">11</a>
-    <a class="tab" href="ch12.html">12</a>
-    <a class="tab easy" href="ch11_easy.html">🍎 やさしい版</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="chap">Chapter 11 · Stepwise & Hierarchical</div>
-    <h1>足すことも、削ることも。<br><span class="g">両方できる</span>のが<br>ステップワイズ。</h1>
-    <p class="sub">前進（足すだけ）と後退（削るだけ）を<strong>同時に</strong>やったら？それがステップワイズ。
-    さらに、専門知識で変数を入れる順番を決める「階層的選択」、そして「シンプルが一番」のオッカムの剃刀まで。AICが下がっていく様子を追います。</p>
-    <div class="jump">
-      <a href="#u1">① ステップワイズとは</a>
-      <a href="#u2">② 探索アニメ</a>
-      <a href="#u3">③ p値で制御</a>
-      <a href="#u4">④ 階層的選択</a>
-      <a href="#u5">⑤ パーシモニー</a>
-      <a href="#quiz">📝 Quiz</a>
-    </div>
-    <br>
-    <a class="easy-hero" href="ch11_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
-  </div>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+    <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main active" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
 
-<!-- U1 -->
-<section id="u1">
-  <div class="wrap reveal">
-    <div class="eyebrow">Idea · ステップワイズとは</div>
-    <h2>両方の「いいとこ取り」</h2>
-    <p class="lead">前進選択は<strong>足すだけ</strong>、後退選択は<strong>削るだけ</strong>。「両方を同時にやったら？」と思った人——講師いわく「するどい！」。
-    それが<strong>ステップワイズ（mixed／混合）選択</strong>。前進のように足し、後退のように削る、各ステップで「足すか削るか」を判断します。</p>
-    <div class="grid3">
-      <div class="card"><h4 style="color:var(--p)">前進（forward）</h4><p style="margin:0;font-size:.9rem">空モデルから<strong>足す</strong>一方。</p></div>
-      <div class="card"><h4 style="color:var(--o)">後退（backward）</h4><p style="margin:0;font-size:.9rem">全部入りから<strong>削る</strong>一方。</p></div>
-      <div class="card" style="border:2px solid var(--g)"><h4 style="color:var(--g)">ステップワイズ（both）</h4><p style="margin:0;font-size:.9rem"><strong>足す＋削る</strong>を行き来できる。</p></div>
-    </div>
-    <div class="callout info">
-      <div class="ctitle">📌 一度削った変数も、また足せる</div>
-      ステップワイズの強みは、後で「やっぱり戻したい」変数を<strong>再追加できる</strong>こと。各ステップで「＋（足す）」候補と「−（削る）」候補の両方を検討し、AICが一番下がる操作を選びます。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      前進＝「足すだけ」、後退＝「削るだけ」、ステップワイズ＝「<strong>足したり削ったり両方できる</strong>」。
-      味見しながら「塩を足す」も「水で薄める」も自由にできるシェフです👨‍🍳
+<div class="ch-banner">
+  <div class="ch-banner-inner">
+    <div class="ch-tag">Chapter 11</div>
+    <h1>🧮 第11章：バイナリ予測変数②：係数の解釈</h1>
+    <p>係数は「対数オッズの変化量」= log(オッズ比)。ForeignWorkerの係数を3ステップで手計算して再現する。</p>
+    <div class="unit-nav"><a href="#u1">Unit 1</a><a href="#u2">Unit 2</a><a href="#u3">Unit 3</a></div>
+  </div>
+</div>
+
+<div class="page-layout">
+<main>
+<div class="unit" id="u1">
+  <div class="unit-header"><div class="unit-num">01</div><div><h2>バイナリ係数の意味</h2><div class="unit-sub">係数 = 対数オッズの変化量</div></div></div>
+  <p>バイナリ予測変数の係数は<strong>「そのバイナリ変数が0→1に変化したときの対数オッズの変化量」</strong>です。単純な確率の差ではなく、<em>オッズ比の対数</em>になります。</p>
+  <div class="big-rule">
+    <div class="ru-arrow">📐</div>
+    <div class="ru-text">
+      <strong>係数 β₁ = log(odds|X=1) − log(odds|X=0)</strong><br>
+        = log(odds|X=1 / odds|X=0)<br>
+      <span style="font-size:.85rem;color:var(--text-sec)">つまり「2つの状態のオッズ比」の対数</span>
     </div>
   </div>
-</section>
-
-<!-- U2 stepwise animation -->
-<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Interactive · 探索アニメ</div>
-    <h2>全部入り(AIC 9160)から、<br>足し引きしてAICを下げる</h2>
-    <p class="lead">講義では<strong>全部入りモデル（AIC 9160）</strong>から始めます。全部入りなので<strong>まず削る</strong>しかできません
-    （weekday Saturday を削る → AIC低下、real_feel を削る…）。途中で「＋（足し戻す）」候補も現れます。
-    「次のステップ」を押して、AICが下がる様子を見てください。もう下がらなくなったら停止＝最終モデル。</p>
-
-    <div class="machine">
-      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px">
-        <div>
-          <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">いまの操作</div>
-          <div id="sw-op" style="font-weight:800;font-size:1.15rem;color:var(--ink)">スタート：全部入りモデル</div>
-        </div>
-        <div style="text-align:right">
-          <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">AIC（低いほど良い）</div>
-          <div id="sw-aic" style="font-family:var(--mono);font-weight:800;font-size:1.7rem;color:var(--g)">9160</div>
-        </div>
-      </div>
-      <div style="margin-top:14px">
-        <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);margin-bottom:6px">いまモデルに入っている変数</div>
-        <div id="sw-vars" style="display:flex;flex-wrap:wrap;gap:8px;min-height:38px"></div>
-      </div>
-      <div style="margin-top:16px">
-        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted)"><span>AICの低下</span><span id="sw-prog">ステップ 0 / 5</span></div>
-        <div style="height:14px;border-radius:8px;background:#eef1f8;overflow:hidden;margin-top:4px">
-          <div id="sw-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#5BD4A8,var(--g));border-radius:8px;transition:width .3s"></div>
-        </div>
-      </div>
-      <div class="btnrow">
-        <button class="btn" id="sw-next">▶ 次のステップ</button>
-        <button class="btn ghost" id="sw-reset">最初から</button>
-      </div>
+  <p>重回帰の係数が「Xが1増えたときのYの変化量」だったのと同様に、ロジスティック回帰の係数は「Xが1増えたときの対数オッズの変化量」です。</p>
+</div>
+<div class="unit" id="u2">
+  <div class="unit-header"><div class="unit-num">02</div><div><h2>手計算で係数を再現する</h2><div class="unit-sub">3ステップで係数を導出</div></div></div>
+  <p>ForeignWorkerの係数（−1.297）を手計算で導出します。</p>
+  <div class="code-block"><span class="cl"><span class="cm"># ForeignWorker係数の解釈：ステップごとに計算</span></span><span class="cl"><span class="cm"># Step1: FW=0（外国人）のとき</span></span><span class="cl">p0   &lt;- <span class="nm">0.891</span><span class="cm">                    # P(Good|FW=0)</span></span><span class="cl">odds0 &lt;- p0 / (<span class="nm">1</span> - p0)<span class="cm">          # → 8.25</span></span><span class="cl">lo0   &lt;- <span class="kw">log</span>(odds0)<span class="cm">              # → 2.11（切片）</span></span></div>
+  <div class="code-block"><span class="cl"><span class="cm"># Step2: FW=1（国内労働者）のとき</span></span><span class="cl">p1   &lt;- <span class="nm">667</span>/<span class="nm">963</span><span class="cm">               # P(Good|FW=1) ≈ 0.693</span></span><span class="cl">odds1 &lt;- p1 / (<span class="nm">1</span> - p1)<span class="cm">          # → 2.255</span></span><span class="cl">lo1   &lt;- <span class="kw">log</span>(odds1)<span class="cm">              # → 0.813</span></span><span class="cl"><span class="cm"># Step3: 係数 = log(新オッズ / 旧オッズ)</span></span><span class="cl">coef_fw &lt;- <span class="kw">log</span>(odds1 / odds0)<span class="cm">    # → -1.297 ← 係数と一致！</span></span></div>
+  <div class="code-block"><span class="cl"><span class="cm"># Rで確認</span></span><span class="cl"><span class="kw">coef</span>(mod_fw)[<span class="st">"ForeignWorkeryes"</span>]<span class="cm">  # → -1.2970</span></span><span class="cl"><span class="cm"># オッズ比に変換（解釈しやすい形）</span></span><span class="cl"><span class="kw">exp</span>(<span class="kw">coef</span>(mod_fw))<span class="cm">  # ForeignWorkeryesのオッズ比 → 0.273</span></span><span class="cl"><span class="cm"># → 国内労働者の良い信用オッズは外国人の0.273倍（外国人の方が有利）</span></span></div>
+  <div class="note-box">
+    <strong>ポイント：</strong>係数を求めるのは「引き算」ではなく「オッズ比の対数」。<br>
+    対数オッズで差をとる = 元のスケールでオッズ同士を割り算することと同じ。<br>
+    exp(係数) = オッズ比 = 0.273 →「国内労働者の良い信用オッズは外国人の27%（＝外国人の方が3.7倍有利）」
+  </div>
+</div>
+<div class="unit" id="u3">
+  <div class="unit-header"><div class="unit-num">03</div><div><h2>係数の解釈まとめ</h2><div class="unit-sub">対数オッズ・オッズ比・確率の3段階</div></div></div>
+<div class="note-box"><strong>📌 係数＝差、exp(係数)＝比：</strong>バイナリ予測変数の係数は「X=1グループとX=0グループの<em>対数オッズの差</em>」です。指数を取った <code>exp(β)</code> は両グループの<em>オッズ比</em>になります。オッズ比が1なら差なし、1より大きければ増加、小さければ減少。確率の差で考えようとすると非線形で破綻するので、必ず「対数オッズ → オッズ → 確率」の順でたどるのが安全です。</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin:1rem 0">
+    <div style="background:var(--yellow-light);border-radius:10px;padding:1rem;text-align:center;border:1.5px solid var(--yellow)">
+      <div style="font-weight:800;color:var(--yellow)">係数（対数オッズ）</div>
+      <div style="font-size:1.6rem;font-weight:900;margin:.5rem 0">−1.297</div>
+      <div style="font-size:.8rem;color:var(--text-sec)">FW: 0→1 の<br>対数オッズ変化</div>
     </div>
-
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># 全部入りモデルから両方向（足す＋削る）で探索</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c">model_all <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> ., data <span class="kw">=</span> bikes_encoded)</span></div>
-      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">step</span>(model_all, direction <span class="kw">=</span> <span class="st">"both"</span>)</span></div>
+    <div style="background:var(--green-light);border-radius:10px;padding:1rem;text-align:center;border:1.5px solid var(--green)">
+      <div style="font-weight:800;color:var(--green)">オッズ比</div>
+      <div style="font-size:1.6rem;font-weight:900;margin:.5rem 0">0.273</div>
+      <div style="font-size:.8rem;color:var(--text-sec)">exp(−1.297)<br>国内/外国人のオッズ比</div>
     </div>
-    <div class="callout info">
-      <div class="ctitle">📌 ＋と−が混在する</div>
-      後退選択の出力は「−」だけ、前進は「＋」だけ。でも<strong>ステップワイズの出力には「＋」と「−」の両方</strong>が現れます。これが「行ったり来たり」の証拠です。
-    </div>
-    <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted)">※ 変数名は講義の例（weekday Saturday・real_feel・windspeed²・Monday 等）に基づく<strong>イメージ図</strong>（AIC値は傾向を示す例）。</div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      魔法の言葉は <code>direction = "both"</code>。"forward" でも "backward" でもなく "both"（両方）と言うだけで、足す・削るを自由に行き来してくれます🔀
+    <div style="background:var(--primary-light);border-radius:10px;padding:1rem;text-align:center;border:1.5px solid var(--primary)">
+      <div style="font-weight:800;color:var(--primary-dark)">確率の変化</div>
+      <div style="font-size:1.6rem;font-weight:900;margin:.5rem 0">0.89→0.69</div>
+      <div style="font-size:.8rem;color:var(--text-sec)">直接引けない<br>（非線形）</div>
     </div>
   </div>
+  <div class="warn-box">⚠️ 確率は直接「足す・引く」できない！係数はあくまで対数オッズのスケール。確率の変化を求めるには2つの状態で確率を別々に計算する必要がある。</div>
+</div>
+
+<section class="quiz-section">
+  <h2>🎯 確認クイズ（英語）</h2>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-container" id="quiz">
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">What does the coefficient of a binary predictor represent in logistic regression?</div>
+  <button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The change in probability when the predictor increases by 1</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The change in log odds when the predictor increases by 1 (0→1)</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The odds of the outcome when the predictor equals 1</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The probability ratio between group 0 and group 1</button>
+<div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">If the coefficient for ForeignWorker is −1.297, what is the odds ratio (exp(β))?</div>
+  <button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>1.297</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>−1.297</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>0.273</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>3.659</button>
+<div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">How do you derive the coefficient for a binary predictor from scratch?</div>
+  <button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Subtract odds(X=1) from odds(X=0)</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Subtract P(X=1) from P(X=0)</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculate log(odds(X=1) / odds(X=0))</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Calculate exp(P(X=1) − P(X=0))</button>
+<div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">An odds ratio of 0.273 for ForeignWorker means:</div>
+  <button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Foreign workers have 0.273 times the odds of Good credit vs native workers</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Native workers have 0.273 times the odds of Good credit vs foreign workers</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The probability of Good credit is 27.3% for everyone</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Foreign workers are 0.273 times as likely to be in the sample</button>
+<div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">Why can't you directly subtract probabilities to get the coefficient?</div>
+  <button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Probabilities are not on the same scale as coefficients</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Coefficients operate on the log-odds scale, which is non-linear relative to probability</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>You can only subtract probabilities in linear regression</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Both A and B are correct</button>
+<div class="q-feedback" id="fb5"></div>
+</div>
+  </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">The coefficient of a binary predictor equals the change in:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Probability between groups</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Log-odds between the two groups</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The intercept value</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Sample size</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">exp(coefficient) for a binary predictor gives the:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Probability difference</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Z-value</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Log-likelihood</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Odds ratio</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">An odds ratio of 0.273 means the odds are:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Increased nearly fourfold</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Exactly equal to baseline</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Reduced to about 27% of the baseline</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Completely unrelated</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Why can&#x27;t you simply subtract probabilities to obtain the coefficient?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The coefficient lives on the log-odds scale, not the probability scale</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Probabilities are always equal</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Subtraction is not allowed in R</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Probabilities cannot be negative numbers</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">An odds ratio greater than 1 indicates the predictor level:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Lowers the odds of the outcome</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Cannot be interpreted</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Has zero effect</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Raises the odds of the outcome</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+  <div class="quiz-score" id="score">0 / 10</div>
 </section>
 
-<!-- U3 p-value -->
-<section id="u3">
-  <div class="wrap reveal">
-    <div class="eyebrow">Control · p値で出入りを決める</div>
-    <h2>olsrr の ols_step_both_p</h2>
-    <p class="lead">AICではなく<strong>p値</strong>を基準にもできます。<code>olsrr</code> の <code>ols_step_both_p</code> なら、
-    変数が<strong>入る基準（p_enter）</strong>と<strong>出る基準（p_remove）</strong>を別々に設定できます。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="fn">library</span>(olsrr)</span></div>
-      <div class="ln"><span class="n">2</span><span class="c"><span class="cm"># 入る≤0.2、出る&gt;0.1 で除外</span></span></div>
-      <div class="ln"><span class="n">3</span><span class="c"><span class="fn">ols_step_both_p</span>(model_all, p_enter <span class="kw">=</span> <span class="nm">0.2</span>, p_remove <span class="kw">=</span> <span class="nm">0.1</span>)</span></div>
+<div class="page-nav">
+  <a href="ch10.html">← 第10章</a>
+  <a href='ch12.html'>第12章 →</a>
+</div>
+</main>
+
+<aside class="sidebar">
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">オッズ比</div>
+      <div class="term-en">Odds Ratio</div>
+      <div class="term-def">exp(係数)。バイナリ予測変数が0→1に変わったときのオッズの倍率。</div>
     </div>
-    <table class="ctable">
-      <tr><th>パラメータ</th><th>意味</th></tr>
-      <tr><td><strong>p_enter = 0.2</strong></td><td>変数がモデルに<strong>入る</strong>には、p値が0.2以下である必要がある</td></tr>
-      <tr><td><strong>p_remove = 0.1</strong></td><td>p値が0.1より<strong>大きい</strong>変数は、モデルから除外される</td></tr>
-    </table>
-    <p>出力には AIC・BIC・R²・調整済みR²・<strong>SBIC</strong> など複数指標が表示されます。講義の例では、
-    <strong>real_feel を追加 → 後で削除</strong>、<strong>windspeed² を追加 → 後で windspeed を削除</strong>、<strong>Monday を追加 → やはり不要と判断して削除</strong>…と、
-    足し引きを繰り返して最終モデルにたどり着きます。</p>
-    <div class="callout warn">
-      <div class="ctitle">⚠️ モデルは自動保存されない</div>
-      <code>ols_step_both_p</code> は<strong>更新後のモデルを自動保存しません</strong>。選ばれた変数で実際に使いたいなら、その変数を自分で <code>lm()</code> に書いて新しいモデルを作る必要があります。
-      表示されるのは標準化係数ではなく、ふつうの係数です。
+    <div class="term-item">
+      <div class="term-name">対数オッズの変化</div>
+      <div class="term-en">Change in Log Odds</div>
+      <div class="term-def">係数の本来の意味。X=0のときとX=1のときの対数オッズの差。</div>
     </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      p_enter と p_remove は「クラブの入場・退場ルール」。「p値0.2以下なら入場OK」「0.1超えたら退場」という2つのドアの基準を別々に決められます🚪
+    <div class="term-item">
+      <div class="term-name">非線形変換</div>
+      <div class="term-en">Non-linear Transformation</div>
+      <div class="term-def">対数オッズ↔確率の変換はシグモイド関数による非線形変換。確率は直接足し引きできない。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">参照カテゴリ</div>
+      <div class="term-en">Reference Category</div>
+      <div class="term-def">バイナリ変数で=0とされるグループ。係数解釈の基準になる。</div>
     </div>
   </div>
-</section>
+</aside>
+</div>
 
-<!-- U4 hierarchical -->
-<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Hierarchical · 理論で順番を決める</div>
-    <h2>統計だけでなく<br>「理論」で積み上げる</h2>
-    <p class="lead"><strong>階層的回帰</strong>は発想が違います。前進・後退・ステップワイズが変数を<strong>独立に・統計的に</strong>扱うのに対し、
-    階層的選択は<strong>理論的・概念的な構造を尊重して</strong>変数を順番に入れます。鍵は<strong>ドメイン知識（その分野の専門知識）</strong>——
-    データに詳しい専門家が「この変数を先に入れるべき」と、重要度や理論的関係に基づいて順序を決めます。</p>
-
-    <h3>例：会社の「仕事のパフォーマンス」を予測する</h3>
-    <div class="recipe">
-      <div class="rstep"><div class="rn"></div><div class="rt"><strong>基本属性</strong>を入れる（年齢・学歴）── 土台となる変数</div></div>
-      <div class="rstep"><div class="rn"></div><div class="rt"><strong>仕事関連</strong>を追加（経験・スキル）── 直接関係する変数</div></div>
-      <div class="rstep final"><div class="rn"></div><div class="rt"><strong>交互作用</strong>を追加（年齢×経験 など）── 最後に積む</div></div>
-    </div>
-    <p>このように<strong>意味のある順番</strong>で積み上げます。これには、その分野とデータへの深い理解が必要です。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      前進・後退・ステップワイズは「コンピュータが数字（AIC・p値）だけで自動で選ぶ」。
-      階層的選択は「<strong>その道のプロが経験と理論で『この順番で入れよう』と決める</strong>」。家を建てるとき、土台→柱→屋根と順番が決まっているのと同じです🏗️
-    </div>
-  </div>
-</section>
-
-<!-- U5 parsimony -->
-<section id="u5">
-  <div class="wrap reveal">
-    <div class="eyebrow">Goal · パーシモニー（簡潔さ）</div>
-    <h2>4手法まとめ ＆ オッカムの剃刀</h2>
-    <table class="ctable">
-      <tr><th>手法</th><th>動き</th><th>判断基準</th><th>過学習リスク</th></tr>
-      <tr><td>前進選択</td><td>足すのみ</td><td>統計（AIC等）</td><td>あり</td></tr>
-      <tr><td>後退選択</td><td>削るのみ</td><td>統計（AIC/p値）</td><td>あり</td></tr>
-      <tr><td>ステップワイズ</td><td>足す＋削る</td><td>統計（AIC/p値）</td><td>あり</td></tr>
-      <tr><td>階層的選択</td><td>理論で順に追加</td><td><strong>ドメイン知識・理論</strong></td><td>低め（理論ベース）</td></tr>
-    </table>
-
-    <h3>パーシモニー（parsimony）＝簡潔さを目指す</h3>
-    <p>変数選択のゴールは<strong>パーシモニアスなモデル</strong>＝<strong>できるだけシンプルかつ効果的に</strong>データを説明し、シグナルを捉えつつ予測変数の数を最小にしたモデルです。</p>
-    <div class="callout violet">
-      <div class="ctitle">🪒 オッカムの剃刀（Occam's Razor）</div>
-      「すべての条件が同じなら、よりシンプルな説明（モデル）が好ましい」。性能（AICなど）がほぼ同じなら、<strong>変数が少ないモデルを選ぶ</strong>。
-      集めるデータが少なくて済み、解釈しやすく、過学習も避けやすいからです。
-    </div>
-    <div class="grid3">
-      <div class="card"><h4 style="color:var(--g)">効率</h4><p style="margin:0;font-size:.9rem">変数が少ない＝集めるデータが少なくて済む。</p></div>
-      <div class="card"><h4 style="color:var(--p)">解釈性</h4><p style="margin:0;font-size:.9rem">少ない変数のほうが人間に理解しやすい。</p></div>
-      <div class="card"><h4 style="color:var(--l)">汎化</h4><p style="margin:0;font-size:.9rem">変数が少ないほど未知データへの一般化がうまくいく（<a href="ch12.html">第12章</a>）。</p></div>
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      「オッカムの剃刀」は<strong>「同じ結果なら、シンプルなほうがエライ」</strong>というルール。
-      旅行カバンも、同じ荷物なら小さいほうがラク。モデルも、同じ性能なら変数が少ないほうが賢いのです🎒
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ -->
-<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Check · 確認クイズ</div>
-    <h2>第11章 確認クイズ</h2>
-    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
-    <div class="quiz" id="quiz11" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<!-- GLOSSARY -->
-<section>
-  <div class="wrap reveal">
-    <div class="eyebrow">Glossary · 重要用語</div>
-    <h2 style="font-size:1.4rem">この章の用語</h2>
-    <div class="gloss">
-      <div class="term"><div class="tn">ステップワイズ選択</div><div class="te">Stepwise / Mixed</div><div class="td">足すことも削ることもできる、前進と後退の組み合わせ。</div></div>
-      <div class="term"><div class="tn">direction = "both"</div><div class="te">step() argument</div><div class="td">ステップワイズを指定するstep関数の引数。</div></div>
-      <div class="term"><div class="tn">p_enter / p_remove</div><div class="te">entry/removal thresholds</div><div class="td">変数が入る・出るp値の基準。olsrrで指定。</div></div>
-      <div class="term"><div class="tn">階層的回帰</div><div class="te">Hierarchical Regression</div><div class="td">理論・ドメイン知識で変数を意味ある順に投入する。</div></div>
-      <div class="term"><div class="tn">パーシモニー</div><div class="te">Parsimony</div><div class="td">必要十分な最小の変数で構成された簡潔なモデルを目指す。</div></div>
-      <div class="term"><div class="tn">オッカムの剃刀</div><div class="te">Occam's Razor</div><div class="td">同条件ならシンプルな説明が好ましいという原則。</div></div>
-    </div>
-    <div class="pagenav">
-      <a href="ch10.html">← 第10章：後退選択</a>
-      <a href="ch12.html">第12章：モデル性能の評価 →</a>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>🚲 重回帰分析 完全ガイド · 第11章：ステップワイズ＆階層的選択</p>
-  <p style="margin-top:.4rem"><a href="ch10.html">← 第10章</a> · <a href="ch12.html">第12章 →</a> · <a href="ch11_easy.html">🍎 やさしい版</a></p>
-</footer>
-
-<script src="m6.js"></script>
+<footer><p>🐚 ロジスティック回帰 完全ガイド · 第11章</p>
+<p style="margin-top:.5rem"><a href="ch11_easy.html">🍎 やさしい版へ</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script>
-/* ---------- stepwise animation（講義の変数名に基づくイメージ） ---------- */
-(function(){
-  var steps=[
-    {op:'スタート：全部入りモデル', aic:9160, vars:['humidity','temperature','windspeed','real_feel','weekday:Sat','Monday','windspeed²']},
-    {op:'− weekday:Saturday を削除（全部入りなので、まず削る）', aic:9152, vars:['humidity','temperature','windspeed','real_feel','Monday','windspeed²']},
-    {op:'− real_feel を削除（AICがわずかに低下）', aic:9146, vars:['humidity','temperature','windspeed','Monday','windspeed²']},
-    {op:'＋ windspeed² を足し戻す（＋候補も現れる）', aic:9141, vars:['humidity','temperature','windspeed','Monday','windspeed²'], add:'windspeed²'},
-    {op:'− windspeed を削除（²があれば十分）', aic:9138, vars:['humidity','temperature','Monday','windspeed²']},
-    {op:'− Monday を削除 → これ以上下がらず停止', aic:9135, vars:['humidity','temperature','windspeed²'], final:true}
-  ];
-  var i=0;
-  var elOp=document.getElementById('sw-op'), elAic=document.getElementById('sw-aic'),
-      elVars=document.getElementById('sw-vars'), elBar=document.getElementById('sw-bar'),
-      elProg=document.getElementById('sw-prog'), btnN=document.getElementById('sw-next'), btnR=document.getElementById('sw-reset');
-  var amax=steps[0].aic, amin=steps[steps.length-1].aic;
-  function render(){
-    var s=steps[i];
-    elOp.textContent=s.op;
-    elOp.style.color = s.op.indexOf('＋')>=0? 'var(--g)' : (s.op.indexOf('−')>=0? 'var(--neg)' : 'var(--ink)');
-    elAic.textContent=s.aic;
-    elVars.innerHTML=s.vars.map(function(v){ var hot=(s.add&&v===s.add); return '<span class="tag-pill '+(hot?'g':'p')+'">'+v+'</span>'; }).join('');
-    elBar.style.width=Math.max(2,(amax-s.aic)/(amax-amin)*100)+'%';
-    elProg.textContent='ステップ '+i+' / '+(steps.length-1);
-    btnN.disabled=s.final; btnN.style.opacity=s.final?.5:1;
-    btnN.textContent=s.final?'✓ 最終モデル（停止）':'▶ 次のステップ';
-  }
-  btnN.addEventListener('click',function(){ if(i<steps.length-1){i++;render();} });
-  btnR.addEventListener('click',function(){ i=0; render(); });
-  render();
-})();
-
-/* ---------- quiz ---------- */
-buildQuiz('quiz11',[
- {q:'What is stepwise (mixed) selection?',
-  opts:[
-   {t:'A method that only ever adds predictors, one at a time, and never removes any of them',ok:false},
-   {t:'A method that only removes predictors based on theory and the analyst’s domain knowledge',ok:false},
-   {t:'A method that fits every single possible subset of the predictors all at the very same time',ok:false},
-   {t:'A method that both adds and removes predictors at each step, combining forward and backward',ok:true}],
-  exp:'ステップワイズは各ステップで足す・削る両方を行う、前進と後退のいいとこ取りです。'},
- {q:"In R's step() function, which argument runs stepwise selection?",
-  opts:[
-   {t:'direction = "forward", always starting from the empty null model with no predictors',ok:false},
-   {t:'direction = "both", usually starting from the full model with every predictor',ok:true},
-   {t:'direction = "backward", which removes the response variable from the model first',ok:false},
-   {t:'direction = "mixed", which squares every predictor before it begins the search',ok:false}],
-  exp:'direction = "both" がステップワイズ。ふつう全部入りモデルから始め、足し引きできます。'},
- {q:'In ols_step_both_p, what do p_enter = 0.2 and p_remove = 0.1 control?',
-  opts:[
-   {t:'The p-value thresholds for a variable to enter (≤0.2) and to be removed (>0.1) from the model',ok:true},
-   {t:'The minimum and maximum number of predictor variables allowed in the final fitted model',ok:false},
-   {t:'The training and test split proportions used when evaluating the model on unseen data',ok:false},
-   {t:'The learning rate and the momentum value used internally while fitting the regression line',ok:false}],
-  exp:'p_enter は入る基準（≤0.2）、p_remove は外す基準（>0.1）。出入りのドアを別々に決めます。'},
- {q:'How does hierarchical selection differ from the other three methods?',
-  opts:[
-   {t:'It chooses predictors purely by minimizing the AIC, with no human judgement involved at all',ok:false},
-   {t:'It can only ever be used when there is exactly one single predictor variable available',ok:false},
-   {t:'It adds predictors in a theory-driven order based on domain knowledge, not just statistics',ok:true},
-   {t:'It removes the model’s intercept so the fitted line is forced through the origin point',ok:false}],
-  exp:'階層的選択は、統計だけでなくドメイン知識・理論に基づく順番で変数を投入します。'},
- {q:"According to Occam's Razor, if two models have roughly the same AIC, which should you prefer?",
-  opts:[
-   {t:'The model with more predictors, because the extra variables capture more detail in the data',ok:false},
-   {t:'The model with the highest plain R², no matter how many predictor variables it uses overall',ok:false},
-   {t:'The model that happened to be trained on the largest total number of observations available',ok:false},
-   {t:'The simpler model with fewer predictors, since it is easier to interpret and to generalize',ok:true}],
-  exp:'性能が同じなら、変数が少ないシンプルなモデルを選びます（解釈・一般化に有利）。'}
-]);
+var ANSWERS=[1, 2, 2, 1, 3, 1, 3, 2, 0, 3];
+var FEEDBACKS=["The coefficient is the change in log odds for a one-unit increase in the predictor. For binary variables, this means going from 0 to 1.", "exp(−1.297) ≈ 0.273. This means native workers (FW=1) have odds of Good credit that are 0.273 times those of foreign workers (FW=0).", "Coefficient β = log(odds|X=1 / odds|X=0) = log(odds ratio). The log of the new odds divided by the original odds.", "Odds ratio = odds(FW=1)/odds(FW=0) = 0.273. So native workers (FW=1) have 27.3% of the odds that foreign workers have. Foreign workers have much better odds.", "Coefficients are on the log-odds scale. Because the relationship between log-odds and probability is non-linear (sigmoid), you cannot simply add/subtract probabilities. You must work through odds → log-odds.", "A binary predictor's coefficient is the difference in log-odds between its two levels.", "Exponentiating the coefficient yields the odds ratio comparing the two groups.", "OR < 1 means lower odds; 0.273 means about 27% of the reference group's odds.", "Coefficients are differences in log-odds; probability differences do not translate linearly.", "OR > 1 means that level increases the odds relative to the reference."];
+var score=0,done=0,total=10;
 </script>
-</body>
-</html>
+<script>
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='\u2705 Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='\u274c '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<script>
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
+setTimeout(function(){units.forEach(function(u){u.classList.add('visible');});},600);
+</script>
+<script src="typewriter.js"></script>
+</body></html>

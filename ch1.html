@@ -3,362 +3,293 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第1章 重回帰分析 — 完全ガイド（M5）</title>
-<link rel="stylesheet" href="m6.css">
+<title>第1章 ロジスティック回帰とは？ — ロジスティック回帰 完全ガイド</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<nav class="topnav">
-  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
-  <div class="tabs">
-    <a class="tab home" href="index.html">🏠 概要</a>
-    <a class="tab active" href="ch1.html">1</a>
-    <a class="tab" href="ch2.html">2</a>
-    <a class="tab" href="ch3.html">3</a>
-    <a class="tab" href="ch3_1.html">3.1</a>
-    <a class="tab" href="ch4.html">4</a>
-    <a class="tab" href="ch5.html">5</a>
-    <a class="tab" href="ch6.html">6</a>
-    <a class="tab" href="ch7.html">7</a>
-    <a class="tab" href="ch8.html">8</a>
-    <a class="tab" href="ch9.html">9</a>
-    <a class="tab" href="ch10.html">10</a>
-    <a class="tab" href="ch11.html">11</a>
-    <a class="tab" href="ch12.html">12</a>
-    <a class="tab easy" href="ch1_easy.html">🍎 やさしい版</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="chap">Chapter 1 · Multiple Regression</div>
-    <h1>手がかりは1つより<br><span class="g">たくさん</span>のほうが、<br>よく当たる。</h1>
-    <p class="sub">気温だけで自転車のレンタル数を当てるのが「単回帰」。
-    気温＋湿度＋風速…と<strong>複数の手がかりを同時に使う</strong>のが「重回帰」。
-    この章では、モデルの作り方と、講義で実際に出てくる3通りの予測のしかたを、本物の数値で追いかけます。</p>
-    <div class="jump">
-      <a href="#u1">① 単回帰のおさらい</a>
-      <a href="#u2">② 重回帰とは</a>
-      <a href="#u3">③ Rで作る</a>
-      <a href="#u4">④ 係数の読み方</a>
-      <a href="#u5">⑤ 予測の3手法</a>
-      <a href="#quiz">📝 Quiz</a>
-    </div>
-    <br>
-    <a class="easy-hero" href="ch1_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
-  </div>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+      <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main active" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
+<div class="ch-banner">
+<div class="ch-banner-inner">
+  <div class="ch-tag">Chapter 1</div>
+  <h1>🎲 ロジスティック回帰とは？</h1>
+  <p>M5で学んだ重回帰との違いは「何を予測するか」。バイナリ結果・確率・glm()の基礎をアバロンデータで学ぶ。</p>
+  <div class="ch-banner unit-nav" style="background:none;padding:0;">
+    <a href="#unit1">① 重回帰との違い</a><a href="#unit2">② バイナリ結果と確率</a><a href="#unit3">③ アバロンで実践</a><a href="#unit4">④ なぜ重回帰では不十分か</a><a href="#quiz">📝 Quiz</a>
+  </div>
+</div>
+</div>
+<div class="page-layout">
+<main>
 
-<!-- ================= U1 単回帰 ================= -->
-<section id="u1">
-  <div class="wrap reveal">
-    <div class="eyebrow">Recap · これまでの話</div>
-    <h2>まずは単回帰のおさらい</h2>
-    <p class="lead">このモジュールでこれまで扱ってきたのは<strong>単回帰（単純線形回帰／最小二乗回帰）</strong>。
-    手がかりが<strong>たった1つ</strong>——たとえば「気温」だけからレンタル数を予測する、一番シンプルな直線の式でした。</p>
+<div class="unit" id="unit1">
+  <div class="unit-header">
+    <div class="unit-num">①</div>
+    <div><h2>ロジスティック回帰とは？</h2><div class="unit-sub">重回帰との決定的な違い：予測する結果が違う</div></div>
+  </div>
+  <p>M5では<strong>量的な値</strong>（自転車レンタル数）を予測する重回帰を学びました。ロジスティック回帰は似ていますが、予測したいものが根本的に異なります。</p>
+<p><strong>結果が「どちらか一方（バイナリ）」</strong>——0か1か——のときに使います。</p>
+<table class="compare-table">
+  <thead><tr><th>手法</th><th>予測するもの</th><th>例</th></tr></thead>
+  <tbody>
+    <tr><td>重回帰</td><td>量的な連続値</td><td>レンタル数・売上・気温</td></tr>
+    <tr><td>ロジスティック回帰</td><td>確率（0〜1）→ 2択の判定</td><td>がんか否か・スパムか否か・合格か否か</td></tr>
+  </tbody>
+</table>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>重回帰は「何個売れるか？」を予測。ロジスティック回帰は「売れるか？売れないか？」を予測します。料理で言えば、重回帰は「何グラム？」、ロジスティック回帰は「おいしいか？まずいか？」🍳</p></div>
+</div>
 
-    <div class="eq">
-      Y<sub>ᵢ</sub> = B<sub>0</sub> + B<sub>1</sub>·X<sub>ᵢ</sub> + <span class="bad">誤差 E</span>
+<div class="unit" id="unit2">
+  <div class="unit-header">
+    <div class="unit-num">②</div>
+    <div><h2>バイナリ結果と確率の考え方</h2><div class="unit-sub">0と1のラベルが何を意味するか</div></div>
+  </div>
+  <p>バイナリ（binary）とは「2択」のことです。ロジスティック回帰では、結果変数を次のようにラベルします：</p>
+<ul>
+  <li><strong>0（ゼロ）：</strong>「失敗」「なし」「いいえ」のグループ</li>
+  <li><strong>1（いち）：</strong>「成功」「あり」「はい」のグループ</li>
+</ul>
+<p>ロジスティック回帰が予測するのは「<strong>1である確率</strong>」です。例えば：</p>
+<div class="task-grid">
+  <div class="task-card"><div class="tc-icon">🔬</div><div class="tc-name">がんの診断</div><div class="tc-example">1=悪性　0=良性</div></div>
+  <div class="task-card"><div class="tc-icon">📧</div><div class="tc-name">スパム検出</div><div class="tc-example">1=スパム　0=正常</div></div>
+  <div class="task-card"><div class="tc-icon">🎓</div><div class="tc-name">合否予測</div><div class="tc-example">1=合格　0=不合格</div></div>
+  <div class="task-card"><div class="tc-icon">💳</div><div class="tc-name">信用審査</div><div class="tc-example">1=良い　0=悪い</div></div>
+</div>
+<div class="note-box"><strong>📌 注意：</strong>「バイナリロジスティック回帰」が基本です。3つ以上のカテゴリがある場合は「多項ロジスティック回帰（multinomial）」になりますが、このコースでは扱いません。</div>
+</div>
+
+<div class="unit" id="unit3">
+  <div class="unit-header">
+    <div class="unit-num">③</div>
+    <div><h2>アバロンデータで実践</h2><div class="unit-sub">オスかメスかを予測する</div></div>
+  </div>
+  <p>このモジュールでは<strong>アバロン（鮑）のデータセット</strong>を使います。<code>AppliedPredictiveModeling</code>パッケージに含まれています。</p>
+<div class="code-block"><span class="cl"><span class="kw">library</span>(AppliedPredictiveModeling)</span><span class="cl"><span class="kw">data</span>(abalone)</span><span class="cl"></span><span class="cl"><span class="cm"># 変数の確認：Type（オス/メス/不明）+ 各種計測値</span></span><span class="cl"><span class="kw">head</span>(abalone)</span><span class="cl"></span><span class="cl"><span class="cm"># オスとメスだけに絞る（不明 = I を除外）</span></span><span class="cl">abalone2 <span class="kw">&lt;-</span> abalone[abalone$Type <span class="kw">!=</span> <span class="st">"I"</span>, ]</span></div>
+<p>次に、ロジスティック回帰を実行します。重回帰の <code>lm()</code> の代わりに <code><strong>glm()</strong></code>（Generalized Linear Model）を使います。</p>
+<div class="code-block"><span class="cl"><span class="cm"># family = binomial が「ロジスティック回帰」の指定</span></span><span class="cl">model1 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter,</span><span class="cl">              data <span class="kw">=</span> abalone2,</span><span class="cl">              family <span class="kw">=</span> binomial)</span><span class="cl"><span class="kw">summary</span>(model1)</span></div>
+<div class="warn-box"><strong>⚠️ lm() ではなく glm() を使う！</strong>　<code>family = binomial</code> を忘れずに指定してください。これがロジスティック回帰であることをRに伝える重要な設定です。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>glm()は「ゼネラル（汎用的）な線形モデル」の略。lm()が「直線専用」とすると、glm()は直線以外の曲線も含む万能な兄貴分です💪</p></div>
+</div>
+
+<div class="unit" id="unit4">
+  <div class="unit-header">
+    <div class="unit-num">④</div>
+    <div><h2>なぜ重回帰をそのまま使えないのか</h2><div class="unit-sub">確率は0〜1の間でないといけない</div></div>
+  </div>
+  <p>「0か1か」の結果変数に対してそのまま重回帰を使うと、予測値が0より小さくなったり1より大きくなったりします。これは確率としておかしい。</p>
+<div class="flow-diagram">
+  <div class="flow-box input">重回帰の予測値<br><small>−∞ 〜 +∞</small></div>
+  <span class="flow-arrow">❌</span>
+  <div class="flow-box" style="border-color:#dc2626;background:#fee2e2;">確率としての要件<br><small>0 〜 1</small></div>
+</div>
+<p>ロジスティック回帰は<strong>シグモイド関数</strong>という特殊な変換を使って、どんな入力値でも必ず0〜1の間に収まる確率を出力します。</p>
+<div class="flow-diagram">
+  <div class="flow-box input">回帰式の値<br><small>−∞ 〜 +∞</small></div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box model">シグモイド関数<br><small>1 / (1 + e⁻ˣ)</small></div>
+  <span class="flow-arrow">→</span>
+  <div class="flow-box output">確率<br><small>0 〜 1</small></div>
+</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>シグモイド関数は「S字カーブ」の形をしています。どんな大きい数も小さい数も、必ず0と1の間に「押し込んで」くれる魔法の変換です🔄</p></div>
+<div class="note-box"><strong>📌 もう一歩深く：</strong>シグモイドは <code>p = 1/(1+e^(−z))</code> で、z（=回帰式の値、＝対数オッズ）が0のとき p=0.5、z→+∞で p→1、z→−∞で p→0 に近づきます。傾きが最も急なのは p=0.5 付近で、ここでは入力の変化が確率に最も強く反映されます。つまりロジスティック回帰は「判断が微妙な境界付近」ほど敏感に確率を動かす設計になっています。
+</div>
+</div>
+
+<div class="quiz-section" id="quiz">
+  <div class="quiz-header">
+    <h2>📝 確認クイズ</h2>
+    <div class="quiz-score" id="score">0 / 10</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
+  
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">What is the key difference between logistic regression and multiple regression?</div>
+  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Logistic regression uses more variables</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Logistic regression predicts a probability for a binary outcome</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Logistic regression is less accurate</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Logistic regression requires larger datasets</button>
+</div>
+  <div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">Which R function is used to run logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>lm()</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>glm()</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>log()</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>predict()</button>
+</div>
+  <div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">In a binary outcome, what do 0 and 1 typically represent?</div>
+  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Positive and negative numbers</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Failure/absence (0) and success/presence (1)</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Zero percent and 100 percent probability</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Small and large values</button>
+</div>
+  <div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">Why can't we use regular linear regression for binary outcomes?</div>
+  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Linear regression is too slow</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Linear regression can predict values outside the 0–1 range, which is invalid for probabilities</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Linear regression needs continuous predictors</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Linear regression has no intercept</button>
+</div>
+  <div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">Which argument in glm() specifies logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>method = "logistic"</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>type = "binary"</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>family = binomial</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>link = "logit"</button>
+</div>
+  <div class="q-feedback" id="fb5"></div>
+</div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">What does the sigmoid function guarantee about its output?</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The output always stays between 0 and 1</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The output is always a whole number</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The output is always greater than 1</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The output can be any real number</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">Which of these is a typical task for logistic regression?</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Predicting tomorrow&#x27;s exact temperature</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Estimating total monthly sales revenue</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Classifying an email as spam or not spam</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Forecasting a continuous stock price</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">In the abalone example, why is the Type &#x27;I&#x27; (infant) removed before modeling?</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Because glm() cannot read text labels</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>To make the dataset larger overall</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Because infants have missing diameter values</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>To keep the outcome strictly binary (Male/Female)</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">What kind of model family does glm() belong to?</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A generalized linear model family</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A purely linear regression family</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A clustering model family</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A decision-tree model family</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">If a linear regression predicts 1.4 for a binary outcome, why is that a problem?</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>1.4 is too small to be useful</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The intercept is undefined</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The slope must always be negative</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A probability cannot exceed 1</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+</div>
+<script>
+var ANSWERS=[1, 1, 1, 1, 2, 0, 2, 3, 0, 3];
+var FEEDBACKS=["Logistic regression predicts a probability (0–1) for a binary outcome, whereas multiple regression predicts continuous values.", "glm() with family=binomial is used for logistic regression. lm() is for linear regression only.", "By convention, 0 = failure/absence/no and 1 = success/presence/yes.", "Linear regression can produce predicted values below 0 or above 1, which make no sense as probabilities.", "family = binomial tells R to use the logistic (binomial) link function.", "The sigmoid 1/(1+e^-x) squeezes any input into the (0,1) range, so the result is always a valid probability.", "Logistic regression handles binary classification such as spam vs. not-spam, not continuous quantities.", "Binary logistic regression needs exactly two outcome classes, so the infant category is dropped to leave Male/Female.", "glm() fits Generalized Linear Models, a broad family that includes logistic regression via family=binomial.", "Predicted probabilities must lie in [0,1]; a value of 1.4 is impossible as a probability, motivating logistic regression."];
+var score=0,done=0,total=10;
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='❌ '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<div class="page-nav"><a href="index.html">← 概要</a><a href="ch2.html">第2章 →</a></div>
+</main>
+<aside class="sidebar">
+
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">バイナリ結果</div>
+      <div class="term-en">Binary Outcome</div>
+      <div class="term-def">0か1かの2択の結果変数。ロジスティック回帰が予測する対象。</div>
     </div>
-    <p>ある観測 <span class="mono">i</span> について、予測したい <span class="tag-pill g">Y<sub>ᵢ</sub></span>（レンタル数）を、手がかり <span class="tag-pill p">X<sub>ᵢ</sub></span>（気温）から、
-    切片 <span class="tag-pill l">B<sub>0</sub></span> と傾き <span class="tag-pill l">B<sub>1</sub></span> で表します。推定には必ず<strong>ズレ（ばらつき）</strong>が残るので、最後に誤差 <span class="mono">E</span> がつきます。</p>
-    <div class="callout info">
-      <div class="ctitle">📌 講義の小ネタ：E の代わりに Ŷ</div>
-      誤差 <span class="mono">E</span> を式に書く代わりに、左辺を <strong>Ŷ（ワイハット＝予測値）</strong>にして書くこともできます。
-      「実測 Y」と「予測 Ŷ」を区別するのが、このあとの<strong>残差</strong>の話につながります。
+    <div class="term-item">
+      <div class="term-name">glm()</div>
+      <div class="term-en">Generalized Linear Model</div>
+      <div class="term-def">Rで一般化線形モデルを実行する関数。ロジスティック回帰にはfamily=binomialを指定。</div>
     </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      単回帰は「アイスの売上は<strong>気温だけ</strong>で決まる！」と決めつけて予測するようなもの。
-      でも本当は雨の日や曜日も効きますよね。その“他の手がかり”も全部使おう、というのが次の重回帰です。
+    <div class="term-item">
+      <div class="term-name">シグモイド関数</div>
+      <div class="term-en">Sigmoid Function</div>
+      <div class="term-def">S字カーブを描く関数。どんな値も0〜1の確率に変換する。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">family=binomial</div>
+      <div class="term-en">Binomial Family</div>
+      <div class="term-def">glm()でロジスティック回帰を指定するための引数。</div>
     </div>
   </div>
-</section>
-
-<!-- ================= U2 重回帰とは ================= -->
-<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">The idea · 重回帰とは</div>
-    <h2>「気温だけじゃなく、<br>もっと使おうよ」</h2>
-    <p class="lead">重回帰の主張はシンプルです。講師の言葉そのまま——
-    「気温からレンタル数を予測するんじゃなくて、<strong>もっとたくさんの予測変数を使おうよ</strong>」。
-    式は単回帰そっくり。最初の部分は同じで、そこに X が増えていくだけです。</p>
-
-    <div class="eq" style="margin-top:18px">
-      Y = B<sub>0</sub> + B<sub>1</sub>X<sub>1</sub> + B<sub>2</sub>X<sub>2</sub> + B<sub>3</sub>X<sub>3</sub> + … + B<sub>n</sub>X<sub>n</sub> + <span class="bad">誤差</span>
-    </div>
-    <p>最初の <span class="mono">B<sub>0</sub>+B<sub>1</sub>X<sub>1</sub></span> は単回帰そのまま。そこに X<sub>2</sub>, X<sub>3</sub>… と
-    <strong>第n番目の予測変数まで</strong>続けられます（添え字は予測変数 Predictor の頭文字を取って <span class="mono">P</span> で書くこともあります）。
-    手がかりを増やすほど、応答変数 Y（＝レンタル数）の推定がよりよくなる——というのが狙いです。
-    講師いわく「湿度と気温と風速がわかれば、より良い推定ができる」。</p>
-
-    <div class="journey" id="jflow" style="margin-top:24px">
-      <div class="jbox p" style="opacity:1">
-        <div class="jl">入力（手がかり）</div>
-        <div class="jv" style="font-size:1rem">湿度・気温・風速</div>
-        <div class="jc">X₁ X₂ X₃</div>
-      </div>
-      <div class="jarrow"><span class="op">モデルに通す</span><span class="ar">→</span></div>
-      <div class="jbox l" style="opacity:1">
-        <div class="jl">重回帰モデル</div>
-        <div class="jv" style="font-size:.95rem">B₀+B₁X₁+B₂X₂+B₃X₃</div>
-        <div class="jc">レシピ</div>
-      </div>
-      <div class="jarrow"><span class="op">計算する</span><span class="ar">→</span></div>
-      <div class="jbox g" style="opacity:1">
-        <div class="jl">出力（予測）</div>
-        <div class="jv">Ŷ</div>
-        <div class="jc">レンタル数</div>
-      </div>
-    </div>
-
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      探偵が事件を解くとき、手がかりは1つより多いほうが正しい犯人に近づけます。
-      重回帰は「湿度」「気温」「風速」という複数の手がかりを集めて、より正確に「今日のレンタル数」を当てる探偵です🕵️
-    </div>
-  </div>
-</section>
-
-<!-- ================= U3 Rで作る ================= -->
-<section id="u3">
-  <div class="wrap reveal">
-    <div class="eyebrow">In R · モデルを作る</div>
-    <h2>Rでは <span class="mono">+</span> でつなぐだけ</h2>
-    <p class="lead">重回帰モデルを作るのは、講師いわく「驚くほど簡単」。
-    <code>応答変数 ~ 予測変数1 + 予測変数2 + …</code> と書くだけです。<code>~</code>（チルダ）は「〜で説明する／〜が与えられたとき」の意味。
-    <code>data = bikes</code> は式の最初でも最後でも構いません。</p>
-
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># rentals（レンタル数）を 湿度+気温+風速 で予測する</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c">bikes_model_1 <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> humidity <span class="kw">+</span> temperature <span class="kw">+</span> windspeed,</span></div>
-      <div class="ln"><span class="n">3</span><span class="c">                    data <span class="kw">=</span> bikes)</span></div>
-      <div class="ln"><span class="n">4</span><span class="c">bikes_model_1            <span class="cm"># 係数（coefficients）が出る</span></span></div>
-      <div class="ln"><span class="n">5</span><span class="c"><span class="fn">summary</span>(bikes_model_1)   <span class="cm"># 係数＋詳しい情報</span></span></div>
-    </div>
-    <p>実行すると<strong>係数（coefficients）</strong>が出ます。予測変数が3つなので B₁, B₂, B₃。これがあなたのモデルの式になります。
-    <code>summary()</code> の「Estimate（推定値）」列に並ぶのが、回帰式に使う係数。
-    それ以外の部分は単回帰の <code>summary</code> とほぼ同じで、<strong>予測変数の行が増えただけ</strong>です。</p>
-
-    <div class="callout info">
-      <div class="ctitle">📊 4変数を1枚の図で：plotly の3D散布図</div>
-      予測変数3つ＋応答変数1つ＝合計4変数は、<code>plotly</code> ライブラリ（要インストール）で1つの<strong>3D散布図</strong>にできます。
-      X・Y・Z軸に湿度・気温・風速、点の色（<code>marker</code>）をレンタル数に。ドラッグして回転でき、講義では
-      <strong>低い値（左下・暗い色）＝レンタル少、黄色＝レンタル多</strong>。気温が低いと色が変わる関係が立体的に見えます。
-    </div>
-  </div>
-</section>
-
-<!-- ================= U4 係数の読み方 ================= -->
-<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Coefficients · 係数の読み方</div>
-    <h2>3つの数字を教えてくれれば、<br>予測できる</h2>
-    <p class="lead">得られた係数を使うと、回帰式はこう書けます。</p>
-    <div class="eq" style="text-align:left">
-      予測レンタル数 (rental_hat) = 切片 (B₀)<br>
-      &nbsp;&nbsp;+ B₁ × 湿度(humidity) + B₂ × 気温(temperature) + B₃ × 風速(windspeed)
-    </div>
-    <p>つまり、ある日の<strong>湿度・気温・風速の3つ</strong>さえ教えてもらえれば、その日のレンタル数を予測できる、ということです。</p>
-
-    <div class="callout warn">
-      <div class="ctitle">⚠️ 係数の大きさ＝重要度ではない</div>
-      講義のモデルでは <strong>湿度の係数が −3100</strong> で、3つの中で一番大きな推定値です。
-      では「湿度が一番重要」？ ── <strong>そうとは言えません</strong>。湿度・気温・風速は<strong>単位（スケール）が違う</strong>うえ、
-      しかも3変数とも p値はとても小さい（みんな有意）。「どれが一番効くか」を公平に比べる方法は
-      <a href="ch3.html">第3章（標準化回帰係数）</a>で学びます。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      回帰式は「料理のレシピ」。「湿度を◯倍、気温を◯倍、風速を◯倍して全部足す」というレシピ通りに計算すれば、
-      その日のレンタル数という料理ができあがります🍳
-    </div>
-  </div>
-</section>
-
-<!-- ================= U5 予測の3手法（実数値ベースのinteractive） ================= -->
-<section id="u5">
-  <div class="wrap reveal">
-    <div class="eyebrow">Interactive · 予測の3手法</div>
-    <h2>同じモデルで、<br>3通りの予測のしかた</h2>
-    <p class="lead">講義では<strong>15番目の観測（15日目）</strong>で予測を試します。その日は<strong>寒い日</strong>で、湿度は <span class="mono">0.49</span>、
-    実際のレンタル数は <strong>1,248件</strong>でした。下のタブで3つの方法を切り替え、<strong>実際の数値と結果</strong>を見比べてください。</p>
-
-    <div class="machine">
-      <div class="btnrow" style="margin-top:0" id="m-tabs">
-        <button class="btn" data-m="0">方法1 手計算</button>
-        <button class="btn ghost" data-m="1">方法2 fitted.values</button>
-        <button class="btn ghost" data-m="2">方法3 predict</button>
-      </div>
-
-      <div id="m-body" style="margin-top:18px"></div>
-
-      <div class="readouts" style="margin-top:18px">
-        <div class="ro p"><div class="lab">入力した値</div><div class="big" id="m-input" style="font-size:1.05rem">湿度0.49 ほか</div><div class="meaning" id="m-inputm">15日目の実データ</div></div>
-        <div class="ro g"><div class="lab">予測レンタル数</div><div class="big" id="m-pred">3,300</div><div class="meaning" id="m-predm">手計算の結果</div></div>
-        <div class="ro o"><div class="lab">残差は出せる？</div><div class="big" id="m-res" style="font-size:1.05rem">出せる</div><div class="meaning" id="m-resm">実測1,248があるから</div></div>
-      </div>
-    </div>
-
-    <!-- residual visual for the 15th day -->
-    <h3>残差（ざんさ）＝予測と実際のズレ</h3>
-    <p>手計算の予測は<strong>約3,300件</strong>、実際は<strong>1,248件</strong>。差はおよそ2,000件。予測が実際より大きい（過大評価）ので、これは<strong>大きな負の残差</strong>です。
-    講師いわく「この日についてはモデルがあまり役立っていない」。</p>
-    <div class="card">
-      <div style="display:grid;gap:10px">
-        <div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--muted)"><span>予測 Ŷ（過大評価）</span><span>3,300</span></div>
-          <div style="height:24px;border-radius:6px;background:#e6eaf2;overflow:hidden"><div style="height:100%;width:88%;background:var(--p);border-radius:6px"></div></div>
-        </div>
-        <div>
-          <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.78rem;color:var(--muted)"><span>実際 Y</span><span>1,248</span></div>
-          <div style="height:24px;border-radius:6px;background:#e6eaf2;overflow:hidden"><div style="height:100%;width:33%;background:var(--g);border-radius:6px"></div></div>
-        </div>
-        <div style="text-align:center;font-size:.85rem;color:var(--neg);font-weight:700;margin-top:4px">
-          残差 = 実際 − 予測 ≈ 1,248 − 3,300 = −2,052（大きな負の残差）
-        </div>
-      </div>
-    </div>
-
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      3つの予測方法は「電卓のレベルアップ」。<strong>手計算</strong>は紙と鉛筆、
-      <strong>fitted.values</strong>は「過去の結果一覧表」から探すだけ、
-      <strong>predict</strong>は「どんな数字を入れても答えを出す万能電卓」。だから普段は predict でOK！
-    </div>
-  </div>
-</section>
-
-<!-- ================= QUIZ ================= -->
-<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Check · 確認クイズ</div>
-    <h2>第1章 確認クイズ</h2>
-    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）／選択肢を押すと正解と解説が出ます</div>
-    <div class="quiz" id="quiz1" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<!-- ================= GLOSSARY ================= -->
-<section>
-  <div class="wrap reveal">
-    <div class="eyebrow">Glossary · 重要用語</div>
-    <h2 style="font-size:1.4rem">この章の用語</h2>
-    <div class="gloss">
-      <div class="term"><div class="tn">重回帰分析</div><div class="te">Multiple Regression</div><div class="td">2つ以上の予測変数で1つの量的な応答変数を予測する手法。</div></div>
-      <div class="term"><div class="tn">予測変数</div><div class="te">Predictor / Independent</div><div class="td">予測の手がかり（X）。説明変数・独立変数とも。添え字はPで書くことも。</div></div>
-      <div class="term"><div class="tn">応答変数</div><div class="te">Response / Dependent</div><div class="td">予測したい対象（Y）。例：レンタル数。</div></div>
-      <div class="term"><div class="tn">係数</div><div class="te">Coefficient (B₀,B₁…)</div><div class="td">各予測変数にかける数字。summaryのEstimate列に出る。</div></div>
-      <div class="term"><div class="tn">残差</div><div class="te">Residual</div><div class="td">実際−予測。マイナスなら過大評価、プラスなら過小評価。</div></div>
-      <div class="term"><div class="tn">fitted.values</div><div class="te">あてはめ値</div><div class="td">データに実在する行の予測値。任意の値には使えない。</div></div>
-      <div class="term"><div class="tn">predict関数</div><div class="te">predict()</div><div class="td">データに無い値でも予測できる最も便利な方法。newdataはdata.frameで。</div></div>
-    </div>
-    <div class="pagenav">
-      <a href="index.html">← 概要へ戻る</a>
-      <a href="ch2.html">第2章：診断 →</a>
-    </div>
-  </div>
-</section>
+<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
+</aside>
+</div>
 
 <footer>
-  <p>🚲 重回帰分析 完全ガイド · 第1章：重回帰分析</p>
-  <p style="margin-top:.4rem"><a href="index.html">← 概要</a> · <a href="ch2.html">第2章 →</a> · <a href="ch1_easy.html">🍎 やさしい版</a></p>
+  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
+  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
 </footer>
-
-<script src="m6.js"></script>
 <script>
-/* ---------- 予測の3手法（講義の実数値ベース） ---------- */
-(function(){
-  var methods=[
-    {
-      title:'方法1：手計算（一番長いやり方）',
-      desc:'回帰式に数字を直接代入します。Rでは係数とカッコの間に必ず <code>*</code>（かけ算）が必要 — 数学のように省略できません。',
-      code:[
-        '<span class="cm"># 15日目の 湿度0.49・気温・風速 を式に代入</span>',
-        'pred <span class="kw">&lt;-</span> B0 <span class="kw">+</span> B1<span class="kw">*</span><span class="nm">0.49</span> <span class="kw">+</span> B2<span class="kw">*</span>(気温) <span class="kw">+</span> B3<span class="kw">*</span>(風速)',
-        '<span class="cm"># → 予測 約3,300件（pull() を使う書き方もある）</span>'
-      ],
-      input:'湿度0.49 ほか', inputm:'15日目の実データ', pred:'3,300', predm:'手計算の結果（過大評価）',
-      res:'出せる', resm:'実測1,248があるから'
-    },
-    {
-      title:'方法2：fitted.values（データにある行だけ）',
-      desc:'モデルが計算済みの「あてはめ値（予測値）」を取り出します。15番目を見るなら <code>[15]</code>。',
-      code:[
-        'bikes_model_1<span class="kw">$</span>fitted.values[<span class="nm">15</span>]',
-        '<span class="cm"># → 3,324（15日目の“モデル上の点”）</span>'
-      ],
-      input:'15行目を指定', inputm:'データに実在する行', pred:'3,324', predm:'15日目のあてはめ値',
-      res:'出せる', resm:'実測1,248があるから'
-    },
-    {
-      title:'方法3：predict（一番便利・おすすめ）',
-      desc:'<code>predict()</code> は手計算を自動でやってくれ、<strong>データに無い好きな値でも</strong>予測できます。newdataは<strong>data.frame</strong>で、列名を正しく指定します。',
-      code:[
-        'new_data <span class="kw">&lt;-</span> <span class="fn">data.frame</span>(humidity <span class="kw">=</span> <span class="nm">0.65</span>, temperature <span class="kw">=</span> <span class="nm">38</span>, windspeed <span class="kw">=</span> <span class="nm">7</span>)',
-        '<span class="fn">predict</span>(bikes_model_1, newdata <span class="kw">=</span> new_data)',
-        '<span class="cm"># → 2,058件。c() で複数の値をまとめて予測も可能</span>'
-      ],
-      input:'湿度0.65/気温38/風速7', inputm:'データに無い任意の値', pred:'2,058', predm:'任意の日の予測',
-      res:'出せない', resm:'実測値が存在しないため'
-    }
-  ];
-  var tabs=document.querySelectorAll('#m-tabs button'), body=document.getElementById('m-body');
-  function show(i){
-    var m=methods[i];
-    body.innerHTML='<h3 style="margin-top:0">'+m.title+'</h3>'
-      +'<p style="font-size:.95rem">'+m.desc+'</p>'
-      +'<div class="codeblk">'+m.code.map(function(line,idx){return '<div class="ln"><span class="n">'+(idx+1)+'</span><span class="c">'+line+'</span></div>';}).join('')+'</div>';
-    document.getElementById('m-input').textContent=m.input;
-    document.getElementById('m-inputm').textContent=m.inputm;
-    document.getElementById('m-pred').textContent=m.pred;
-    document.getElementById('m-predm').textContent=m.predm;
-    var rr=document.getElementById('m-res'); rr.textContent=m.res; rr.style.color=(m.res==='出せない')?'var(--neg)':'var(--g)';
-    document.getElementById('m-resm').textContent=m.resm;
-    tabs.forEach(function(b,idx){ b.className=(idx===i)?'btn':'btn ghost'; });
-  }
-  tabs.forEach(function(b,i){ b.addEventListener('click',function(){show(i);}); });
-  show(0);
-})();
-
-/* ---------- quiz（英語MCQ・内容は講義に準拠） ---------- */
-buildQuiz('quiz1',[
- {q:'What is the main difference between simple and multiple regression?',
-  opts:[
-   {t:'Multiple regression uses two or more predictor variables instead of just one',ok:true},
-   {t:'Simple regression has no error term, while multiple regression always includes one',ok:false},
-   {t:'Multiple regression does not need a y-intercept because it has several predictors',ok:false},
-   {t:'Multiple regression can only predict categorical outcomes rather than numeric ones',ok:false}],
-  exp:'単回帰は予測変数1つ、重回帰は X₁, X₂, X₃… と複数使ってデータのシグナルをよく捉えます。'},
- {q:'In R, which formula correctly builds a multiple regression model predicting rentals from humidity, temperature, and windspeed?',
-  opts:[
-   {t:'lm(rentals = humidity, temperature, windspeed, data = bikes)',ok:false},
-   {t:'predict(rentals ~ humidity * temperature * windspeed, data = bikes)',ok:false},
-   {t:'lm(rentals ~ humidity + temperature + windspeed, data = bikes)',ok:true},
-   {t:'lm(humidity + temperature + windspeed ~ rentals, data = bikes)',ok:false}],
-  exp:'応答変数は ~ の左、予測変数は + でつないで右、そして data = bikes を指定します。'},
- {q:'The model predicts 3,300 rentals but the actual value was 1,248. How is this residual described?',
-  opts:[
-   {t:'A large positive residual — the model underestimated the actual value',ok:false},
-   {t:'A large negative residual — the model overestimated the actual value',ok:true},
-   {t:'A small positive residual — the prediction was only slightly too low',ok:false},
-   {t:'A residual of exactly zero — the prediction matched the actual value',ok:false}],
-  exp:'予測(3,300) > 実際(1,248) なので過大評価。実際−予測 がマイナス → 大きな負の残差です。'},
- {q:"Why can't you use fitted.values to predict for humidity=0.65, temperature=38, windspeed=7?",
-  opts:[
-   {t:'fitted.values only works for simple regression models with a single predictor',ok:false},
-   {t:'fitted.values requires a data.frame of new values passed as its newdata argument',ok:false},
-   {t:'Those predictor values fall outside the range the model is able to handle',ok:false},
-   {t:'fitted.values only returns predictions for rows that actually exist in the data',ok:true}],
-  exp:'fitted.values はデータに実在する行の予測だけ。任意の新しい値には predict() を使います。'},
- {q:'Why is it WRONG to say "humidity has the largest coefficient, so it is the most important predictor"?',
-  opts:[
-   {t:'Because the predictors are on different scales/units, so raw coefficients can’t be compared directly',ok:true},
-   {t:'Because the model’s intercept always carries more weight than any predictor coefficient',ok:false},
-   {t:'Because humidity is a categorical variable, so its coefficient can’t be ranked at all',ok:false},
-   {t:'Because regression coefficients are always negative, so the largest one matters least',ok:false}],
-  exp:'湿度(−3100)は最大の係数ですが、単位が違うので比べられません。標準化係数（第3章）を使います。'}
-]);
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
 </script>
-</body>
-</html>
+<script src="typewriter.js"></script>
+</body></html>

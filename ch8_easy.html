@@ -1,107 +1,126 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第8章 超やさしい版:交互作用 — 完全ガイド</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>第8章 超やさしい版：モデル評価③：Z値とR²</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="easy.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="logo">重回帰分析 <span>完全ガイド</span></div>
-  <nav class="header-nav">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+    <nav class="header-nav">
     <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">📈 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">🩺 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">⚖️ 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3_1.html">🎯 3.1</a><a class="n-easy" href="ch3_1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🔗 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">〰️ 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">🏷️ 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">📅 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">✖️ 8</a><a class="n-easy active" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">➡️ 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">⬅️ 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🔀 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">🎓 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy active" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
-
 <div class="ch-banner easy">
   <div class="ch-banner-inner">
-    <div class="ch-tag">Chapter 8 ・ Easy Mode</div>
-    <h1>✖️ 第8章 超やさしい版:交互作用</h1>
-    <p>2つの変数の「組み合わせ効果」の話。風と雨を動かして、ダブルパンチを体感しよう。<a href="ch8.html" class="easy-toplink">✖️ 本編はこちら</a></p>
-    <div class="unit-nav">
-      <a href="#u1">⚡ 一言でいうと</a>
-      <a href="#u2">① カレーライスの法則</a>
-      <a href="#u3">② 風×雨を体感</a>
-      <a href="#u4">③ 共線性との違い</a>
-      <a href="#u5">④ 30秒セルフ確認</a>
-    </div>
+    <div class="ch-tag">Chapter 8 · Easy Mode 🍎</div>
+    <h1>🍎 第8章 超やさしい版：モデル評価③：Z値とR²</h1>
+    <p>Z値 = 係数÷標準誤差。電卓で自分で計算・Rコードで確認。R²がない理由と代替指標も学ぼう。</p>
+    <div class="unit-nav"><a href="#u1">一言でいうと</a><a href="#u2">Z値を自分で計算</a><a href="#u3">RでZ値確認・疑似R²</a><a href="ch8.html" class="easy-toplink">📏 本編はこちら</a></div>
   </div>
 </div>
-
 <div class="page-layout">
 <main>
 
 <div class="unit" id="u1">
-  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">1+1が2より大きくなる</div></div></div>
-  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0;">2つの変数を<strong>組み合わせる</strong>と、別々の効果を足した以上の効果が出ることがある。これが<strong>交互作用</strong>。Rでは <code>A * B</code> と書くと、A・B・A:B（交互作用）を全部入れてくれる。</p></div>
+  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">個別の変数はZ値で判定。R²はないので逸脱度・AICで代用。</div></div></div>
+  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0">重回帰のT値の代わりにZ値を使う。計算式は同じ：Z = 係数 ÷ 標準誤差。|Z|>1.96でp<0.05（有意）。R²は最尤推定と相性が悪いので存在しない。代わりに逸脱度・AIC・疑似R²を使う。</p></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin:1.5rem 0">
+    <div style="background:var(--primary-light);border-radius:10px;padding:1.25rem;text-align:center;border:2px solid var(--primary)">
+      <div style="font-size:1.5rem">📈 重回帰</div>
+      <div style="margin-top:.75rem;font-size:.88rem">個別検定：<strong>T値</strong><br>全体評価：<strong>R²（決定係数）</strong><br>比較：<strong>調整済みR²・AIC</strong></div>
+    </div>
+    <div style="background:var(--teal-light);border-radius:10px;padding:1.25rem;text-align:center;border:2px solid var(--teal)">
+      <div style="font-size:1.5rem">📐 ロジスティック回帰</div>
+      <div style="margin-top:.75rem;font-size:.88rem">個別検定：<strong>Z値</strong><br>全体評価：<strong>逸脱度（Deviance）</strong><br>比較：<strong>AIC</strong></div>
+    </div>
+  </div>
 </div>
 
 <div class="unit" id="u2">
-  <div class="unit-header"><div class="unit-num">①</div><div><h2>カレーライスの法則 🍛</h2><div class="unit-sub">組み合わせると、もっとおいしい</div></div></div>
-  <p>カレーのルウだけ、ごはんだけでもおいしい。でも「カレーライス」にすると、おいしさが単なる足し算を超える。運動＋食事、薬＋生活習慣も同じで、組み合わせると効果が大きくなります。</p>
-  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>個々でも良いけど、2つの組み合わせは「足し算以上」になることがある。それが交互作用。</p></div>
+  <div class="unit-header"><div class="unit-num">①</div><div><h2>Z値を自分で計算してみよう</h2><div class="unit-sub">係数 ÷ 標準誤差 = Z値</div></div></div>
+  <p>入力フォームに係数（β）と標準誤差（SE）を入れると、Z値と有意性がリアルタイムで表示されます。</p>
+  <div class="widget purple">
+    <div class="widget-title">📏 Z値 電卓</div>
+    <div class="slider-row">
+      <label>β 係数</label>
+      <input type="number" id="zc-coef" value="-7.218" step="0.1" style="width:120px;padding:.45rem;border-radius:6px;border:1.5px solid var(--border);font-size:.9rem;font-family:inherit">
+    </div>
+    <div class="slider-row">
+      <label>SE 標準誤差</label>
+      <input type="number" id="zc-se" value="0.335" step="0.01" min="0.001" style="width:120px;padding:.45rem;border-radius:6px;border:1.5px solid var(--border);font-size:.9rem;font-family:inherit">
+    </div>
+    <div style="background:var(--secondary-light);border-radius:10px;padding:1.1rem;text-align:center;margin-top:1rem">
+      <div style="font-size:.8rem;font-weight:700;color:var(--secondary)">Z = 係数 ÷ 標準誤差</div>
+      <div style="font-size:2.2rem;font-weight:900;color:var(--secondary)" id="zc-z">-21.547</div>
+    </div>
+    <div class="verdict" id="zc-verdict">—</div>
+  </div>
+  <div class="note-box">📌 summary()に表示される「z value」はこれと同じ計算。|Z|>1.96ならp&lt;0.05で有意（95%信頼区間内にゼロが含まれない）。</div>
 </div>
 
 <div class="unit" id="u3">
-  <div class="unit-header"><div class="unit-num">②</div><div><h2>風×雨のダブルパンチを体感</h2><div class="unit-sub">スライダーで予測が変わる</div></div></div>
-  <p>「弱い風＋大雨」より「強い風＋大雨」のほうが、レンタル数はずっと減ります。風と雨が<strong>重なると</strong>ダブルパンチ。下のスライダーで体感してください。「交互作用ぶんの減少」も表示されます。</p>
-
-  <div class="widget">
-    <div class="widget-title">💨🌧️ 交互作用シミュレーター</div>
-    <div class="slider-row"><label>💨 風速</label><input type="range" id="ix-wind" min="1" max="10" step="1" value="3"><span class="slider-val" id="ix-wind-v">3 mph</span></div>
-    <div class="slider-row"><label>🌧️ 天気</label><input type="range" id="ix-rain" min="0" max="2" step="1" value="0"><span class="slider-val" id="ix-rain-v">晴れ</span></div>
-    <div class="result-big" id="ix-out">—</div>
-    <div class="result-label">台のレンタル予測 🚲</div>
-    <div style="text-align:center;font-size:.85rem;color:var(--red);margin-top:.3rem;">うち交互作用ぶんの減少: <strong id="ix-inter">—</strong> 台</div>
-    <div class="verdict good" id="ix-verdict">—</div>
-  </div>
-  <div class="note-box">風と雨を<strong>両方とも強く</strong>してみてください。交互作用ぶんの減少がぐっと大きくなります。これが「別々に足すだけでは見逃すダブルパンチ」です。</div>
+  <div class="unit-header"><div class="unit-num">②</div><div><h2>RでZ値確認・疑似R²を計算</h2><div class="unit-sub">summary()の読み方と代替R²</div></div></div>
+  <p class="code-label">▶ summary()でZ値を確認する</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># summary()でZ値を確認</span></span>
+<span class="cl">model &lt;- <span class="kw">glm</span>(Sex ~ Diameter, <span class="kw">data</span>=Abalone, <span class="kw">family</span>=<span class="st">binomial</span>)</span>
+<span class="cl"><span class="kw">summary</span>(model)</span>
+<span class="cl"><span class="cm">#             Estimate Std. Error z value Pr(&gt;|z|)</span></span>
+<span class="cl"><span class="cm"># (Intercept)   -7.218      0.335  -21.57  &lt;2e-16 ***</span></span>
+<span class="cl"><span class="cm"># Diameter       21.99      0.924   23.80  &lt;2e-16 ***</span></span>
+</pre>
+  <p class="code-label">▶ Z値を手計算で再現する</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># Z値を手計算</span></span>
+<span class="cl">coef_est &lt;- -<span class="nm">7.218</span></span>
+<span class="cl">std_err  &lt;- <span class="nm">0.335</span></span>
+<span class="cl">z_val    &lt;- coef_est / std_err</span>
+<span class="cl">z_val<span class="cm">  # → -21.55（summary()の-21.57と一致）</span></span>
+<span class="cl"><span class="cm"># |Z| &gt; 1.96 → p &lt; 0.05 → 有意</span></span>
+<span class="cl"><span class="kw">abs</span>(z_val) &gt; <span class="nm">1.96</span><span class="cm">  # → TRUE</span></span>
+</pre>
+  <p class="code-label">▶ R²の代わりにMcFaddenの疑似R²を計算</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># ロジスティック回帰にR²はない</span></span>
+<span class="cl"><span class="cm"># 代わりに McFadden の疑似R²を使うことがある</span></span>
+<span class="cl">null_dev  &lt;- model<span class="kw">$</span>null.deviance</span>
+<span class="cl">resid_dev &lt;- model<span class="kw">$</span>deviance</span>
+<span class="cl">mcfadden_r2 &lt;- <span class="nm">1</span> - (resid_dev / null_dev)</span>
+<span class="cl">mcfadden_r2<span class="cm">  # 0〜1（大きいほど良い）</span></span>
+</pre>
+  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>R²は「OLS（最小二乗法）専用の評価指標」。ロジスティック回帰はMLE（最尤推定）を使うため定義が合わない。疑似R²という代用指標があるが、R²とは意味が異なるので注意。</p></div>
+  <div class="checkpoint"><h4>🤔 答えられるかな？（クリックで答えが開く）</h4><div class="cp-q">Q1. Z値の計算式は？<span class="cp-a">A. Z = 係数（β） ÷ 標準誤差（SE）。重回帰のT値と同じ計算式。</span></div><div class="cp-q">Q2. |Z|>1.96は何を意味する？<span class="cp-a">A. p値<0.05（有意水準5%）で統計的に有意。その予測変数が0でない可能性が高い。summary()の***はこれ以上に有意。</span></div><div class="cp-q">Q3. ロジスティック回帰にR²がない理由は？<span class="cp-a">A. 最尤推定（MLE）を使うためR²が定義されない。代わりに逸脱度・AIC、または疑似R²（McFadden等）を使う。</span></div></div>
 </div>
-
-<div class="unit" id="u4">
-  <div class="unit-header"><div class="unit-num">③</div><div><h2>多重共線性との違い</h2><div class="unit-sub">似て非なるもの</div></div></div>
-  <table class="compare-table">
-    <tr><th></th><th>多重共線性</th><th>交互作用</th></tr>
-    <tr><td>正体</td><td>双子（被ってて困る）</td><td>名コンビ（組むと強い）</td></tr>
-    <tr><td>問題?効果?</td><td>⚠️ 問題</td><td>✅ 効果</td></tr>
-  </table>
-  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>共線性＝「同じこと言う双子」（困る）。交互作用＝「性格の違う2人が組むと強い」（嬉しい）。</p></div>
-</div>
-
-<div class="unit" id="u5">
-  <div class="unit-header"><div class="unit-num">④</div><div><h2>30秒セルフ確認</h2><div class="unit-sub">クリックで答えが開きます</div></div></div>
-  <div class="checkpoint"><h4>🤔 答えられるかな？</h4>
-    <div class="cp-q">Q1. 交互作用とは？<span class="cp-a">A. 2変数を組み合わせたときに、別々とは違う効果が応答に出ること。</span></div>
-    <div class="cp-q">Q2. Rで <code>windspeed * weather</code> は何を含む？<span class="cp-a">A. windspeed、weather、その交互作用（windspeed:weather）の3つ全部。</span></div>
-    <div class="cp-q">Q3. 出力で交互作用項を表す記号は？<span class="cp-a">A. コロン（:）。例 windspeed:weatherHeavy。</span></div>
-  </div>
-  <div class="note-box" style="background:var(--secondary-light);border-color:var(--secondary);">🎓 予測の計算方法・*と:の違いは <a href="ch8.html">第8章 本編</a> へ。</div>
-  <div class="page-nav"><a href="ch8.html">← 第8章 本編</a><a href="ch9_easy.html">第9章 やさしい版 →</a></div>
-</div>
-
+<div class="page-nav"><a href="ch7_easy.html">← 第7章 やさしい版</a><a href="ch9_easy.html">第9章 やさしい版 →</a></div>
 </main>
 <aside class="sidebar">
-  <div class="tip-box"><h4>💡 結論</h4><p>交互作用 ＝ <strong>組み合わせ効果</strong>（1+1が2以上）。<br><br>共線性とは別もの（こちらは“効果”）。<br><br>R： <strong>A * B</strong> で一括。<br><br>出力は <strong>:（コロン）</strong>で表示。</p></div>
-  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2);"><h4 style="color:var(--primary-dark);">📖 本編</h4><p style="color:var(--text);">詳しくは <a href="ch8.html">第8章</a> へ。</p></div>
+  <div class="tip-box"><h4>💡 まとめ</h4><p style="margin:.4rem 0">• Z = 係数 ÷ 標準誤差</p><p style="margin:.4rem 0">• |Z|>1.96 で p<0.05（有意）</p><p style="margin:.4rem 0">• R²はMLE（最尤推定）と相性が悪い</p><p style="margin:.4rem 0">• 代わりに逸脱度・AIC・疑似R²</p></div>
+  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2)">
+    <h4 style="color:var(--primary-dark)">📖 本編へ</h4>
+    <p style="color:var(--text)">詳しいコードと解説は <a href="ch8.html">第8章 本編</a> へ。英語MCQクイズもあります。</p>
+  </div>
 </aside>
 </div>
-
-<footer><p>重回帰分析 完全ガイド · 第8章 超やさしい版</p><p style="margin-top:.5rem;"><a href="ch8.html">← 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
+<footer><p>🐚 ロジスティック回帰 完全ガイド · 第8章 超やさしい版</p>
+<p style="margin-top:.5rem"><a href="ch8.html">← 第8章 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script src="interactive.js"></script>
-<script>initInteractionDemo();</script>
-</body>
-</html>
+<script src="typewriter.js"></script>
+<script>initZCalc();</script>
+</body></html>

@@ -3,275 +3,268 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第6章 カテゴリ変数の変換 — 重回帰分析 完全ガイド（M5）</title>
-<link rel="stylesheet" href="m6.css">
+<title>第6章 モデル評価②：AIC — ロジスティック回帰 完全ガイド</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<nav class="topnav">
-  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
-  <div class="tabs">
-    <a class="tab home" href="index.html">🏠 概要</a>
-    <a class="tab" href="ch1.html">1</a>
-    <a class="tab" href="ch2.html">2</a>
-    <a class="tab" href="ch3.html">3</a>
-    <a class="tab" href="ch3_1.html">3.1</a>
-    <a class="tab" href="ch4.html">4</a>
-    <a class="tab" href="ch5.html">5</a>
-    <a class="tab active" href="ch6.html">6</a>
-    <a class="tab" href="ch7.html">7</a>
-    <a class="tab" href="ch8.html">8</a>
-    <a class="tab" href="ch9.html">9</a>
-    <a class="tab" href="ch10.html">10</a>
-    <a class="tab" href="ch11.html">11</a>
-    <a class="tab" href="ch12.html">12</a>
-    <a class="tab easy" href="ch6_easy.html">🍎 やさしい版</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="chap">Chapter 6 · Categorical Variables</div>
-    <h1>「季節＝1」では<br>意味がわからない。<br><span class="g">名前とスイッチ</span>に変える。</h1>
-    <p class="sub">数字で表されたカテゴリ（季節・曜日・天気）は、そのままだと意味不明だし、特定の季節だけ取り除くこともできません。
-    factor化とワンホットエンコーディングで解決します。1つの列が複数のスイッチに分かれる様子を、クリックして確かめましょう。</p>
-    <div class="jump">
-      <a href="#u1">① なぜ変換する</a>
-      <a href="#u2">② factorとcase_when</a>
-      <a href="#u3">③ ワンホット体験</a>
-      <a href="#u4">④ ダミー変数トラップ</a>
-      <a href="#u5">⑤ スケーリング</a>
-      <a href="#quiz">📝 Quiz</a>
-    </div>
-    <br>
-    <a class="easy-hero" href="ch6_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
-  </div>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+      <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main active" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
+<div class="ch-banner">
+<div class="ch-banner-inner">
+  <div class="ch-tag">Chapter 6</div>
+  <h1>📊 モデル評価②：AIC</h1>
+  <p>AIC = −2LL + 2K。予測変数追加のペナルティがある点が逸脱度との違い。2モデルをAICで比較する。</p>
+  <div class="ch-banner unit-nav" style="background:none;padding:0;">
+    <a href="#unit1">① AICとは</a><a href="#unit2">② 2モデルを比較</a><a href="#unit3">③ AICと逸脱度の違い</a><a href="#quiz">📝 Quiz</a>
+  </div>
+</div>
+</div>
+<div class="page-layout">
+<main>
 
-<!-- U1 -->
-<section id="u1">
-  <div class="wrap reveal">
-    <div class="eyebrow">Why · なぜ変換するか</div>
-    <h2>2つの理由</h2>
-    <p class="lead">これまで気温・風速など<strong>量的な予測変数</strong>を使ってきました。この章は<strong>カテゴリ予測変数</strong>（季節・祝日・曜日・天気）。文字データは（自由記述でなければ）<strong>factor型</strong>に変換するのが基本です。</p>
-    <div class="grid2">
-      <div class="card"><h4 style="color:var(--p)">① わかりやすさ</h4><p style="margin:0;font-size:.92rem">「季節＝1、曜日＝6、天気＝2」では意味不明。コードブックを見ないとわからず、グラフでも伝わらない。</p></div>
-      <div class="card"><h4 style="color:var(--g)">② 特定カテゴリの操作</h4><p style="margin:0;font-size:.92rem">「天気1は残して天気3だけ削りたい」が、数字のままだとできない。</p></div>
+<div class="unit" id="unit1">
+  <div class="unit-header">
+    <div class="unit-num">①</div>
+    <div><h2>AICとは何か</h2><div class="unit-sub">逸脱度に予測変数数のペナルティを加える</div></div>
+  </div>
+  <p>M5でも登場したAIC（赤池情報量規準）は、ロジスティック回帰でも使えます。計算式はほぼ同じです：</p>
+<div class="note-box" style="text-align:center;font-size:1.1rem;">
+  <strong>AIC = −2LL + 2K</strong><br>
+  <small>（−2LL = 逸脱度、K = モデルのパラメータ数）</small>
+</div>
+<ul>
+  <li><strong>−2LL（逸脱度）：</strong>当てはまりの悪さを示す部分。小さいほど良い。</li>
+  <li><strong>2K：</strong>予測変数を増やすほど大きくなるペナルティ。複雑すぎるモデルを罰する。</li>
+</ul>
+<div class="note-box"><strong>📌 AICは小さいほど良い！</strong>　当てはまりが良く（−2LLが小さく）、かつシンプルな（Kが小さい）モデルが低いAICを持ちます。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>AICは「成績とコストのバランス」で先生を評価するようなもの。どんなに授業が上手くても（当てはまりが良くても）、コストがかかりすぎる（変数が多すぎる）なら減点されます📝</p></div>
+</div>
+
+<div class="unit" id="unit2">
+  <div class="unit-header">
+    <div class="unit-num">②</div>
+    <div><h2>2つのモデルをAICで比較</h2><div class="unit-sub">Diameterのみ vs Diameter + Rings</div></div>
+  </div>
+  <p>アバロンデータで、2つのモデルを比較します。</p>
+<div class="code-block"><span class="cl"><span class="cm"># モデル1: Type ~ Diameter</span></span><span class="cl">model1 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter, data<span class="kw">=</span>abalone2, family<span class="kw">=</span>binomial)</span><span class="cl"></span><span class="cl"><span class="cm"># モデル2: Type ~ Diameter + Rings（わずかに有意な変数を追加）</span></span><span class="cl">model2 <span class="kw">&lt;-</span> <span class="kw">glm</span>(Type <span class="kw">~</span> Diameter <span class="kw">+</span> Rings, data<span class="kw">=</span>abalone2, family<span class="kw">=</span>binomial)</span><span class="cl"></span><span class="cl"><span class="cm"># AICを比較</span></span><span class="cl"><span class="kw">AIC</span>(model1)</span><span class="cl"><span class="kw">AIC</span>(model2)</span></div>
+<div class="output-text">AIC(model1) = 3597.8  (Diameterのみ)
+AIC(model2) = 3596.1  (Diameter + Rings)
+差 = 1.7  ← ほとんど変わらない</div>
+<p>RingsはわずかにAICを下げますが、差はとても小さい。AICの<strong>ペナルティ（2K）</strong>が、Ringsを追加することで得られる当てはまりの改善をほぼ相殺しています。</p>
+</div>
+
+<div class="unit" id="unit3">
+  <div class="unit-header">
+    <div class="unit-num">③</div>
+    <div><h2>AICと逸脱度の違い</h2><div class="unit-sub">ペナルティがある vs ない</div></div>
+  </div>
+<div class="note-box"><strong>📌 なぜペナルティが要るか：</strong>予測変数を増やせば逸脱度はほぼ必ず下がります（当てはめ自由度が増えるため）。しかしそれは「本当に良くなった」のか「データに過剰適合しただけ」かを区別できません。AICは <code>2K</code> という複雑さへの罰金を課すことで、見かけの改善に惑わされず、汎化性能の良いモデルを選べるようにします。AICは絶対値ではなく<em>モデル間の差</em>で比較するのが基本です。</div>
+  <p>AICと逸脱度（Deviance）の最大の違いは<strong>予測変数数へのペナルティ</strong>です。</p>
+<table class="compare-table">
+  <thead><tr><th>指標</th><th>計算式</th><th>予測変数を増やしたとき</th></tr></thead>
+  <tbody>
+    <tr><td>逸脱度（Deviance）</td><td>−2LL</td><td>必ず下がる（良く見える）</td></tr>
+    <tr><td>AIC</td><td>−2LL + 2K</td><td>改善が小さければ上がることもある</td></tr>
+  </tbody>
+</table>
+<div class="warn-box"><strong>⚠️ 逸脱度だけ見ると騙される：</strong>無意味な変数を追加しても逸脱度は減ります。AICはそれにペナルティを課すので、より公平なモデル比較ができます。</div>
+<div class="simple-box"><div class="simple-title">🍎 かんたん説明</div><p>逸脱度は「何点取ったか」だけ見る評価。AICは「何点取ったか」と「何問解いたか（変数の数）」の両方を見る評価。変数を増やせば点は上がるが、AICはそれをズルとみなします😏</p></div>
+</div>
+
+<div class="quiz-section" id="quiz">
+  <div class="quiz-header">
+    <h2>📝 確認クイズ</h2>
+    <div class="quiz-score" id="score">0 / 10</div>
+  </div>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-lang-note">✏️ Questions are in English — answers are checked instantly.</div>
+  
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">What does the K in the AIC formula (AIC = −2LL + 2K) represent?</div>
+  <div class="options"><button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The number of observations</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The number of parameters (predictors + intercept)</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The chi-square value</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The degrees of freedom of the residuals</button>
+</div>
+  <div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">A model has AIC = 3597.8 and a second model (with one more predictor) has AIC = 3596.1. Which model is preferred?</div>
+  <div class="options"><button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Model 1 (fewer predictors, simpler)</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Model 2 (lower AIC)</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>They are equivalent — the difference is too small</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Cannot be determined</button>
+</div>
+  <div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">Why does adding more predictors NOT always lower AIC?</div>
+  <div class="options"><button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>R has a bug with AIC</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC penalizes model complexity with the 2K term</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC is based on R-squared</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Adding predictors always lowers AIC</button>
+</div>
+  <div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">Compared to deviance alone, what advantage does AIC provide?</div>
+  <div class="options"><button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>AIC is easier to compute</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC penalizes unnecessary complexity, making model comparison fairer</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC accounts for sample size</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>AIC is always smaller than deviance</button>
+</div>
+  <div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">In R, how do you compute AIC for a glm model object called 'model1'?</div>
+  <div class="options"><button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>deviance(model1)</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>AIC(model1)</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>summary(model1)$AIC</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>aic(model1)</button>
+</div>
+  <div class="q-feedback" id="fb5"></div>
+</div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">AIC penalizes models for:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Having more parameters</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Having too few observations</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Using continuous predictors</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Having a large intercept</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">When comparing models by AIC, you prefer the model with:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The highest AIC</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An AIC of exactly zero</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The lowest AIC</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The most predictors</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">In AIC = −2LL + 2K, the −2LL term reflects:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The penalty for complexity</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The sample variance</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of rows</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The goodness of fit</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">Adding a useless predictor will usually:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Lower AIC substantially</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Always lower the deviance to zero</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Leave fit unchanged but raise the penalty, often raising AIC</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Have no effect on either term</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">Compared with raw deviance, AIC is more useful for:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Counting observations</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Removing outliers</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculating probabilities</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Choosing between models of different size</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+</div>
+<script>
+var ANSWERS=[1, 1, 1, 1, 1, 0, 2, 3, 2, 3];
+var FEEDBACKS=["K is the number of parameters in the model, including the intercept.", "Lower AIC is preferred. Model 2 has a slightly lower AIC, but the difference (1.7) is very small in practice.", "AIC = −2LL + 2K. Adding a predictor decreases −2LL but increases 2K. If the improvement in fit is small, AIC may increase.", "AIC penalizes model complexity (via 2K), discouraging overfitting by adding too many predictors.", "AIC(model1) directly returns the AIC value of the model.", "The 2K term penalizes additional parameters, discouraging unnecessary complexity.", "Lower AIC indicates a better trade-off between fit and complexity.", "−2 × log-likelihood measures how well the model fits; 2K is the complexity penalty.", "A useless predictor barely improves fit yet adds 2 to the penalty, so AIC tends to rise.", "Because AIC penalizes parameters, it fairly compares models with different numbers of predictors."];
+var score=0,done=0,total=10;
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='✅ Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='❌ '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<div class="page-nav"><a href="ch5.html">← 第5章</a><a href="ch7.html">第7章 →</a></div>
+</main>
+<aside class="sidebar">
+
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">AIC</div>
+      <div class="term-en">Akaike Information Criterion</div>
+      <div class="term-def">赤池情報量規準。= −2LL + 2K。小さいほど良いモデル。</div>
     </div>
-    <div class="callout info">
-      <div class="ctitle">📌 余談</div>
-      カテゴリ変数（季節・祝日・曜日・天気）を加えると、調整済みR²が前のモデル（約0.6）から<strong>増加</strong>。調整済みR²は無駄な変数を罰するので、増えた＝役立つ情報を持っている証拠です。
+    <div class="term-item">
+      <div class="term-name">ペナルティ項</div>
+      <div class="term-en">Penalty Term</div>
+      <div class="term-def">AICの2K部分。予測変数が多いほど大きくなり、過複雑化を防ぐ。</div>
     </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      「給食メニューが1番、2番、3番」と数字で言われても何が出るかわからない。「1＝カレー、2＝ラーメン」と名前にすればすぐわかる。
-      カテゴリ変数の変換は、数字に「名前」をつける作業です🍛
+    <div class="term-item">
+      <div class="term-name">K（パラメータ数）</div>
+      <div class="term-en">Number of Parameters</div>
+      <div class="term-def">切片 + 予測変数の数の合計。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">モデル比較</div>
+      <div class="term-en">Model Comparison</div>
+      <div class="term-def">複数のモデルを評価指標（AIC・逸脱度など）で比較し最良を選ぶ作業。</div>
     </div>
   </div>
-</section>
-
-<!-- U2 -->
-<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Label · factorとcase_when</div>
-    <h2>数字に「名前」をつける</h2>
-    <p class="lead"><code>case_when</code> で数字を意味のある名前に変換します。<strong>== は2つ</strong>（イコール2個）、最後に <code>.default</code> で取りこぼしを防ぎます。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c">bikes <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(season <span class="kw">=</span> <span class="fn">case_when</span>(</span></div>
-      <div class="ln"><span class="n">2</span><span class="c">    season <span class="kw">==</span> <span class="nm">1</span> <span class="kw">~</span> <span class="st">"winter"</span>,</span></div>
-      <div class="ln"><span class="n">3</span><span class="c">    season <span class="kw">==</span> <span class="nm">2</span> <span class="kw">~</span> <span class="st">"spring"</span>,</span></div>
-      <div class="ln"><span class="n">4</span><span class="c">    season <span class="kw">==</span> <span class="nm">3</span> <span class="kw">~</span> <span class="st">"summer"</span>,</span></div>
-      <div class="ln"><span class="n">5</span><span class="c">    season <span class="kw">==</span> <span class="nm">4</span> <span class="kw">~</span> <span class="st">"fall"</span>,</span></div>
-      <div class="ln"><span class="n">6</span><span class="c">    .default <span class="kw">=</span> <span class="fn">as.character</span>(season)))</span></div>
-    </div>
-    <p>同様に祝日（0/1）、曜日（0=日〜6=土）、天気（1=晴れ…）も変換。すると最初の行が「冬・祝日でない・土曜・小雨」のように<strong>一目で読める</strong>ようになります。変換後は改めて<strong>factor型</strong>に戻すのがおすすめです。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      case_whenは「翻訳機」。「1という暗号は冬、2は春…」というルールを教えると、数字の羅列を人間が読める言葉に翻訳してくれます🌸
-    </div>
-  </div>
-</section>
-
-<!-- U3 one-hot interactive -->
-<section id="u3">
-  <div class="wrap reveal">
-    <div class="eyebrow">Interactive · ワンホット体験</div>
-    <h2>1つの列が、<br>4つの「はい/いいえ」に分かれる</h2>
-    <p class="lead">下の季節ボタンを押すと、その日の<strong>ワンホット表現</strong>が光ります。
-    「夏」を選べば「夏スイッチだけ1、他は0」。こうすれば<strong>特定の季節だけ</strong>モデルから取り除けます。</p>
-
-    <div class="machine">
-      <div class="btnrow" style="margin-top:0" id="season-btns">
-        <button class="btn" data-s="winter">❄️ winter</button>
-        <button class="btn ghost" data-s="spring">🌸 spring</button>
-        <button class="btn ghost" data-s="summer">☀️ summer</button>
-        <button class="btn ghost" data-s="fall">🍂 fall</button>
-      </div>
-      <div style="margin-top:18px;overflow-x:auto">
-        <table class="ctable" style="margin:0;min-width:420px">
-          <tr><th>season（元）</th><th>season_winter</th><th>season_spring</th><th>season_summer</th><th>season_fall</th></tr>
-          <tr id="oh-row">
-            <td id="oh-label" style="font-weight:700">winter</td>
-            <td id="oh-winter">1</td><td id="oh-spring">0</td><td id="oh-summer">0</td><td id="oh-fall">0</td>
-          </tr>
-        </table>
-      </div>
-      <p style="font-size:.85rem;color:var(--muted);margin-top:8px">緑の <span style="color:var(--g);font-weight:700">1</span> ＝「はい（その季節）」。これで「夏」列だけ削除する、といった操作ができます。</p>
-    </div>
-
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># if_else で手動ワンホット（課題では手動。fastDummies は不可）</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c">bikes <span class="kw">&lt;-</span> bikes <span class="kw">%&gt;%</span> <span class="fn">mutate</span>(</span></div>
-      <div class="ln"><span class="n">3</span><span class="c">  season_winter <span class="kw">=</span> <span class="fn">if_else</span>(season <span class="kw">==</span> <span class="st">"winter"</span>, <span class="nm">1</span>, <span class="nm">0</span>),</span></div>
-      <div class="ln"><span class="n">4</span><span class="c">  season_spring <span class="kw">=</span> <span class="fn">if_else</span>(season <span class="kw">==</span> <span class="st">"spring"</span>, <span class="nm">1</span>, <span class="nm">0</span>))   <span class="cm"># …他の季節も</span></span></div>
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      1個のスイッチ（season）を、「冬・春・夏・秋」の4個のスイッチに分けるイメージ。今日が夏なら「夏スイッチだけON、他はOFF」。
-      こうすれば「夏スイッチだけ外す」ことができます🔘
-    </div>
-  </div>
-</section>
-
-<!-- U4 dummy trap -->
-<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Trap · ダミー変数トラップ</div>
-    <h2>ダミーは必ず n−1 個<br>（1つ必ず削る）</h2>
-    <p class="lead">大事なルール：カテゴリがn個なら、ダミー列は<strong>n個ではなく n−1個</strong>にします。</p>
-    <div class="callout warn">
-      <div class="ctitle">⚠️ なぜ1つ削る？</div>
-      季節4つで「春でも夏でも冬でもない」なら、自動的に<strong>秋に決まります</strong>。だから「秋」列は無くても情報が完全。
-      むしろ残すと<strong>多重共線性</strong>が起きる——これを<strong>ダミー変数トラップ</strong>と呼びます。
-    </div>
-    <table class="ctable">
-      <tr><th>カテゴリ</th><th>カテゴリ数</th><th>必要なダミー列</th></tr>
-      <tr><td>季節</td><td>4（春夏秋冬）</td><td>3（1つ削除）</td></tr>
-      <tr><td>曜日</td><td>7</td><td>6（1つ削除）</td></tr>
-      <tr><td>天気</td><td>3（晴れ/小雨/大雨）</td><td>2（1つ削除）</td></tr>
-    </table>
-    <div class="callout info">
-      <div class="ctitle">📌 トラップに落ちたサイン</div>
-      係数に <code>NA</code> が出たり、<strong>"singularity"</strong> というメッセージが出たら、ダミー変数トラップに落ちています。n−1個にすれば解決します。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      「右でも左でも真ん中でもないなら…必ず上ですよね」。だから「上」のスイッチは省略できる。
-      全部のスイッチを用意すると逆に矛盾（共線性）が起きるので、1つ減らすのがルールです🔼
-    </div>
-  </div>
-</section>
-
-<!-- U5 scaling -->
-<section id="u5">
-  <div class="wrap reveal">
-    <div class="eyebrow">Finish · スケーリング</div>
-    <h2>数値とカテゴリが混在するとき</h2>
-    <p class="lead">数値変数（気温・湿度）とワンホット変数（曜日など）が混在する場合、比較しやすくするため<strong>数値変数のスケーリング</strong>を検討します。</p>
-    <div class="grid2">
-      <div class="card"><h4 style="color:var(--p)">標準化 Standardization</h4><p style="margin:0;font-size:.92rem">Zスコアを使う（第3章で学んだ方法）。</p></div>
-      <div class="card"><h4 style="color:var(--g)">正規化 Normalization</h4><p style="margin:0;font-size:.92rem">最大・最小でスケールする方法。</p></div>
-    </div>
-    <p>これらは機械学習の授業でより詳しく学びます。機械学習モデルでは、スケーリングが必要になることが多いです。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      身長(cm)と「夏スイッチ(0か1)」を一緒に扱うと、桁が違いすぎて比べにくい。みんなを「0〜1」や「偏差値」にそろえると、フェアに比べられます⚖️
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ -->
-<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Check · 確認クイズ</div>
-    <h2>第6章 確認クイズ</h2>
-    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
-    <div class="quiz" id="quiz6" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<!-- GLOSSARY -->
-<section>
-  <div class="wrap reveal">
-    <div class="eyebrow">Glossary · 重要用語</div>
-    <h2 style="font-size:1.4rem">この章の用語</h2>
-    <div class="gloss">
-      <div class="term"><div class="tn">カテゴリ変数</div><div class="te">Categorical Variable</div><div class="td">季節・曜日・天気など種類を表す変数。数字でも実体はカテゴリ。</div></div>
-      <div class="term"><div class="tn">factor型</div><div class="te">factor</div><div class="td">Rでカテゴリを扱う型。回帰や可視化で適切に処理される。</div></div>
-      <div class="term"><div class="tn">ワンホットエンコーディング</div><div class="te">One-Hot / Dummy</div><div class="td">1列を「はい/いいえ(1/0)」の複数列に分割する。</div></div>
-      <div class="term"><div class="tn">ダミー変数トラップ</div><div class="te">Dummy Variable Trap</div><div class="td">全カテゴリをダミー化して共線性が起きる罠。n−1列で回避。</div></div>
-      <div class="term"><div class="tn">case_when</div><div class="te">case_when()</div><div class="td">条件で値を置き換えるdplyr関数。数字→ラベル変換に使う。</div></div>
-    </div>
-    <div class="pagenav">
-      <a href="ch5.html">← 第5章：多項式回帰</a>
-      <a href="ch7.html">第7章：日付データの処理 →</a>
-    </div>
-  </div>
-</section>
+<div class="tip-box"><h4>💡 学習のヒント</h4><p>概念が難しく感じたら、コードを実際にRで動かして確認してみましょう。手を動かすことで理解が深まります。</p></div>
+</aside>
+</div>
 
 <footer>
-  <p>🚲 重回帰分析 完全ガイド · 第6章：カテゴリ変数の変換</p>
-  <p style="margin-top:.4rem"><a href="ch5.html">← 第5章</a> · <a href="ch7.html">第7章 →</a> · <a href="ch6_easy.html">🍎 やさしい版</a></p>
+  <p>🐚 SU1 Data Analytics M6 講義をもとに作成 · <strong>ロジスティック回帰 完全ガイド</strong></p>
+  <p style="margin-top:.5rem;"><a href="index.html">← 章の一覧に戻る</a></p>
 </footer>
-
-<script src="m6.js"></script>
 <script>
-/* ---------- one-hot interactive ---------- */
-(function(){
-  var seasons={winter:'❄️ winter',spring:'🌸 spring',summer:'☀️ summer',fall:'🍂 fall'};
-  var cells={winter:'oh-winter',spring:'oh-spring',summer:'oh-summer',fall:'oh-fall'};
-  var btns=document.querySelectorAll('#season-btns button');
-  function pick(s){
-    document.getElementById('oh-label').textContent=s;
-    Object.keys(cells).forEach(function(k){
-      var td=document.getElementById(cells[k]);
-      if(k===s){ td.textContent='1'; td.style.color='var(--g)'; td.style.fontWeight='800'; td.style.background='var(--g-soft)'; }
-      else { td.textContent='0'; td.style.color='var(--muted)'; td.style.fontWeight='400'; td.style.background=''; }
-    });
-    btns.forEach(function(b){ b.className = (b.dataset.s===s)?'btn':'btn ghost'; });
-  }
-  btns.forEach(function(b){ b.addEventListener('click',function(){pick(b.dataset.s);}); });
-  pick('winter');
-})();
-
-/* ---------- quiz ---------- */
-buildQuiz('quiz6',[
- {q:'What is one key reason to transform categorical variables from numbers into labels?',
-  opts:[
-   {t:'To make the dataset larger by adding many extra rows of newly labelled observations to it',ok:false},
-   {t:'To remove the intercept term from the model so the fitted line passes through the origin',ok:false},
-   {t:'To make the data understandable ("winter" instead of "1") and easier to read in plots',ok:true},
-   {t:'To convert the response variable into one of the predictor variables used by the model',ok:false}],
-  exp:'ラベル化すると「winter」のように意味が伝わり、グラフも読みやすくなります（2つの理由の1つ）。'},
- {q:'What does one-hot (dummy) encoding do?',
-  opts:[
-   {t:'Squares each of the categorical values to turn the column into a numeric predictor term',ok:false},
-   {t:'Splits one category column into multiple yes/no (1/0) columns, one for each category',ok:true},
-   {t:'Deletes all of the categorical variables and keeps only the numeric predictors in the data',ok:false},
-   {t:'Combines several separate category columns into a single averaged numeric predictor column',ok:false}],
-  exp:'ワンホットは1つのカテゴリ列を、カテゴリごとの「はい/いいえ(1/0)」列に分けます。'},
- {q:'For a variable with 7 weekdays, how many dummy columns should remain?',
-  opts:[
-   {t:'6 (n − 1, dropping one column to avoid the dummy variable trap)',ok:true},
-   {t:'7 (n, keeping one separate column for every single weekday)',ok:false},
-   {t:'8 (n + 1, adding one extra column to also cover the intercept)',ok:false},
-   {t:'1 (a single column that holds all seven of the weekday codes)',ok:false}],
-  exp:'n−1＝6列。1つ削ることでダミー変数トラップ（多重共線性）を避けます。'},
- {q:'You see NA coefficients or a "singularity" message. What likely happened?',
-  opts:[
-   {t:'You used too few rows, so the model simply ran out of data to estimate the coefficients',ok:false},
-   {t:'The response variable is missing, so lm had nothing at all to predict against this time',ok:false},
-   {t:'The model is perfect, and the NA values simply mark the predictors that went unused here',ok:false},
-   {t:'You fell into the dummy variable trap (kept all n dummies instead of just n−1 of them)',ok:true}],
-  exp:'NA係数や singularity は、ダミーを n個すべて残したサイン。n−1個にすれば解決します。'},
- {q:'When numeric and one-hot encoded variables are mixed, what is recommended?',
-  opts:[
-   {t:'Delete all of the numeric variables and keep only the one-hot encoded dummy columns instead',ok:false},
-   {t:'Use fastDummies on the response variable so it ends up on the same scale as the predictors',ok:false},
-   {t:'Consider scaling the numeric predictors (standardization or normalization) for comparability',ok:true},
-   {t:'Square all of the dummy variables so that they match the magnitude of the numeric predictors',ok:false}],
-  exp:'数値とワンホットが混在するなら、数値変数をスケーリング（標準化/正規化）して比較しやすくします。'}
-]);
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
 </script>
-</body>
-</html>
+<script src="typewriter.js"></script>
+</body></html>

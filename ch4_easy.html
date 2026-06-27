@@ -1,118 +1,129 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第4章 超やさしい版：多重共線性とVIF — 完全ガイド</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>第4章 超やさしい版：係数の解釈：アバロンの例</title>
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="easy.css">
 </head>
 <body>
 <header class="site-header">
-  <div class="logo">重回帰分析 <span>完全ガイド</span></div>
-  <nav class="header-nav">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+    <nav class="header-nav">
     <a href="index.html">🏠 概要</a>
-    <span class="navg"><a class="n-main" href="ch1.html">📈 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch2.html">🩺 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3.html">⚖️ 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch3_1.html">🎯 3.1</a><a class="n-easy" href="ch3_1_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch4.html">🔗 4</a><a class="n-easy active" href="ch4_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch5.html">〰️ 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch6.html">🏷️ 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch7.html">📅 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch8.html">✖️ 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch9.html">➡️ 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch10.html">⬅️ 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch11.html">🔀 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
-    <span class="navg"><a class="n-main" href="ch12.html">🎓 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy active" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
   </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
-
 <div class="ch-banner easy">
   <div class="ch-banner-inner">
-    <div class="ch-tag">Chapter 4 ・ Easy Mode</div>
-    <h1>🔗 第4章 超やさしい版：多重共線性とVIF</h1>
-    <p>予測変数どうしが「似すぎ」だと困る、という話。VIF計算機で体感しよう。<a href="ch4.html" class="easy-toplink">🔗 本編はこちら</a></p>
-    <div class="unit-nav">
-      <a href="#u1">⚡ 一言でいうと</a>
-      <a href="#u2">① 似すぎると困る</a>
-      <a href="#u3">② VIF計算機</a>
-      <a href="#u4">③ 見つけたら</a>
-      <a href="#u5">④ 30秒セルフ確認</a>
-    </div>
+    <div class="ch-tag">Chapter 4 · Easy Mode 🍎</div>
+    <h1>🍎 第4章 超やさしい版：係数の解釈：アバロンの例</h1>
+    <p>切片が対数オッズである理由をアバロンの実データとRコードで手計算。ボタンを押してステップを1つずつ追おう。</p>
+    <div class="unit-nav"><a href="#u1">一言でいうと</a><a href="#u2">Rでモデル実行</a><a href="#u3">計算ステップを追う</a><a href="ch4.html" class="easy-toplink">🐚 本編はこちら</a></div>
   </div>
 </div>
-
 <div class="page-layout">
 <main>
 
 <div class="unit" id="u1">
-  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">似た変数が2つあると、モデルが混乱する</div></div></div>
-  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0;">予測変数どうしが<strong>似すぎている（強く相関）</strong>と係数がおかしくなる。これが<strong>多重共線性</strong>。検出する道具が<strong>VIF</strong>。<strong>VIF &gt; 5 で問題、&gt; 10 で深刻</strong>。対処は「1つ削る」か「合体させる」。</p></div>
+  <div class="unit-header"><div class="unit-num">⚡</div><div><h2>一言でいうと</h2><div class="unit-sub">切片 = 「全体の対数オッズ」 → exp → オッズ → 確率</div></div></div>
+  <div class="tldr"><h3>🎯 これだけ覚えればOK</h3><p style="margin:0">予測変数がないとき（切片のみのモデル）、切片はデータ全体の対数オッズ。exp(切片)でオッズ、さらにodds/(1+odds)で確率に変換できる。アバロンの例では切片0.1565 → exp → 1.169 → 53.9%（オスの割合）と完全に一致。</p></div>
+  <p>アバロン（アワビ）のデータで、切片が何を意味するのかを手計算で確認します。これが分かれば、係数の解釈が全部わかります。</p>
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:1.25rem;margin:1.25rem 0">
+    <h4 style="margin-top:0;color:var(--primary-dark)">🐚 アバロンデータの概要</h4>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;text-align:center">
+      <div><div style="font-size:1.5rem;font-weight:900;color:var(--primary)">1,307</div><div style="font-size:.82rem">メス（Female）</div></div>
+      <div><div style="font-size:1.5rem;font-weight:900;color:var(--green)">1,528</div><div style="font-size:.82rem">オス（Male = 1）</div></div>
+      <div><div style="font-size:1.5rem;font-weight:900;color:var(--secondary)">2,835</div><div style="font-size:.82rem">合計</div></div>
+    </div>
+  </div>
 </div>
 
 <div class="unit" id="u2">
-  <div class="unit-header"><div class="unit-num">①</div><div><h2>似すぎると、なぜ困る？</h2><div class="unit-sub">同じことを言う友達が2人いる状態</div></div></div>
-  <p>クイズの答えを2人の友達に聞いても、同じことしか返ってこないなら1人で十分。似た情報を持つ変数を2つ入れると、モデルが「どっちを信じれば?」と混乱します。</p>
-  <div class="viz">
-    <div class="viz-title">同じことを言う2人 👬</div>
-    <svg viewBox="0 0 500 120" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:500px;display:block;margin:0 auto;">
-      <circle cx="130" cy="50" r="26" fill="#fcd34d" stroke="#d97706" stroke-width="2"/><text x="130" y="55" font-size="18" text-anchor="middle">😀</text>
-      <circle cx="220" cy="50" r="26" fill="#fcd34d" stroke="#d97706" stroke-width="2"/><text x="220" y="55" font-size="18" text-anchor="middle">😀</text>
-      <text x="175" y="100" font-size="11" text-anchor="middle" fill="#dc2626" font-weight="700">「面積」と「寝室の数」は似てる（家が広い＝部屋多い）</text>
-      <text x="380" y="45" font-size="13" text-anchor="middle">→ どちらか</text>
-      <text x="380" y="63" font-size="13" text-anchor="middle">1人で十分</text>
-    </svg>
-  </div>
-  <div class="warn-box"><strong>困ること：</strong>係数が異常に大きくなったり、符号が逆（プラスのはずがマイナス）になったり、p値が信用できなくなる。</div>
+  <div class="unit-header"><div class="unit-num">①</div><div><h2>Rでモデルを実行</h2><div class="unit-sub">切片のみモデルで切片の意味をつかむ</div></div></div>
+  <p>まず予測変数を入れない「切片のみのモデル」を実行します。この切片がデータ全体の対数オッズになっているはずです。</p>
+  <p class="code-label">▶ 切片のみモデル（glm with 1）</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># 切片のみのモデル（予測変数なし）</span></span>
+<span class="cl">model0 &lt;- <span class="kw">glm</span>(Sex ~ <span class="nm">1</span>, <span class="kw">data</span>=Abalone, <span class="kw">family</span>=<span class="st">binomial</span>)</span>
+<span class="cl"><span class="kw">summary</span>(model0)</span>
+<span class="cl"><span class="cm"># (Intercept) = 0.1565  ← 対数オッズ</span></span>
+</pre>
+  <p class="code-label">▶ 手計算で切片を再現する</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># 手計算で切片を再現する</span></span>
+<span class="cl">n_female &lt;- <span class="nm">1307</span></span>
+<span class="cl">n_male   &lt;- <span class="nm">1528</span></span>
+<span class="cl">p_male   &lt;- n_male / (n_female + n_male)</span>
+<span class="cl">p_male<span class="cm">  # → 0.5387</span></span>
+<span class="cl">odds     &lt;- p_male / (<span class="nm">1</span> - p_male)</span>
+<span class="cl">odds<span class="cm">   # → 1.1685</span></span>
+<span class="cl">log_odds &lt;- <span class="kw">log</span>(odds)</span>
+<span class="cl">log_odds<span class="cm"> # → 0.1557 ≈ 0.1565（切片と一致！）</span></span>
+</pre>
 </div>
 
 <div class="unit" id="u3">
-  <div class="unit-header"><div class="unit-num">②</div><div><h2>VIF計算機で体感</h2><div class="unit-sub">R²を上げると、VIFがどう変わる?</div></div></div>
-  <p>VIFは<strong>1 ÷ (1 − R²)</strong> で計算します。ここでのR²は「その変数を、他の変数でどれだけ予測できるか」。他の変数で予測できてしまう（R²が高い）ほど、被っている＝VIFが大きくなります。スライダーを動かしてみてください。</p>
-
-  <div class="widget">
-    <div class="widget-title">🧮 VIF計算機</div>
-    <p style="font-size:.85rem;color:var(--text-sec);margin:0 0 .5rem;">「その変数を、他の変数で予測したときのR²」を動かす：</p>
-    <div class="slider-row"><label>R²</label><input type="range" id="vif-r2" min="0" max="0.99" step="0.01" value="0.3"><span class="slider-val" id="vif-r2-v">0.30</span></div>
-    <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;margin-top:.5rem;">
-      <div style="text-align:center;"><div class="result-big" id="vif-out" style="font-size:1.6rem;">—</div><div class="result-label">VIF</div></div>
-      <div style="text-align:center;"><div class="result-big" id="vif-tol" style="font-size:1.6rem;color:var(--teal);">—</div><div class="result-label">許容度(Tolerance)</div></div>
+  <div class="unit-header"><div class="unit-num">②</div><div><h2>アバロン：計算ステップを追う</h2><div class="unit-sub">ボタンを押してステップを1つずつ確認</div></div></div>
+  <div class="widget green">
+    <div class="widget-title">🐚 アバロン：切片の計算ステップ</div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin:1rem 0" id="ab-steps">
+      <div class="ab-step" style="background:var(--bg);border-radius:8px;padding:.9rem;border:1.5px solid var(--border);transition:all .4s">
+        <strong>📊 データ：</strong>メス 1,307匹　オス 1,528匹（オス=1）
+      </div>
+      <div class="ab-step" style="background:var(--primary-light);border-radius:8px;padding:.9rem;border:1.5px solid var(--primary)">
+        <strong>① 確率：</strong>P(オス) = 1528 / (1307+1528) = <strong>0.5387</strong>（53.9%がオス）
+      </div>
+      <div class="ab-step" style="background:var(--green-light);border-radius:8px;padding:.9rem;border:1.5px solid var(--green)">
+        <strong>② オッズ：</strong>0.5387 / 0.4613 = <strong>1.169</strong>（オスの方がメスより1.169倍多い）
+      </div>
+      <div class="ab-step" style="background:var(--yellow-light);border-radius:8px;padding:.9rem;border:1.5px solid var(--yellow)">
+        <strong>③ 対数オッズ：</strong>log(1.169) = <strong>0.1565</strong>　← glm()の切片と一致！✅
+      </div>
+      <div class="ab-step" style="background:var(--teal-light);border-radius:8px;padding:.9rem;border:1.5px solid var(--teal)">
+        <strong>④ 逆変換：</strong>exp(0.1565)=1.169 → 1.169/2.169 = <strong>0.5387</strong>（元の確率に戻った！🔄）
+      </div>
     </div>
-    <div class="verdict good" id="vif-verdict">—</div>
+    <div class="btn-row"><button class="btn-step" id="ab-next">次のステップ →</button></div>
   </div>
-  <div class="note-box">R²を0.8あたりまで上げてみてください。VIFが5を超えて警告が出ます。「他の変数でほぼ予測できる＝被っている」ということです。</div>
+  <p class="code-label">▶ 係数をオッズ比に変換して解釈するコード</p>
+  <pre class="code-block">
+<span class="cl"><span class="cm"># 係数をオッズ比に変換して解釈</span></span>
+<span class="cl">coef_val &lt;- <span class="kw">coef</span>(model0)[<span class="st">"(Intercept)"</span>]</span>
+<span class="cl">exp(coef_val)<span class="cm">   # → 1.169（オッズ）</span></span>
+<span class="cl"><span class="cm"># 確率に戻す</span></span>
+<span class="cl">odds_to_p &lt;- <span class="kw">function</span>(odds) odds / (<span class="nm">1</span> + odds)</span>
+<span class="cl">odds_to_p(<span class="kw">exp</span>(coef_val))<span class="cm">  # → 0.5387（元の確率）</span></span>
+</pre>
+  <div class="note-box">📌 <code>exp(coef(model))</code>で係数をオッズ比に変換できます。オッズ比=1.169は「オスはメスの1.169倍のオッズがある」ことを意味します。</div>
+  <div class="checkpoint"><h4>🤔 答えられるかな？（クリックで答えが開く）</h4><div class="cp-q">Q1. 係数（対数オッズ）からオッズに変換するには？<span class="cp-a">A. exp(係数)。例：exp(0.1565) ≈ 1.169。Rでは exp(coef(model)) で全係数を一度に変換できる。</span></div><div class="cp-q">Q2. オッズから確率に変換するには？<span class="cp-a">A. 確率 = odds / (1 + odds)。例：1.169 / 2.169 ≈ 0.539（53.9%）。</span></div><div class="cp-q">Q3. 切片のみのモデルで切片が示すのは？<span class="cp-a">A. データ全体での「1（オス）である確率」の対数オッズ。予測変数なし＝データの単純な比率から計算できる。</span></div></div>
 </div>
-
-<div class="unit" id="u4">
-  <div class="unit-header"><div class="unit-num">③</div><div><h2>見つけたらどうする？</h2><div class="unit-sub">削るか、まとめるか</div></div></div>
-  <table class="compare-table">
-    <tr><th>対処法</th><th>たとえると</th></tr>
-    <tr><td>① 1つ削除する</td><td>同じこと言う友達3人のうち1人だけ残す</td></tr>
-    <tr><td>② 合体させる</td><td>3人の意見を「みんなの総意」1つにまとめる</td></tr>
-  </table>
-  <div class="simple-box"><div class="simple-title">🍎 ひとことで</div><p>ダブった情報を整理してスッキリさせるのが目的。VIFが一番高い変数から削っていく。</p></div>
-</div>
-
-<div class="unit" id="u5">
-  <div class="unit-header"><div class="unit-num">④</div><div><h2>30秒セルフ確認</h2><div class="unit-sub">クリックで答えが開きます</div></div></div>
-  <div class="checkpoint"><h4>🤔 答えられるかな？</h4>
-    <div class="cp-q">Q1. 多重共線性とは？<span class="cp-a">A. 予測変数どうしが強く相関している状態（応答変数とではない）。</span></div>
-    <div class="cp-q">Q2. VIFはいくつを超えたら問題？<span class="cp-a">A. 5を超えたら問題、10を超えたら深刻。</span></div>
-    <div class="cp-q">Q3. 許容度0.88は良い？悪い？<span class="cp-a">A. 良い。88%がその変数だけの独自情報＝残すべき。</span></div>
-  </div>
-  <div class="note-box" style="background:var(--secondary-light);border-color:var(--secondary);">🎓 相関行列の限界・3変数以上の共線性は <a href="ch4.html">第4章 本編</a> へ。</div>
-  <div class="page-nav"><a href="ch4.html">← 第4章 本編</a><a href="ch5_easy.html">第5章 やさしい版 →</a></div>
-</div>
-
+<div class="page-nav"><a href="ch3_easy.html">← 第3章 やさしい版</a><a href="ch5_easy.html">第5章 やさしい版 →</a></div>
 </main>
 <aside class="sidebar">
-  <div class="tip-box"><h4>💡 早見表</h4><p>相関 |r| &gt; 0.5 → ペアの共線性<br><strong>VIF &gt; 5</strong> → 共線性あり<br><strong>VIF &gt; 10</strong> → 深刻<br>Tolerance &lt; 0.2 → 不要かも<br><br>対処：削る or 合体</p></div>
-  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2);"><h4 style="color:var(--primary-dark);">📖 本編</h4><p style="color:var(--text);">詳しくは <a href="ch4.html">第4章</a> へ。</p></div>
+  <div class="tip-box"><h4>💡 まとめ</h4><p style="margin:.4rem 0">• 切片 = データ全体の対数オッズ</p><p style="margin:.4rem 0">• exp(切片) = オッズ</p><p style="margin:.4rem 0">• odds/(1+odds) = 確率</p><p style="margin:.4rem 0">• 逆変換で元の確率に戻る</p></div>
+  <div class="tip-box" style="margin-top:1rem;background:var(--primary-light);border-color:rgba(37,99,235,.2)">
+    <h4 style="color:var(--primary-dark)">📖 本編へ</h4>
+    <p style="color:var(--text)">詳しいコードと解説は <a href="ch4.html">第4章 本編</a> へ。英語MCQクイズもあります。</p>
+  </div>
 </aside>
 </div>
-
-<footer><p>重回帰分析 完全ガイド · 第4章 超やさしい版</p><p style="margin-top:.5rem;"><a href="ch4.html">← 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
+<footer><p>🐚 ロジスティック回帰 完全ガイド · 第4章 超やさしい版</p>
+<p style="margin-top:.5rem"><a href="ch4.html">← 第4章 本編</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script src="interactive.js"></script>
-<script>initVifCalc();</script>
-</body>
-</html>
+<script src="typewriter.js"></script>
+<script>initAbaloneSteps();</script>
+</body></html>

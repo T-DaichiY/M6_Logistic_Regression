@@ -1,337 +1,255 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>第12章 モデル性能の評価 — 重回帰分析 完全ガイド（M5）</title>
-<link rel="stylesheet" href="m6.css">
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>第12章：連続予測変数の解釈 — ロジスティック回帰ガイド</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<nav class="topnav">
-  <div class="brand"><b>重回帰分析</b> 完全ガイド</div>
-  <div class="tabs">
-    <a class="tab home" href="index.html">🏠 概要</a>
-    <a class="tab" href="ch1.html">1</a>
-    <a class="tab" href="ch2.html">2</a>
-    <a class="tab" href="ch3.html">3</a>
-    <a class="tab" href="ch3_1.html">3.1</a>
-    <a class="tab" href="ch4.html">4</a>
-    <a class="tab" href="ch5.html">5</a>
-    <a class="tab" href="ch6.html">6</a>
-    <a class="tab" href="ch7.html">7</a>
-    <a class="tab" href="ch8.html">8</a>
-    <a class="tab" href="ch9.html">9</a>
-    <a class="tab" href="ch10.html">10</a>
-    <a class="tab" href="ch11.html">11</a>
-    <a class="tab active" href="ch12.html">12</a>
-    <a class="tab easy" href="ch12_easy.html">🍎 やさしい版</a>
-  </div>
-</nav>
-
-<header class="hero">
-  <div class="wrap">
-    <div class="chap">Chapter 12 · Evaluating Performance · 最終章</div>
-    <h1>練習で満点でも、<br><span class="a">本番</span>で解けなきゃ<br>意味がない。</h1>
-    <p class="sub">本当に知りたいのは「見たことのない新しいデータでもうまくいく？」。モデルを本番（production）に出すなら、明日来るデータにも効いてほしい。
-    訓練・テスト分割で<strong>汎化</strong>を確かめ、丸暗記＝<strong>過学習</strong>を見抜きます。</p>
-    <div class="jump">
-      <a href="#u1">① なぜ評価か</a>
-      <a href="#u2">② 過学習エクスプローラ</a>
-      <a href="#u3">③ 訓練/テスト分割</a>
-      <a href="#u4">④ Rで実装</a>
-      <a href="#u5">⑤ データ漏洩</a>
-      <a href="#quiz">📝 Quiz</a>
-    </div>
-    <br>
-    <a class="easy-hero" href="ch12_easy.html">🍎 むずかしく感じたら「超やさしい版」へ →</a>
-  </div>
+<header class="site-header">
+  <div class="logo">ロジスティック回帰 <span>完全ガイド</span></div>
+    <nav class="header-nav">
+    <a href="index.html">🏠 概要</a>
+    <span class="navg"><a class="n-main" href="ch1.html">🎲 1</a><a class="n-easy" href="ch1_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch2.html">📐 2</a><a class="n-easy" href="ch2_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch3.html">🔑 3</a><a class="n-easy" href="ch3_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch4.html">🐚 4</a><a class="n-easy" href="ch4_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch5.html">📉 5</a><a class="n-easy" href="ch5_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch6.html">📊 6</a><a class="n-easy" href="ch6_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch7.html">🔧 7</a><a class="n-easy" href="ch7_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch8.html">📏 8</a><a class="n-easy" href="ch8_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch9.html">🏦 9</a><a class="n-easy" href="ch9_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch10.html">🔀 10</a><a class="n-easy" href="ch10_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main" href="ch11.html">🧮 11</a><a class="n-easy" href="ch11_easy.html" title="やさしい版">🍎</a></span>
+    <span class="navg"><a class="n-main active" href="ch12.html">📈 12</a><a class="n-easy" href="ch12_easy.html" title="やさしい版">🍎</a></span>
+  </nav>
+  <a href="log_master.html" class="log-link" title="対数補足">㏒ log補足</a>
+  <a href="logodds_full_course.html" class="log-link" style="background:rgba(20,184,166,.12);color:#0f766e;border-color:rgba(20,184,166,.4);" title="係数完全攻略">🧮 係数攻略</a>
 </header>
 
-<!-- U1 -->
-<section id="u1">
-  <div class="wrap reveal">
-    <div class="eyebrow">Why · なぜ評価が必要か</div>
-    <h2>本当に知りたいのは<br>「未知データでの成績」</h2>
-    <p class="lead">診断（第2章）でモデルの選び方を学びました。でも本当に知りたいのは——
-    <strong>このモデル、見たことのない新しいデータでもうまく予測できる？</strong> ということ。
-    モデルを<strong>本番（production）で使う／デプロイする</strong>なら、明日来る新しいデータにもちゃんと予測してほしい。
-    「学習に使ったデータ」だけでなく「<strong>まったく新しいデータ</strong>」で良い成績を出せるか——これが<strong>汎化（generalization）</strong>です。</p>
-    <div class="callout info">
-      <div class="ctitle">📌 汎化（はんか）とは</div>
-      モデルが<strong>未知のデータにもうまく対応できる能力</strong>のこと。本番で使うモデルは、この汎化性能が高くなければ意味がありません。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      「過去問の答えを丸暗記」した人は、過去問では満点でも<strong>本番の新しい問題</strong>では解けません。
-      モデルも同じ。「練習データで満点」より「<strong>本番の新データで何点取れるか</strong>」が大事です📝
+<div class="ch-banner">
+  <div class="ch-banner-inner">
+    <div class="ch-tag">Chapter 12</div>
+    <h1>📈 第12章：連続予測変数の解釈</h1>
+    <p>Ageを予測変数として追加。係数は全年齢範囲で一定のオッズ比の対数。手計算でバイナリと同じ方法で再現する。</p>
+    <div class="unit-nav"><a href="#u1">Unit 1</a><a href="#u2">Unit 2</a><a href="#u3">Unit 3</a></div>
+  </div>
+</div>
+
+<div class="page-layout">
+<main>
+<div class="unit" id="u1">
+  <div class="unit-header"><div class="unit-num">01</div><div><h2>連続予測変数の追加</h2><div class="unit-sub">Ageを予測変数として追加する</div></div></div>
+  <p>バイナリ変数の次は、<strong>連続変数（Continuous Predictor）</strong>の解釈を学びます。GermanCreditデータに年齢（Age）を追加します。</p>
+  <p>良い信用を持つ人の年齢をグループ別に確認すると、Good信用の人の方がわずかに年齢が高い傾向があります。</p>
+  <div class="code-block"><span class="cl"><span class="cm"># Ageを連続予測変数として追加</span></span><span class="cl">mod_age &lt;- <span class="kw">glm</span>(Class ~ Age,</span><span class="cl">            <span class="kw">data</span>=GermanCredit, <span class="kw">family</span>=<span class="st">binomial</span>)</span><span class="cl"><span class="kw">summary</span>(mod_age)</span><span class="cl"><span class="cm"># Age係数 ≈ 0.0184（1歳増加→対数オッズが0.0184増）</span></span></div>
+  <div class="note-box">連続変数の係数の解釈：<strong>「Ageが1単位増加するごとに、対数オッズが0.0184増加する」</strong>。これはAgeの全範囲で一定（線形な変化）。</div>
+</div>
+<div class="unit" id="u2">
+  <div class="unit-header"><div class="unit-num">02</div><div><h2>係数を手計算で再現する</h2><div class="unit-sub">バイナリ変数と同じ「オッズ比の対数」</div></div></div>
+  <p>連続変数の係数も、バイナリ変数と同じ方法で求められます。「X=0のときのオッズ」と「X=1のときのオッズ」を計算し、その比の対数をとります。</p>
+  <div class="code-block"><span class="cl"><span class="cm"># Age=0のとき（仮想値：仕組みの確認用）</span></span><span class="cl">b0 &lt;- <span class="kw">coef</span>(mod_age)[<span class="nm">1</span>]<span class="cm">   # 切片 ≈ -0.354</span></span><span class="cl">b1 &lt;- <span class="kw">coef</span>(mod_age)[<span class="nm">2</span>]<span class="cm">   # Age係数 ≈ 0.0184</span></span><span class="cl">p_age0  &lt;- <span class="kw">plogis</span>(b0 + b1*<span class="nm">0</span>)<span class="cm">  # → 0.4124</span></span><span class="cl">odds_a0 &lt;- p_age0 / (<span class="nm">1</span> - p_age0)<span class="cm">     # → 0.7014</span></span><span class="cl"><span class="cm"># Age=1のとき</span></span><span class="cl">p_age1  &lt;- <span class="kw">plogis</span>(b0 + b1*<span class="nm">1</span>)<span class="cm">  # → 0.4156</span></span><span class="cl">odds_a1 &lt;- p_age1 / (<span class="nm">1</span> - p_age1)<span class="cm">     # → 0.7143</span></span><span class="cl"><span class="cm"># 係数の再現：log(オッズ比)</span></span><span class="cl">log(odds_a1 / odds_a0)<span class="cm">                 # → 0.0184（係数と一致！）</span></span></div>
+  <div class="big-rule">
+    <div class="ru-arrow">🔁</div>
+    <div class="ru-text">
+      <strong>どの2値でも同じ！</strong><br>
+      Age=55→56でも、Age=33→34でも<br>
+      log(odds_next / odds_prev) = 0.0184（係数と一致）<br>
+      <span style="font-size:.85rem;color:var(--text-sec)">これが「線形性」の意味。係数は全範囲で一定。</span>
     </div>
   </div>
+</div>
+<div class="unit" id="u3">
+  <div class="unit-header"><div class="unit-num">03</div><div><h2>オッズ比と複合モデル</h2><div class="unit-sub">exp(係数)の解釈とFull Modelへの拡張</div></div></div>
+<div class="note-box"><strong>📌 連続変数の一定性の仮定：</strong>連続予測変数の係数は「1単位増えるごとの対数オッズの一定の変化量」です。だから <code>exp(β)</code> はどの値の区間でも同じオッズ比になります（年齢55→56でも0→1でも同じ）。ただし<em>確率</em>の増え方は一定ではなく、シグモイドの形ゆえ中央付近で大きく、両端で小さくなります。「対数オッズは一定、確率は一定でない」が連続変数解釈の核心です。</div>
+  <div class="code-block"><span class="cl"><span class="cm"># exp(係数) = オッズ比（連続変数）</span></span><span class="cl"><span class="kw">exp</span>(<span class="kw">coef</span>(mod_age)[<span class="st">"Age"</span>])<span class="cm">  # → 1.0186</span></span><span class="cl"><span class="cm"># 解釈：1歳増えるごとにオッズが1.0186倍（約1.86%増加）</span></span><span class="cl"><span class="cm"># ForeignWorkerとAgeを組み合わせたフルモデル</span></span><span class="cl">mod_full &lt;- <span class="kw">glm</span>(Class ~ ForeignWorker + Age,</span><span class="cl">             <span class="kw">data</span>=GermanCredit, <span class="kw">family</span>=<span class="st">binomial</span>)</span><span class="cl"><span class="kw">AIC</span>(mod_fw, mod_age, mod_full)<span class="cm">  # 最良モデルを選ぶ</span></span></div>
+  <div style="background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:1.25rem;margin:1rem 0">
+    <h4 style="margin-top:0">📊 バイナリ vs 連続：係数解釈の比較</h4>
+    <table style="width:100%;border-collapse:collapse;font-size:.88rem">
+      <thead><tr style="background:var(--primary);color:white">
+        <th style="padding:.5rem">予測変数</th><th style="padding:.5rem">係数</th><th style="padding:.5rem">exp(係数)</th><th style="padding:.5rem">解釈</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:.5rem">ForeignWorker（バイナリ）</td><td style="padding:.5rem">−1.297</td><td style="padding:.5rem">0.273</td><td style="padding:.5rem">国内労働者のオッズは外国人の0.273倍</td></tr>
+        <tr><td style="padding:.5rem">Age（連続）</td><td style="padding:.5rem">0.0184</td><td style="padding:.5rem">1.0186</td><td style="padding:.5rem">1歳増すごとにオッズが1.0186倍（+1.86%）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<section class="quiz-section">
+  <h2>🎯 確認クイズ（英語）</h2>
+  <div class="progress-wrap"><div class="progress-bar" id="prog" style="width:0%"></div></div>
+  <div class="quiz-container" id="quiz">
+<div class="quiz-q" id="q1">
+  <div class="q-num">Question 1</div>
+  <div class="q-text">For a continuous predictor Age with coefficient 0.0184, what does exp(0.0184) represent?</div>
+  <button class="option-btn" data-q="1" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The probability of Good credit for each age</button>
+<button class="option-btn" data-q="1" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>The log odds change per year</button>
+<button class="option-btn" data-q="1" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The odds ratio: for each 1-year increase in Age, the odds multiply by 1.0186</button>
+<button class="option-btn" data-q="1" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The change in probability per year</button>
+<div class="q-feedback" id="fb1"></div>
+</div>
+<div class="quiz-q" id="q2">
+  <div class="q-num">Question 2</div>
+  <div class="q-text">How do you verify a continuous predictor's coefficient by hand?</div>
+  <button class="option-btn" data-q="2" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Subtract P(X=1) − P(X=0)</button>
+<button class="option-btn" data-q="2" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Calculate log(odds at X=1 / odds at X=0)</button>
+<button class="option-btn" data-q="2" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Calculate exp(P(X=1) / P(X=0))</button>
+<button class="option-btn" data-q="2" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Multiply the coefficient by the predictor value</button>
+<div class="q-feedback" id="fb2"></div>
+</div>
+<div class="quiz-q" id="q3">
+  <div class="q-num">Question 3</div>
+  <div class="q-text">If you use Age=55 and Age=56 instead of Age=0 and Age=1, what happens to log(odds_56/odds_55)?</div>
+  <button class="option-btn" data-q="3" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>It changes depending on the age values</button>
+<button class="option-btn" data-q="3" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>It becomes larger for older ages</button>
+<button class="option-btn" data-q="3" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>It equals the same coefficient (0.0184)</button>
+<button class="option-btn" data-q="3" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>It equals twice the coefficient</button>
+<div class="q-feedback" id="fb3"></div>
+</div>
+<div class="quiz-q" id="q4">
+  <div class="q-num">Question 4</div>
+  <div class="q-text">What does a coefficient of 0.0184 for Age mean in plain language?</div>
+  <button class="option-btn" data-q="4" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Each additional year of age increases the probability of Good credit by 1.84%</button>
+<button class="option-btn" data-q="4" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Each additional year of age increases the log odds of Good credit by 0.0184</button>
+<button class="option-btn" data-q="4" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Customers aged 18+ have Good credit odds 0.0184 times higher</button>
+<button class="option-btn" data-q="4" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Age has no practical effect since 0.0184 is small</button>
+<div class="q-feedback" id="fb4"></div>
+</div>
+<div class="quiz-q" id="q5">
+  <div class="q-num">Question 5</div>
+  <div class="q-text">To compare models mod_fw (ForeignWorker only), mod_age (Age only), and mod_full (both), what function do you use?</div>
+  <button class="option-btn" data-q="5" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>summary()</button>
+<button class="option-btn" data-q="5" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>anova()</button>
+<button class="option-btn" data-q="5" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>AIC()</button>
+<button class="option-btn" data-q="5" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>pchisq()</button>
+<div class="q-feedback" id="fb5"></div>
+</div>
+  </div>
+<div class="quiz-q" id="q6">
+  <div class="q-num">Question 6</div>
+  <div class="q-text">For a continuous predictor, exp(coefficient) is the odds ratio for:</div>
+  <div class="options"><button class="option-btn" data-q="6" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A 10-unit increase</button>
+<button class="option-btn" data-q="6" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>A one-unit increase in the predictor</button>
+<button class="option-btn" data-q="6" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The entire data range</button>
+<button class="option-btn" data-q="6" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>A decrease to zero</button>
+</div>
+  <div class="q-feedback" id="fb6"></div>
+</div>
+<div class="quiz-q" id="q7">
+  <div class="q-num">Question 7</div>
+  <div class="q-text">A continuous predictor&#x27;s coefficient is assumed constant across:</div>
+  <div class="options"><button class="option-btn" data-q="7" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>The whole range of the predictor</button>
+<button class="option-btn" data-q="7" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Only the lowest values</button>
+<button class="option-btn" data-q="7" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Only categorical splits</button>
+<button class="option-btn" data-q="7" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The intercept only</button>
+</div>
+  <div class="q-feedback" id="fb7"></div>
+</div>
+<div class="quiz-q" id="q8">
+  <div class="q-num">Question 8</div>
+  <div class="q-text">Using Age=55 vs 56 instead of 0 vs 1 to derive the coefficient gives:</div>
+  <div class="options"><button class="option-btn" data-q="8" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>A completely different value</button>
+<button class="option-btn" data-q="8" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>An undefined value</button>
+<button class="option-btn" data-q="8" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>A negative of the value</button>
+<button class="option-btn" data-q="8" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>The same coefficient value</button>
+</div>
+  <div class="q-feedback" id="fb8"></div>
+</div>
+<div class="quiz-q" id="q9">
+  <div class="q-num">Question 9</div>
+  <div class="q-text">A small positive Age coefficient (e.g. 0.0184) means each extra year:</div>
+  <div class="options"><button class="option-btn" data-q="9" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Halves the odds of the outcome</button>
+<button class="option-btn" data-q="9" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Has no effect whatsoever</button>
+<button class="option-btn" data-q="9" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>Slightly increases the log-odds of the outcome</button>
+<button class="option-btn" data-q="9" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>Removes the intercept</button>
+</div>
+  <div class="q-feedback" id="fb9"></div>
+</div>
+<div class="quiz-q" id="q10">
+  <div class="q-num">Question 10</div>
+  <div class="q-text">To compare nested models mod_fw, mod_age, and mod_full, you would mainly use:</div>
+  <div class="options"><button class="option-btn" data-q="10" data-idx="0" onclick="handleQ(this)"><span class="opt-letter">A</span>Their colors</button>
+<button class="option-btn" data-q="10" data-idx="1" onclick="handleQ(this)"><span class="opt-letter">B</span>Their file sizes</button>
+<button class="option-btn" data-q="10" data-idx="2" onclick="handleQ(this)"><span class="opt-letter">C</span>The number of rows</button>
+<button class="option-btn" data-q="10" data-idx="3" onclick="handleQ(this)"><span class="opt-letter">D</span>AIC (and deviance) values</button>
+</div>
+  <div class="q-feedback" id="fb10"></div>
+</div>
+  <div class="quiz-score" id="score">0 / 10</div>
 </section>
 
-<!-- U2 overfitting explorer -->
-<section id="u2" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Interactive · 過学習エクスプローラ</div>
-    <h2>複雑にしすぎると、<br>テスト成績だけ落ちていく</h2>
-    <p class="lead"><strong>過学習（overfitting）</strong>とは、モデルがパターン（シグナル）を理解する代わりに、手元のデータを<strong>丸暗記</strong>してしまう状態。
-    ノイズをシグナルと勘違いします。スライダーで<strong>複雑さ</strong>を上げてみてください。
-    <span style="color:var(--g);font-weight:700">訓練</span>はどんどん上がるのに、<span style="color:var(--neg);font-weight:700">テスト</span>はあるピークを過ぎると下がり始めます。</p>
+<div class="page-nav">
+  <a href="ch11.html">← 第11章</a>
+  <a href='index.html'>目次へ →</a>
+</div>
+</main>
 
-    <div class="machine">
-      <div class="slider-row l">
-        <label>モデルの複雑さ</label>
-        <input type="range" id="s-cx" min="1" max="10" value="4">
-        <div class="val" id="v-cx">4</div>
-      </div>
-      <div class="svgwrap">
-        <svg id="ofsvg" viewBox="0 0 640 320" style="width:100%;max-width:640px;display:block;margin:0 auto"></svg>
-      </div>
-      <div style="font-family:var(--mono);font-size:.72rem;color:var(--muted);text-align:center;margin-top:4px">※ 概念を示す<strong>イメージ図</strong>（講義の例：訓練R²=0.95・テストR²=0.4 を再現）</div>
-      <div class="readouts">
-        <div class="ro g"><div class="lab">訓練 R²（練習）</div><div class="big" id="ro-tr">0.92</div><div class="meaning">複雑なほど上がり続ける</div></div>
-        <div class="ro o"><div class="lab">テスト R²（本番）</div><div class="big" id="ro-te">0.80</div><div class="meaning">ピークを過ぎると下がる</div></div>
-        <div class="ro l"><div class="lab">判定</div><div class="big" id="ro-verdict" style="font-size:1.1rem">ちょうど良い</div><div class="meaning" id="me-verdict">訓練とテストが近い＝良い</div></div>
-      </div>
+<aside class="sidebar">
+  <div class="glossary">
+    <h3>📖 用語集</h3>
+    <div class="term-item">
+      <div class="term-name">連続予測変数</div>
+      <div class="term-en">Continuous Predictor</div>
+      <div class="term-def">年齢・収入など連続した数値をとる予測変数。係数は1単位増加あたりの対数オッズ変化を示す。</div>
     </div>
-    <p style="font-size:.85rem;color:var(--muted);margin-top:10px">
-      📌 講義の例：<strong>訓練 R²＝0.95 なのにテスト R²＝0.4</strong> → 過学習のサイン。逆に訓練とテストが<strong>だいたい同じ</strong>なら、過学習していない良いモデルです。</p>
-
-    <div class="callout warn">
-      <div class="ctitle">⚠️ 補足</div>
-      単純な重回帰では過学習はそこまで大きな問題にならないことが多いです。でも今後学ぶ<strong>機械学習モデル</strong>はもっと複雑で丸暗記しやすい（過学習しやすい）ので、この考え方がとても重要になります。
+    <div class="term-item">
+      <div class="term-name">オッズ比（連続）</div>
+      <div class="term-en">Odds Ratio (Continuous)</div>
+      <div class="term-def">exp(係数)。予測変数1単位増加あたりのオッズの倍率。</div>
     </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      過学習は「教科書を丸暗記したけど意味は理解していない」状態。同じ問題なら満点でも、ひねられると解けない。
-      モデルにも「丸暗記タイプ」と「理解タイプ」がいて、私たちは<strong>理解タイプ</strong>を作りたいのです🧠
+    <div class="term-item">
+      <div class="term-name">線形性</div>
+      <div class="term-en">Linearity Assumption</div>
+      <div class="term-def">連続変数の係数は全範囲で一定（Age=0→1でもAge=55→56でも同じ変化量）。</div>
+    </div>
+    <div class="term-item">
+      <div class="term-name">フルモデル</div>
+      <div class="term-en">Full Model</div>
+      <div class="term-def">複数の予測変数を全て含むモデル。AICで他のモデルと比較して最適なものを選択する。</div>
     </div>
   </div>
-</section>
+</aside>
+</div>
 
-<!-- U3 train/test split -->
-<section id="u3">
-  <div class="wrap reveal">
-    <div class="eyebrow">Tool · 訓練・テスト分割</div>
-    <h2>データを2つに分け、<br>片方は「本番テスト」用に隠す</h2>
-    <p class="lead">過学習を見抜く道具が<strong>訓練・テスト分割</strong>。データを2つに分けます。</p>
-    <div class="card">
-      <div style="font-family:var(--mono);font-size:.74rem;color:var(--muted);margin-bottom:6px">全データ 731行 を 80 : 20 に分割</div>
-      <div style="display:flex;height:42px;border-radius:8px;overflow:hidden;border:1px solid var(--hair)">
-        <div style="width:80%;background:var(--g);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.85rem">訓練セット 80%（学習）</div>
-        <div style="width:20%;background:var(--o);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.8rem">テスト 20%</div>
-      </div>
-      <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:.7rem;color:var(--muted);margin-top:4px">
-        <span>約584行：パターンを学ぶ</span><span>約147行：本番の代わり</span>
-      </div>
-    </div>
-    <div class="grid2" style="margin-top:16px">
-      <div class="card"><h4 style="color:var(--g)">訓練セット training set</h4><p style="margin:0;font-size:.92rem">モデルにパターンや関係を学ばせるためのデータ。</p></div>
-      <div class="card"><h4 style="color:var(--o)">テストセット test set</h4><p style="margin:0;font-size:.92rem">取っておいて、<strong>モデルが見たことのないデータ</strong>として性能を評価する。「本番」の代わり。</p></div>
-    </div>
-    <p>このクラスでは<strong>80:20分割</strong>。他のコースでは70:30、85:15、評価（validation）セットを使う構成なども（データの大きさ次第）。
-    <strong>データが少ないときは分割すべきではありません</strong>（学習に使えるデータが減りすぎるため）。なお、評価セットやホールドアウトセットもありますが、この章では入門として訓練・テストの2分割に絞ります。</p>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      問題集を「練習用」と「模擬試験用」に分けるのと同じ。練習用で勉強して、模擬試験用（取っておいた問題）で実力を測る。
-      最初から答えを見ちゃダメ＝テストセットは最後まで取っておきます📚
-    </div>
-  </div>
-</section>
-
-<!-- U4 R -->
-<section id="u4" style="background:#fff;border-top:1px solid var(--hair);border-bottom:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">In R · 実装する</div>
-    <h2>seedを固定して、80:20に分ける</h2>
-    <p class="lead">分割にはランダム性があるので、<strong>再現性のために <code>set.seed()</code></strong> でシードを固定します。
-    これでチームの誰が実行しても、まったく同じ分割・同じ結果を再現できます。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># ① 再現性のためにシードを固定</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c"><span class="fn">set.seed</span>(<span class="nm">123</span>)</span></div>
-      <div class="ln"><span class="n">3</span><span class="c">n <span class="kw">&lt;-</span> <span class="fn">dim</span>(bikes)[<span class="nm">1</span>]                          <span class="cm"># 行数 = 731</span></span></div>
-      <div class="ln"><span class="n">4</span><span class="c">train_indices <span class="kw">&lt;-</span> <span class="fn">sample</span>(<span class="nm">1</span><span class="kw">:</span>n, size <span class="kw">=</span> <span class="nm">0.8</span> <span class="kw">*</span> n)  <span class="cm"># 80%の行番号を選ぶ</span></span></div>
-      <div class="ln"><span class="n">5</span><span class="c">train_set <span class="kw">&lt;-</span> bikes[train_indices, ]            <span class="cm"># 選ばれた行</span></span></div>
-      <div class="ln"><span class="n">6</span><span class="c">test_set  <span class="kw">&lt;-</span> bikes[<span class="kw">-</span>train_indices, ]           <span class="cm"># それ以外（−でマイナス指定）</span></span></div>
-    </div>
-    <p>結果、訓練は約584行（80%）、テストは約147行（20%）に。<strong>ちょうど80:20にはならないこともあります</strong>。</p>
-    <div class="codeblk">
-      <div class="ln"><span class="n">1</span><span class="c"><span class="cm"># ① 訓練セットでモデルを作る</span></span></div>
-      <div class="ln"><span class="n">2</span><span class="c">model_train <span class="kw">&lt;-</span> <span class="fn">lm</span>(rentals <span class="kw">~</span> temperature, data <span class="kw">=</span> train_set)</span></div>
-      <div class="ln"><span class="n">3</span><span class="c"><span class="cm"># ② テストセット（未知データ）で予測</span></span></div>
-      <div class="ln"><span class="n">4</span><span class="c">predictions <span class="kw">&lt;-</span> <span class="fn">predict</span>(model_train, newdata <span class="kw">=</span> test_set)</span></div>
-      <div class="ln"><span class="n">5</span><span class="c"><span class="cm"># ③ 実測値と予測値の相関からR²を計算</span></span></div>
-      <div class="ln"><span class="n">6</span><span class="c">r_squared <span class="kw">&lt;-</span> <span class="fn">cor</span>(test_set<span class="kw">$</span>rentals, predictions)<span class="kw">^</span><span class="nm">2</span></span></div>
-    </div>
-    <div class="callout good">
-      <div class="ctitle">📌 結果の読み方</div>
-      講義では、テストのR²が訓練のR²と<strong>だいたい同じ</strong>でした → <strong>過学習なし</strong>（ノイズに惑わされずシグナルを捉えている）。
-      完璧なモデルなら、実測値と予測値が一直線に並び R²＝1。R²は <code>cor()</code> の二乗、または専用パッケージで計算できます。
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      <code>set.seed</code> は「サイコロの出目を固定する魔法」。これがないと実行のたびに違う分け方に。固定すれば誰がやっても同じ結果＝再現できます🎲
-    </div>
-  </div>
-</section>
-
-<!-- U5 leakage -->
-<section id="u5">
-  <div class="wrap reveal">
-    <div class="eyebrow">Pitfall · データ漏洩</div>
-    <h2>クリーニングは<br>分割の「前」か「後」か</h2>
-    <p class="lead">とても重要なテーマです。「データのクリーニングは、分割の<strong>前</strong>にやる？<strong>後</strong>にやる？」
-    分割の<strong>後</strong>にやる処理は、まず<strong>訓練セットだけ</strong>で決め、その同じやり方をテストセットにも適用します。</p>
-    <div class="compare">
-      <div class="ccard good">
-        <h4>分割の「前」にOK</h4>
-        <ul><li>列名を直す</li><li>重複行を削除する</li><li>明らかなデータ入力ミスを直す</li></ul>
-      </div>
-      <div class="ccard bad">
-        <h4>分割の「後」にやる（テスト情報を使うもの）</h4>
-        <ul><li>欠損値の補完（imputation）</li><li>訓練セットだけで決め、同じ処理をテストにも適用</li></ul>
-      </div>
-    </div>
-    <div class="callout warn">
-      <div class="ctitle">⚠️ データ漏洩（data leakage）とは</div>
-      <strong>テストセットの情報が訓練セットに漏れてしまう</strong>こと。これが起きると性能が<strong>実際より良く見えてしまう（過度に楽観的）</strong>。<br>
-      講義の例：欠損値を<strong>全データの中央値</strong>で埋めると、テストのデータが中央値に影響し、それが訓練→モデルに漏れる。
-      だからNAの補完は分割の<strong>後</strong>に、訓練セットだけで決めましょう。
-    </div>
-    <p>訓練とテストの間には<strong>しっかりした仕切り（パーティション）</strong>を保つこと。モデルは「訓練データだけ」で学び、「テストデータ（未知）」で評価する——この境界を守るのが鉄則。
-    また、どんなクリーニングをしたかを<strong>記録・説明できる</strong>ようにしておくのも大切です。</p>
-    <div class="callout good">
-      <div class="ctitle">🎓 全12章 完走！</div>
-      モデルを<strong>作り</strong>（1章）、<strong>診断し</strong>（2章）、影響度を<strong>比べ</strong>（3章）、外れ値を<strong>扱い</strong>（3.1章）、共線性を<strong>直し</strong>（4章）、
-      曲線・カテゴリ・日付・交互作用で<strong>拡張し</strong>（5〜8章）、変数を<strong>選び抜き</strong>（9〜11章）、最後に未知データでの性能を<strong>評価</strong>（12章）。重回帰分析の全工程をマスターしました！🎉
-    </div>
-    <div class="simple">
-      <div class="stitle">🍎 かんたん説明</div>
-      データ漏洩は「模擬試験の問題をこっそり見ながら勉強する」ようなもの。それで模擬試験が満点でも本番では意味がない。
-      テストセット（模擬試験）は<strong>絶対に勉強に混ぜない</strong>——これが漏洩を防ぐコツです🚧
-    </div>
-  </div>
-</section>
-
-<!-- QUIZ -->
-<section id="quiz" style="background:#fff;border-top:1px solid var(--hair)">
-  <div class="wrap reveal">
-    <div class="eyebrow">Check · 確認クイズ</div>
-    <h2>第12章 確認クイズ</h2>
-    <div class="quiz-note">📌 クイズは英語で出題されます（MCQ is in English）</div>
-    <div class="quiz" id="quiz12" style="margin-top:14px"></div>
-  </div>
-</section>
-
-<!-- GLOSSARY -->
-<section>
-  <div class="wrap reveal">
-    <div class="eyebrow">Glossary · 重要用語</div>
-    <h2 style="font-size:1.4rem">この章の用語</h2>
-    <div class="gloss">
-      <div class="term"><div class="tn">汎化</div><div class="te">Generalization</div><div class="td">未知の新しいデータにもうまく対応できる能力。</div></div>
-      <div class="term"><div class="tn">過学習</div><div class="te">Overfitting</div><div class="td">シグナルでなくノイズを暗記し、新データで性能が落ちる。</div></div>
-      <div class="term"><div class="tn">訓練・テスト分割</div><div class="te">Train/Test Split</div><div class="td">データを学習用と評価用に分ける。本講義は80:20。</div></div>
-      <div class="term"><div class="tn">set.seed</div><div class="te">set.seed()</div><div class="td">乱数を固定して再現性を確保するR関数。</div></div>
-      <div class="term"><div class="tn">データ漏洩</div><div class="te">Data Leakage</div><div class="td">テスト情報が訓練に漏れ、性能が過度に楽観的になる。</div></div>
-      <div class="term"><div class="tn">補完</div><div class="te">Imputation</div><div class="td">欠損値を埋める処理。分割後に訓練セットだけで決める。</div></div>
-    </div>
-    <div class="pagenav">
-      <a href="ch11.html">← 第11章：ステップワイズ＆階層的選択</a>
-      <a href="index.html">🏠 目次に戻る</a>
-    </div>
-  </div>
-</section>
-
-<footer>
-  <p>🚲 重回帰分析 完全ガイド · 第12章：モデル性能の評価 — 全12章 完走！🎉</p>
-  <p style="margin-top:.4rem"><a href="ch11.html">← 第11章</a> · <a href="index.html">🏠 目次へ</a> · <a href="ch12_easy.html">🍎 やさしい版</a></p>
-</footer>
-
-<script src="m6.js"></script>
+<footer><p>🐚 ロジスティック回帰 完全ガイド · 第12章</p>
+<p style="margin-top:.5rem"><a href="ch12_easy.html">🍎 やさしい版へ</a> · <a href="index.html">🏠 目次</a></p></footer>
 <script>
-/* ---------- overfitting explorer（イメージ図／0.95・0.4を再現） ---------- */
-(function(){
-  var svg=document.getElementById('ofsvg');
-  var W=640,H=320,PAD={l:54,r:20,t:20,b:48}, pW=W-PAD.l-PAD.r, pH=H-PAD.t-PAD.b;
-  function train(c){ return 0.60 + 0.39*(1-Math.exp(-c/2.5)); }
-  function test(c){ var t=0.82 - 0.022*(c-4)*(c-4); return Math.max(0.05,t); }
-  function xOf(c){ return PAD.l + (c-1)/9*pW; }
-  function yOf(v){ return PAD.t + (1-v)*pH; }
-  [0,0.25,0.5,0.75,1].forEach(function(v){
-    svg.appendChild(svgEl('line',{class:'grid',x1:PAD.l,y1:yOf(v),x2:PAD.l+pW,y2:yOf(v)}));
-    var t=svgEl('text',{class:'axlab',x:PAD.l-8,y:yOf(v)+4,'text-anchor':'end'}); t.textContent=v.toFixed(2); svg.appendChild(t);
-  });
-  for(var c=1;c<=10;c++){ var t=svgEl('text',{class:'axlab',x:xOf(c),y:H-26,'text-anchor':'middle'}); t.textContent=c; svg.appendChild(t); }
-  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:PAD.l+pW,y:H-10,'text-anchor':'end'});t.textContent='モデルの複雑さ →';return t;})());
-  svg.appendChild((function(){var t=svgEl('text',{class:'axlab',x:14,y:PAD.t+6,'text-anchor':'start'});t.textContent='R²';return t;})());
-  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t,x2:PAD.l,y2:PAD.t+pH}));
-  svg.appendChild(svgEl('line',{class:'axis',x1:PAD.l,y1:PAD.t+pH,x2:PAD.l+pW,y2:PAD.t+pH}));
-  svg.appendChild(svgEl('rect',{x:xOf(3.4),y:PAD.t,width:xOf(4.6)-xOf(3.4),height:pH,fill:'#1FA37A',opacity:.06}));
-  function curve(fn,color){ var d=''; for(var c=1;c<=10;c+=0.1){ d+=(d===''?'M':'L')+xOf(c).toFixed(1)+' '+yOf(fn(c)).toFixed(1)+' '; } svg.appendChild(svgEl('path',{d:d,fill:'none',stroke:color,'stroke-width':3})); }
-  curve(train,'#1FA37A'); curve(test,'#D84C4C');
-  svg.appendChild((function(){var t=svgEl('text',{x:xOf(10),y:yOf(train(10))-8,'text-anchor':'end','font-size':11,'font-weight':700,fill:'#1FA37A'});t.textContent='訓練 R²';return t;})());
-  svg.appendChild((function(){var t=svgEl('text',{x:xOf(10),y:yOf(test(10))+16,'text-anchor':'end','font-size':11,'font-weight':700,fill:'#D84C4C'});t.textContent='テスト R²';return t;})());
-  var mk=svgEl('line',{stroke:'#CDD5E4','stroke-width':1.5,'stroke-dasharray':'4 4'}); svg.appendChild(mk);
-  var d1=svgEl('circle',{r:6,fill:'#1FA37A',stroke:'#fff','stroke-width':2}); svg.appendChild(d1);
-  var d2=svgEl('circle',{r:6,fill:'#D84C4C',stroke:'#fff','stroke-width':2}); svg.appendChild(d2);
-  var sc=document.getElementById('s-cx');
-  function update(){
-    var c=+sc.value; setFill(sc,1,10);
-    document.getElementById('v-cx').textContent=c;
-    var tr=train(c), te=test(c), gap=tr-te;
-    document.getElementById('ro-tr').textContent=tr.toFixed(2);
-    document.getElementById('ro-te').textContent=te.toFixed(2);
-    var v=document.getElementById('ro-verdict'), me=document.getElementById('me-verdict');
-    if(c<=2){ v.textContent='過小学習'; v.style.color='var(--o)'; me.textContent='単純すぎ。両方とも低め'; }
-    else if(gap<0.12){ v.textContent='ちょうど良い ✓'; v.style.color='var(--g)'; me.textContent='訓練とテストが近い＝良い'; }
-    else { v.textContent='過学習 ✗'; v.style.color='var(--neg)'; me.textContent='差='+gap.toFixed(2)+'：ノイズを暗記'; }
-    var x=xOf(c);
-    mk.setAttribute('x1',x); mk.setAttribute('y1',PAD.t); mk.setAttribute('x2',x); mk.setAttribute('y2',PAD.t+pH);
-    d1.setAttribute('cx',x); d1.setAttribute('cy',yOf(tr));
-    d2.setAttribute('cx',x); d2.setAttribute('cy',yOf(te));
-  }
-  sc.addEventListener('input',update); update();
-})();
-
-/* ---------- quiz ---------- */
-buildQuiz('quiz12',[
- {q:'What does it mean for a model to "generalize well"?',
-  opts:[
-   {t:'It memorizes the training data perfectly and reproduces every single value exactly right',ok:false},
-   {t:'It performs well on new, unseen data, not just the data it was trained on originally',ok:true},
-   {t:'It always uses every single one of the available predictor variables in the final model',ok:false},
-   {t:'It produces a plain R² that is exactly equal to the model’s adjusted R² value as well',ok:false}],
-  exp:'汎化＝訓練データだけでなく、新しい未知データでもうまく予測できること。'},
- {q:'What is overfitting?',
-  opts:[
-   {t:'When a model memorizes the noise in the data instead of learning the real signal',ok:true},
-   {t:'When a model is far too simple and uses too few predictors to fit the data at all',ok:false},
-   {t:'When the response variable is accidentally stored as a categorical factor data type',ok:false},
-   {t:'When the training and test sets happen to contain the same total number of rows',ok:false}],
-  exp:'過学習はシグナルでなくノイズを暗記すること。だから新データで性能が落ちます。'},
- {q:'Training R² = 0.95 but test R² = 0.4. What does this signal?',
-  opts:[
-   {t:'A perfectly generalizing model that will work great on absolutely any new data given',ok:false},
-   {t:'Underfitting, because the training R² is clearly far too low to be of any use at all',ok:false},
-   {t:'Overfitting — the model learned the noise and so it fails badly on new unseen data',ok:true},
-   {t:'A data entry error that can be fixed simply by re-running the random split once more',ok:false}],
-  exp:'訓練◎・テスト✕の大きなギャップは過学習の典型。ノイズを学んでしまった証拠です。'},
- {q:'Why do we call set.seed() before splitting the data?',
-  opts:[
-   {t:'To make the model train noticeably faster whenever you happen to have very large data',ok:false},
-   {t:'To automatically remove any of the rows that contain missing or duplicated data values',ok:false},
-   {t:'To guarantee the test set will always score a higher R² than the training set will do',ok:false},
-   {t:'For reproducibility, so the random split is exactly the same every time anyone runs it',ok:true}],
-  exp:'set.seed() で乱数を固定すると、誰が実行しても同じ分割になり再現できます。'},
- {q:'What is data leakage, and how do you avoid it?',
-  opts:[
-   {t:'When test-set information influences training; avoid it by cleaning after the split',ok:true},
-   {t:'When the model file becomes corrupted; avoid it by saving frequent backup copies of it',ok:false},
-   {t:'When the training set is larger than the test set; avoid it by using a 50:50 split ratio',ok:false},
-   {t:'When predictors correlate with each other; avoid it by always checking the VIF first',ok:false}],
-  exp:'データ漏洩はテスト情報が訓練に漏れること（全体中央値での補完など）。補完は分割の後、訓練だけで行います。'}
-]);
+var ANSWERS=[2, 1, 2, 1, 2, 1, 0, 3, 2, 3];
+var FEEDBACKS=["exp(coefficient) = odds ratio. For each 1-unit increase in Age, the odds of Good credit multiply by exp(0.0184) ≈ 1.0186 — about a 1.86% increase per year.", "Same as binary: coefficient = log(odds_at_X+1 / odds_at_X). This ratio is constant regardless of which two consecutive values you use.", "The log odds change is constant (linear) across all values of a continuous predictor. log(odds_56/odds_55) = log(odds_1/odds_0) = coefficient.", "The coefficient is on the log-odds scale: each 1-year increase in Age adds 0.0184 to the log odds. The probability change depends on the starting value due to the non-linear sigmoid function.", "AIC(mod_fw, mod_age, mod_full) compares all three models at once. The model with the lowest AIC is preferred.", "exp(b) gives the multiplicative change in odds per one-unit rise in the predictor.", "Logistic regression assumes a constant log-odds change per unit, i.e. a linear effect on the logit.", "Because the per-unit log-odds change is constant, any adjacent pair of ages yields the same coefficient.", "A positive coefficient means the log-odds rise modestly with each additional year.", "AIC (alongside deviance) lets you compare model fit and complexity across the candidates."];
+var score=0,done=0,total=10;
 </script>
-</body>
-</html>
+<script>
+function handleQ(btn){
+  var q=+btn.dataset.q, idx=+btn.dataset.idx;
+  var btns=document.querySelectorAll('[data-q="'+q+'"]');
+  btns.forEach(function(b){b.disabled=true;});
+  var fb=document.getElementById('fb'+q);
+  fb.classList.add('show');
+  if(idx===ANSWERS[q-1]){
+    btn.classList.add('correct');
+    fb.className='q-feedback show correct-fb';
+    fb.textContent='\u2705 Correct! '+FEEDBACKS[q-1];
+    score++;
+  }else{
+    btn.classList.add('wrong');
+    btns[ANSWERS[q-1]].classList.add('correct');
+    fb.className='q-feedback show wrong-fb';
+    fb.textContent='\u274c '+FEEDBACKS[q-1];
+  }
+  done++;
+  document.getElementById('score').textContent=score+' / '+total;
+  document.getElementById('prog').style.width=(done/total*100)+'%';
+}
+</script>
+<script>
+var units=document.querySelectorAll('.unit');
+var obs=new IntersectionObserver(function(entries){
+  entries.forEach(function(e){if(e.isIntersecting)e.target.classList.add('visible');});
+},{threshold:0.1});
+units.forEach(function(u){obs.observe(u);});
+setTimeout(function(){units.forEach(function(u){u.classList.add('visible');});},600);
+</script>
+<script src="typewriter.js"></script>
+</body></html>
